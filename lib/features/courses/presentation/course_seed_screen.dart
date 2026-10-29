@@ -30,7 +30,8 @@ class _CourseSeedScreenState extends ConsumerState<CourseSeedScreen> {
     if (!isAdmin) {
       setState(
         () => _message =
-            'Set is_admin to true on profiles/$userId before importing.',
+            'Only an account on the admin allowlist can import course data. '
+            'Ask a project administrator to allowlist account $userId.',
       );
       return false;
     }
@@ -51,13 +52,18 @@ class _CourseSeedScreenState extends ConsumerState<CourseSeedScreen> {
 
       final courses = await courseRepository.seedSouthAfricanCourseCatalog();
       if (mounted) {
-        setState(() => _message = '$courses courses imported. Loading holes...');
+        setState(
+          () => _message = '$courses courses imported. Loading holes...',
+        );
       }
 
       final holes = await courseRepository.seedCourseHoles();
       if (mounted) {
-        setState(() => _message = '$courses courses, $holes holes. '
-            'Loading driving ranges...');
+        setState(
+          () => _message =
+              '$courses courses, $holes holes. '
+              'Loading driving ranges...',
+        );
       }
 
       final ranges = await ref
@@ -66,7 +72,8 @@ class _CourseSeedScreenState extends ConsumerState<CourseSeedScreen> {
 
       if (mounted) {
         setState(
-          () => _message = 'Imported $courses courses, $holes holes and '
+          () => _message =
+              'Imported $courses courses, $holes holes and '
               '$ranges driving ranges. Courses with a full 18-hole card are '
               'now marked round-ready.',
         );

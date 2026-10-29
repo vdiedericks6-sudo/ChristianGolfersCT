@@ -34,9 +34,31 @@ The APK is written to
 
 ## Live backend
 
-The demo mode uses local in-memory data. To use Supabase, provide
-`SUPABASE_URL` and `SUPABASE_ANON_KEY` as Dart defines and apply the SQL files in
-`supabase/migrations/` to the intended Supabase project.
+The app is connected to the ChristianGolfersCT Supabase project. Its project
+URL and publishable client key are configured in
+`lib/core/supabase/supabase_config.dart`; both are intended for client apps.
+Never place a Supabase secret or `service_role` key in Flutter code, Android
+resources, or this repository. Build-time `SUPABASE_URL` and
+`SUPABASE_PUBLISHABLE_KEY` Dart defines can override the defaults.
+
+The `Christian Golfers Demo` Android Studio run configuration still uses the
+in-memory sample backend. Run the app normally without the demo define to use
+the live Supabase project. All database migrations, including the RPC
+permissions hardening, have been applied to that project in filename order.
+The database currently has an empty course catalog and admin allowlist. A
+pre-provisioned administrator must sign in and use Course Data Tools to import
+the bundled course catalog and hole data; administrators are granted access by
+adding their Supabase Auth user ID and sign-in email to
+`public.admin_allowlist`.
+
+### Google sign-in setup
+
+The Android app returns from Google sign-in through
+`com.christiangolfers.capetown://login-callback`. Add that exact URI to the
+Supabase Auth URL Configuration redirect allowlist, and enable the Google
+provider with the club's OAuth client credentials before enabling live Google
+sign-in. Provider credentials are managed in Supabase and must not be committed
+to this repository.
 
 Apply the migrations in filename order. The final migration adds a secure
 administrator allowlist and saves each completed round's gross score,

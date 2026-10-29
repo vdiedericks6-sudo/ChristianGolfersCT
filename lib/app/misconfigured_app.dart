@@ -16,8 +16,11 @@ class MisconfiguredApp extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: const [
-                Icon(Icons.warning_amber_rounded,
-                    color: Color(0xFF0D6EFD), size: 48),
+                Icon(
+                  Icons.warning_amber_rounded,
+                  color: Color(0xFF0D6EFD),
+                  size: 48,
+                ),
                 SizedBox(height: 16),
                 Text(
                   'Christian Golfers Cape Town is not configured',
@@ -31,7 +34,7 @@ class MisconfiguredApp extends StatelessWidget {
                 SizedBox(height: 10),
                 Text(
                   'This build was compiled without SUPABASE_URL and '
-                  'SUPABASE_ANON_KEY.\n\n'
+                  'SUPABASE_PUBLISHABLE_KEY.\n\n'
                   'Pass them with --dart-define, or set them as environment '
                   'variables on the Vercel project and redeploy.\n\n'
                   'To open the local sample experience without backend keys, run with '

@@ -32,7 +32,8 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
-  ChristianGolferUser? get currentUser => _toChristianGolferUser(_auth.currentUser);
+  ChristianGolferUser? get currentUser =>
+      _toChristianGolferUser(_auth.currentUser);
 
   @override
   String? get currentUserId => _auth.currentUser?.id;
@@ -56,7 +57,7 @@ class SupabaseAuthRepository implements AuthRepository {
   Future<void> signInWithGoogle() async {
     await _auth.signInWithOAuth(
       OAuthProvider.google,
-      redirectTo: SupabaseConfig.redirectUrlOrNull,
+      redirectTo: kIsWeb ? null : SupabaseConfig.redirectUrlOrNull,
       authScreenLaunchMode: kIsWeb
           ? LaunchMode.platformDefault
           : LaunchMode.externalApplication,
@@ -65,7 +66,10 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> signInWithPassword({required String email, required String password}) async {
+  Future<void> signInWithPassword({
+    required String email,
+    required String password,
+  }) async {
     await _auth.signInWithPassword(email: email.trim(), password: password);
   }
 
