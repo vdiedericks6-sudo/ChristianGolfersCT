@@ -109,7 +109,10 @@ class DemoBackend {
   String? get currentUserId => _currentUser?.id;
 
   List<UserProfile> get allProfiles => _profiles.values.toList()
-    ..sort((a, b) => a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase()));
+    ..sort(
+      (a, b) =>
+          a.displayName.toLowerCase().compareTo(b.displayName.toLowerCase()),
+    );
 
   double leagueAMaxHandicap = 12.0;
   double leagueBMaxHandicap = 24.0;
@@ -169,8 +172,10 @@ class DemoBackend {
           .map((score) => score.holeNumber)
           .toSet();
 
-      final nextHole = List.generate(18, (index) => index + 1)
-          .firstWhere((hole) => !played.contains(hole), orElse: () => -1);
+      final nextHole = List.generate(
+        18,
+        (index) => index + 1,
+      ).firstWhere((hole) => !played.contains(hole), orElse: () => -1);
 
       if (nextHole == -1) return;
 
@@ -199,8 +204,9 @@ class DemoBackend {
   /// Total strokes (including penalties) a golfer took in a round, and how
   /// many holes they entered.
   (int holes, int gross) _cardFor(String roundId, String golferId) {
-    final card = (_scores[roundId] ?? const <HoleScore>[])
-        .where((score) => score.playerId == golferId);
+    final card = (_scores[roundId] ?? const <HoleScore>[]).where(
+      (score) => score.playerId == golferId,
+    );
 
     return (
       card.length,
@@ -245,16 +251,11 @@ class DemoBackend {
         final playable = card != null && card.length >= 18;
 
         courses.add(
-          playable && !course.playable
-              ? _asPlayable(course, card)
-              : course,
+          playable && !course.playable ? _asPlayable(course, card) : course,
         );
 
         if (playable) {
-          teeSets.putIfAbsent(
-            course.id,
-            () => [_defaultTeeSet(course, card)],
-          );
+          teeSets.putIfAbsent(course.id, () => [_defaultTeeSet(course, card)]);
         }
       }
 
@@ -267,10 +268,7 @@ class DemoBackend {
 
       _courses = courses;
       _holes = {...holes, ..._seed.holes};
-      _ranges = [
-        ..._seed.ranges,
-        ...rangeRows.map(DrivingRange.fromJson),
-      ];
+      _ranges = [..._seed.ranges, ...rangeRows.map(DrivingRange.fromJson)];
       _teeSets = teeSets;
       catalogueLoaded = true;
       _bump();
@@ -372,8 +370,20 @@ class _DemoAuthRepository implements AuthRepository {
   }
 
   @override
-  Future<void> signInWithPassword({required String email, required String password}) async {
+  Future<void> signInWithPassword({
+    required String email,
+    required String password,
+  }) async {
     throw StateError('Admin accounts are not available in demo mode.');
+  }
+
+  @override
+  Future<void> signUpWithPassword({
+    required String displayName,
+    required String email,
+    required String password,
+  }) async {
+    throw StateError('Email registration is not available in demo mode.');
   }
 
   @override
@@ -463,30 +473,26 @@ class _DemoCourseRepository implements CourseRepository {
 
   @override
   Stream<List<GolfCourse>> watchActiveCourses() => _backend._watch(() {
-        final list = _backend._courses
-            .where((course) => course.active)
-            .toList();
-        list.sort((a, b) => a.name.compareTo(b.name));
-        return list;
-      });
+    final list = _backend._courses.where((course) => course.active).toList();
+    list.sort((a, b) => a.name.compareTo(b.name));
+    return list;
+  });
 
   @override
   Stream<GolfCourse?> watchCourse(String courseId) => _backend._watch(() {
-        for (final course in _backend._courses) {
-          if (course.id == courseId) return course;
-        }
-        return null;
-      });
+    for (final course in _backend._courses) {
+      if (course.id == courseId) return course;
+    }
+    return null;
+  });
 
   @override
-  Stream<List<TeeSet>> watchTeeSets(String courseId) => _backend._watch(
-        () => _backend._teeSets[courseId] ?? const <TeeSet>[],
-      );
+  Stream<List<TeeSet>> watchTeeSets(String courseId) =>
+      _backend._watch(() => _backend._teeSets[courseId] ?? const <TeeSet>[]);
 
   @override
-  Stream<List<GolfHole>> watchHoles(String courseId) => _backend._watch(
-        () => _backend._holes[courseId] ?? const <GolfHole>[],
-      );
+  Stream<List<GolfHole>> watchHoles(String courseId) =>
+      _backend._watch(() => _backend._holes[courseId] ?? const <GolfHole>[]);
 
   @override
   Future<List<GolfCourse>> coursesByIds(Iterable<String> courseIds) async {
@@ -643,16 +649,15 @@ class _DemoRoundRepository implements RoundRepository {
       _backend._watch(() => _backend._rounds[roundId]);
 
   @override
-  Stream<List<RoundPlayer>> watchPlayers(String roundId) =>
-      _backend._watch(() {
-        final seats = [...?_backend._players[roundId]];
-        seats.sort((a, b) {
-          if (a.isHost && !b.isHost) return -1;
-          if (!a.isHost && b.isHost) return 1;
-          return a.displayName.compareTo(b.displayName);
-        });
-        return seats;
-      });
+  Stream<List<RoundPlayer>> watchPlayers(String roundId) => _backend._watch(() {
+    final seats = [...?_backend._players[roundId]];
+    seats.sort((a, b) {
+      if (a.isHost && !b.isHost) return -1;
+      if (!a.isHost && b.isHost) return 1;
+      return a.displayName.compareTo(b.displayName);
+    });
+    return seats;
+  });
 
   @override
   Future<List<GolfRound>> myRounds({int limit = 50}) async {
@@ -789,14 +794,13 @@ class _DemoScoreRepository implements ScoreRepository {
       _backend._watch(() => _sorted(roundId));
 
   @override
-  Stream<List<HoleScore>> watchMyScores(String roundId) =>
-      _backend._watch(() {
-        final mine = _sorted(roundId)
-            .where((score) => score.playerId == _me)
-            .toList();
-        mine.sort((a, b) => a.holeNumber.compareTo(b.holeNumber));
-        return mine;
-      });
+  Stream<List<HoleScore>> watchMyScores(String roundId) => _backend._watch(() {
+    final mine = _sorted(
+      roundId,
+    ).where((score) => score.playerId == _me).toList();
+    mine.sort((a, b) => a.holeNumber.compareTo(b.holeNumber));
+    return mine;
+  });
 
   @override
   Future<List<HoleScore>> myScoresForRounds(Iterable<String> roundIds) async {
@@ -877,7 +881,8 @@ class _DemoCommunityRepository implements CommunityRepository {
             displayName: _backend._profiles[entry.key]!.displayName,
             email: _backend._profiles[entry.key]!.email,
             photoUrl: _backend._profiles[entry.key]!.photoUrl,
-            handicapIndex: _backend._profiles[entry.key]!.estimatedHandicapIndex,
+            handicapIndex:
+                _backend._profiles[entry.key]!.estimatedHandicapIndex,
             state: entry.value,
             since: DateTime.now().subtract(const Duration(days: 30)),
           ),
@@ -900,7 +905,9 @@ class _DemoCommunityRepository implements CommunityRepository {
     );
 
     if (match.isEmpty) {
-      throw StateError('No Christian Golfers member is using that email address yet.');
+      throw StateError(
+        'No Christian Golfers member is using that email address yet.',
+      );
     }
 
     final target = match.first;
@@ -912,8 +919,8 @@ class _DemoCommunityRepository implements CommunityRepository {
     // Mirrors the RPC: an existing incoming request becomes a friendship.
     _backend._friendships[target.id] =
         _backend._friendships[target.id] == FriendshipState.incomingRequest
-            ? FriendshipState.accepted
-            : FriendshipState.outgoingRequest;
+        ? FriendshipState.accepted
+        : FriendshipState.outgoingRequest;
 
     _backend._bump();
   }
@@ -923,8 +930,7 @@ class _DemoCommunityRepository implements CommunityRepository {
     required String requesterId,
     required bool accept,
   }) async {
-    if (_backend._friendships[requesterId] !=
-        FriendshipState.incomingRequest) {
+    if (_backend._friendships[requesterId] != FriendshipState.incomingRequest) {
       throw StateError('That friend request is no longer open.');
     }
 
@@ -944,9 +950,9 @@ class _DemoCommunityRepository implements CommunityRepository {
   }
 
   Set<String> get _acceptedFriends => {
-        for (final entry in _backend._friendships.entries)
-          if (entry.value == FriendshipState.accepted) entry.key,
-      };
+    for (final entry in _backend._friendships.entries)
+      if (entry.value == FriendshipState.accepted) entry.key,
+  };
 
   @override
   Future<List<FriendActivity>> activity({int limit = 25}) async {
@@ -956,7 +962,8 @@ class _DemoCommunityRepository implements CommunityRepository {
     for (final round in _backend._rounds.values) {
       if (!round.isCompleted) continue;
 
-      for (final player in _backend._players[round.id] ?? const <RoundPlayer>[]) {
+      for (final player
+          in _backend._players[round.id] ?? const <RoundPlayer>[]) {
         if (player.userId == _me) continue;
         if (!friends.contains(player.userId)) continue;
 
@@ -994,7 +1001,8 @@ class _DemoCommunityRepository implements CommunityRepository {
       final playedAt = round.completedAt ?? round.createdAt;
       if (playedAt != null && playedAt.isBefore(cutoff)) continue;
 
-      for (final player in _backend._players[round.id] ?? const <RoundPlayer>[]) {
+      for (final player
+          in _backend._players[round.id] ?? const <RoundPlayer>[]) {
         if (!crew.contains(player.userId)) continue;
 
         final (holes, gross) = _backend._cardFor(round.id, player.userId);
@@ -1039,12 +1047,10 @@ class _DemoDrivingRangeRepository implements DrivingRangeRepository {
 
   @override
   Stream<List<DrivingRange>> watchActiveRanges() => _backend._watch(() {
-        final list = _backend._ranges
-            .where((range) => range.active)
-            .toList();
-        list.sort((a, b) => a.name.compareTo(b.name));
-        return list;
-      });
+    final list = _backend._ranges.where((range) => range.active).toList();
+    list.sort((a, b) => a.name.compareTo(b.name));
+    return list;
+  });
 
   @override
   Future<List<DrivingRange>> rangesForCourse(String courseId) async {

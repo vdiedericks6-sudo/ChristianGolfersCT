@@ -82,9 +82,25 @@ class _AuthGateState extends ConsumerState<AuthGate> {
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
-            child: Text(
-              'Unable to check your login status.\n$error',
-              textAlign: TextAlign.center,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Unable to check your login status. Check your connection and try again.',
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                OutlinedButton(
+                  onPressed: () => ref.invalidate(authStateProvider),
+                  child: const Text('Try again'),
+                ),
+                if (const bool.fromEnvironment('dart.vm.product') == false)
+                  Text(
+                    '$error',
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+              ],
             ),
           ),
         ),

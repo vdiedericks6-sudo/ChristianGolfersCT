@@ -194,10 +194,10 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                         SizedBox(width: 12),
                         Expanded(
                           child: Text(
-                            'This is a real course catalog entry. '
-                            'Round creation stays disabled until verified '
-                            'tee ratings, slope ratings, stroke indexes and '
-                            'hole GPS data are loaded.',
+                            'This listing has partial course data. '
+                            'Round creation is available only for complete '
+                            '18-hole cards. GPS line distances are estimates; '
+                            'official tee distances and ratings are not loaded.',
                           ),
                         ),
                       ],
@@ -250,91 +250,92 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                       );
                     },
                   ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Holes',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  holes.when(
-                    loading: () => const LinearProgressIndicator(),
-                    error: (error, stackTrace) => Text('$error'),
-                    data: (items) {
-                      if (items.isEmpty) {
-                        return const Text('No holes are available.');
-                      }
+                ],
+                const SizedBox(height: 24),
+                Text(
+                  'Holes',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w900),
+                ),
+                const SizedBox(height: 12),
+                holes.when(
+                  loading: () => const LinearProgressIndicator(),
+                  error: (error, stackTrace) => Text('$error'),
+                  data: (items) {
+                    if (items.isEmpty) {
+                      return const Text('No holes are available.');
+                    }
 
-                      return Card(
-                        child: Column(
-                          children: items.map((hole) {
-                            TeeSet? selectedTee;
-                            for (final tee in teeSets.valueOrNull ?? const []) {
-                              if (tee.id == _selectedTeeId) {
-                                selectedTee = tee;
-                                break;
-                              }
+                    return Card(
+                      child: Column(
+                        children: items.map((hole) {
+                          TeeSet? selectedTee;
+                          for (final tee in teeSets.valueOrNull ?? const []) {
+                            if (tee.id == _selectedTeeId) {
+                              selectedTee = tee;
+                              break;
                             }
-                            final officialDistance =
-                                selectedTee?.holeDistancesMeters[hole.number];
-                            final estimate = hole.estimatedStraightLineMeters;
+                          }
+                          final officialDistance =
+                              selectedTee?.holeDistancesMeters[hole.number];
+                          final estimate = hole.estimatedStraightLineMeters;
 
-                            return Padding(
-                              padding: const EdgeInsets.all(10),
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    width: 76,
-                                    child: HoleArtwork(
-                                      hole: hole,
-                                      seed: '${item.id}-${hole.number}',
-                                      height: 60,
-                                    ),
+                          return Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 76,
+                                  child: HoleArtwork(
+                                    hole: hole,
+                                    seed: '${item.id}-${hole.number}',
+                                    height: 60,
                                   ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text('Hole ${hole.number}'),
-                                        Text(
-                                          'Par ${hole.par} · Stroke index ${hole.strokeIndex}',
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.bodySmall,
-                                        ),
-                                      ],
-                                    ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text('Hole ${hole.number}'),
+                                      Text(
+                                        'Par ${hole.par} · Stroke index ${hole.strokeIndex}',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.bodySmall,
+                                      ),
+                                    ],
                                   ),
-                                  if (officialDistance != null)
-                                    Text('$officialDistance m')
-                                  else if (estimate != null)
-                                    Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.end,
-                                      children: [
-                                        Text('~$estimate m'),
-                                        Text(
-                                          'GPS line',
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.labelSmall,
-                                        ),
-                                      ],
-                                    )
-                                  else
-                                    const Text('Distance N/A'),
-                                ],
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 24),
+                                ),
+                                if (officialDistance != null)
+                                  Text('$officialDistance m')
+                                else if (estimate != null)
+                                  Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text('~$estimate m'),
+                                      Text(
+                                        'GPS line',
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.labelSmall,
+                                      ),
+                                    ],
+                                  )
+                                else
+                                  const Text('Distance N/A'),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    );
+                  },
+                ),
+                const SizedBox(height: 24),
+                if (item.playable)
                   FilledButton.icon(
                     onPressed: _selectedTeeId == null || _creatingRound
                         ? null
@@ -344,7 +345,6 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                       _creatingRound ? 'Creating round...' : 'Create round',
                     ),
                   ),
-                ],
                 _PracticeFacilities(courseId: widget.courseId),
                 const OsmAttribution(),
               ],

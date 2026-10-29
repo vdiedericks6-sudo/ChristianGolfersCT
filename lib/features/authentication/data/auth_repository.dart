@@ -12,7 +12,16 @@ abstract class AuthRepository {
 
   Future<void> signInWithGoogle();
 
-  Future<void> signInWithPassword({required String email, required String password});
+  Future<void> signInWithPassword({
+    required String email,
+    required String password,
+  });
+
+  Future<void> signUpWithPassword({
+    required String displayName,
+    required String email,
+    required String password,
+  });
 
   Future<void> updateDisplayName(String displayName);
 

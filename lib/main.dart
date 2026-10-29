@@ -27,6 +27,8 @@ Future<void> main() async {
       publishableKey: SupabaseConfig.publishableKey,
       authOptions: const FlutterAuthClientOptions(
         authFlowType: AuthFlowType.pkce,
+        autoRefreshToken: true,
+        persistSession: true,
       ),
     );
   }

@@ -374,7 +374,7 @@ class SupabaseCourseRepository implements CourseRepository {
         'course_id': courseId,
         'id': 'default',
         'name': 'Club (unrated)',
-        'colour': 'White',
+        'colour': 'Unrated',
         'course_rating': par,
         'slope_rating': 113,
         'par': par,

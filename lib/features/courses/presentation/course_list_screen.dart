@@ -29,6 +29,11 @@ class _CourseListScreenState extends ConsumerState<CourseListScreen> {
     'Gauteng',
     'Eastern Cape',
     'KwaZulu-Natal',
+    'Free State',
+    'Limpopo',
+    'Mpumalanga',
+    'North West',
+    'Northern Cape',
   ];
 
   @override
@@ -79,7 +84,10 @@ class _CourseListScreenState extends ConsumerState<CourseListScreen> {
                   ),
                   filled: true,
                   fillColor: Colors.white,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(24),
                     borderSide: const BorderSide(color: AppTheme.line),
@@ -111,7 +119,9 @@ class _CourseListScreenState extends ConsumerState<CourseListScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       alignment: Alignment.center,
                       decoration: BoxDecoration(
-                        color: selected ? AppTheme.primaryGreen : AppTheme.cardSecondary,
+                        color: selected
+                            ? AppTheme.primaryGreen
+                            : AppTheme.cardSecondary,
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
@@ -131,8 +141,7 @@ class _CourseListScreenState extends ConsumerState<CourseListScreen> {
 
             Expanded(
               child: coursesState.when(
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, stackTrace) =>
                     _LoadFailed(what: 'courses', error: error),
                 data: (items) => _buildCoursesList(context, items),
@@ -149,7 +158,9 @@ class _CourseListScreenState extends ConsumerState<CourseListScreen> {
 
     final filtered = items.where((course) {
       if (_selectedRegion != 'All' &&
-          !course.province.toLowerCase().contains(_selectedRegion.toLowerCase())) {
+          !course.province.toLowerCase().contains(
+            _selectedRegion.toLowerCase(),
+          )) {
         return false;
       }
 
@@ -169,19 +180,12 @@ class _CourseListScreenState extends ConsumerState<CourseListScreen> {
         if (filtered.isEmpty)
           const _NoResults(message: 'No courses match your search.')
         else
-          ...filtered.asMap().entries.map(
-            (entry) {
-              final index = entry.key;
-              final course = entry.value;
-              final mockRatings = ['4.6 (87)', '4.7 (102)', '4.8 (124)', '4.3 (78)'];
-              final rating = mockRatings[index % mockRatings.length];
-
-              return Padding(
-                padding: const EdgeInsets.only(bottom: 12),
-                child: _CourseCardScreen3(course: course, rating: rating),
-              );
-            },
-          ),
+          ...filtered.map((course) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _CourseCardScreen3(course: course),
+            );
+          }),
         const SizedBox(height: 8),
         const OsmAttribution(),
       ],
@@ -224,19 +228,15 @@ class _NoResults extends StatelessWidget {
 
 /// Course item card matching Screen 3 in the branding image.
 class _CourseCardScreen3 extends StatelessWidget {
-  const _CourseCardScreen3({
-    required this.course,
-    required this.rating,
-  });
+  const _CourseCardScreen3({required this.course});
 
   final GolfCourse course;
-  final String rating;
 
   @override
   Widget build(BuildContext context) {
     final location = course.province.isNotEmpty
         ? course.province
-        : (course.city ?? 'Western Cape');
+        : (course.city ?? 'South Africa');
 
     return ChristianGolfersCard(
       padding: EdgeInsets.zero,
@@ -279,23 +279,15 @@ class _CourseCardScreen3 extends StatelessWidget {
                     style: AppTheme.body(11.5, colour: AppTheme.textMuted),
                   ),
                   const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      const Icon(
-                        Icons.star_rounded,
-                        size: 14,
-                        color: Color(0xFFEAB308),
-                      ),
-                      const SizedBox(width: 3),
-                      Text(
-                        rating,
-                        style: AppTheme.body(
-                          11,
-                          colour: AppTheme.textMuted,
-                          weight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    course.playable
+                        ? '${course.holes ?? 18} hole data available'
+                        : 'Course listing',
+                    style: AppTheme.body(
+                      11,
+                      colour: AppTheme.textMuted,
+                      weight: FontWeight.w600,
+                    ),
                   ),
                 ],
               ),

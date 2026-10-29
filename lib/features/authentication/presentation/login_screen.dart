@@ -63,6 +63,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     }
   }
 
+  Future<void> _chooseSignInMethod() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      builder: (sheetContext) => Padding(
+        padding: EdgeInsets.fromLTRB(
+          24,
+          24,
+          24,
+          MediaQuery.viewInsetsOf(sheetContext).bottom + 24,
+        ),
+        child: _EmailAccessSheet(
+          onGoogle: () {
+            Navigator.pop(sheetContext);
+            _signInWithGoogle();
+          },
+          onEmailComplete: () => Navigator.pop(sheetContext),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -155,7 +178,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     height: 52,
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: _busy ? null : _signInWithGoogle,
+                      onPressed: _busy ? null : _chooseSignInMethod,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primaryGreen,
                         foregroundColor: Colors.white,
@@ -206,4 +229,144 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
     );
   }
+}
+
+class _EmailAccessSheet extends ConsumerStatefulWidget {
+  const _EmailAccessSheet({
+    required this.onGoogle,
+    required this.onEmailComplete,
+  });
+  final VoidCallback onGoogle;
+  final VoidCallback onEmailComplete;
+
+  @override
+  ConsumerState<_EmailAccessSheet> createState() => _EmailAccessSheetState();
+}
+
+class _EmailAccessSheetState extends ConsumerState<_EmailAccessSheet> {
+  final _formKey = GlobalKey<FormState>();
+  final _name = TextEditingController();
+  final _email = TextEditingController();
+  final _password = TextEditingController();
+  bool _register = false;
+  bool _busy = false;
+
+  @override
+  void dispose() {
+    _name.dispose();
+    _email.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    setState(() => _busy = true);
+    try {
+      final auth = ref.read(authRepositoryProvider);
+      if (_register) {
+        await auth.signUpWithPassword(
+          displayName: _name.text,
+          email: _email.text,
+          password: _password.text,
+        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text(
+                'Account created. Check your email to confirm, then sign in.',
+              ),
+            ),
+          );
+          widget.onEmailComplete();
+        }
+      } else {
+        await auth.signInWithPassword(
+          email: _email.text,
+          password: _password.text,
+        );
+        if (mounted) widget.onEmailComplete();
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(authErrorMessage(error))));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) => Form(
+    key: _formKey,
+    child: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          _register ? 'Create your account' : 'Welcome back',
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 16),
+        if (_register)
+          TextFormField(
+            controller: _name,
+            textCapitalization: TextCapitalization.words,
+            decoration: const InputDecoration(labelText: 'Full name'),
+            validator: (v) =>
+                (v?.trim().isEmpty ?? true) ? 'Enter your name' : null,
+          ),
+        if (_register) const SizedBox(height: 10),
+        TextFormField(
+          controller: _email,
+          keyboardType: TextInputType.emailAddress,
+          autofillHints: const [AutofillHints.email],
+          decoration: const InputDecoration(labelText: 'Email address'),
+          validator: (v) => (v?.contains('@') ?? false)
+              ? null
+              : 'Enter a valid email address',
+        ),
+        const SizedBox(height: 10),
+        TextFormField(
+          controller: _password,
+          obscureText: true,
+          autofillHints: _register
+              ? const [AutofillHints.newPassword]
+              : const [AutofillHints.password],
+          decoration: const InputDecoration(labelText: 'Password'),
+          validator: (v) =>
+              (v?.length ?? 0) >= 8 ? null : 'Use at least 8 characters',
+        ),
+        const SizedBox(height: 16),
+        FilledButton(
+          onPressed: _busy ? null : _submit,
+          child: Text(
+            _busy
+                ? 'Please wait…'
+                : _register
+                ? 'Create account'
+                : 'Sign in with email',
+          ),
+        ),
+        TextButton(
+          onPressed: _busy
+              ? null
+              : () => setState(() => _register = !_register),
+          child: Text(
+            _register
+                ? 'Already registered? Sign in'
+                : 'New here? Create an account',
+          ),
+        ),
+        const Divider(),
+        OutlinedButton.icon(
+          onPressed: _busy ? null : widget.onGoogle,
+          icon: const Icon(Icons.g_mobiledata),
+          label: const Text('Continue with Google'),
+        ),
+      ],
+    ),
+  );
 }

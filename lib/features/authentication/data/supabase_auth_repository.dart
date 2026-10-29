@@ -74,6 +74,20 @@ class SupabaseAuthRepository implements AuthRepository {
   }
 
   @override
+  Future<void> signUpWithPassword({
+    required String displayName,
+    required String email,
+    required String password,
+  }) async {
+    await _auth.signUp(
+      email: email.trim(),
+      password: password,
+      emailRedirectTo: kIsWeb ? null : SupabaseConfig.redirectUrlOrNull,
+      data: {'full_name': displayName.trim()},
+    );
+  }
+
+  @override
   Future<void> updateDisplayName(String displayName) async {
     final trimmed = displayName.trim();
     if (trimmed.isEmpty) return;
