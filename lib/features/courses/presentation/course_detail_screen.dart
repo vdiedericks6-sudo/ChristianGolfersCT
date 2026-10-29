@@ -102,6 +102,7 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                       CourseArtwork(
                         seed: item.id,
                         imageUrl: item.imageUrl,
+                        fallbackLabel: 'Official course photo unavailable',
                         height: 190,
                       ),
                       Positioned(
@@ -306,26 +307,22 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                                           context,
                                         ).textTheme.bodySmall,
                                       ),
+                                      Text(
+                                        officialDistance != null
+                                            ? '${selectedTee?.colour ?? 'Selected'} tees · $officialDistance m official'
+                                            : estimate != null
+                                            ? 'GPS line ~$estimate m · tee yardage not supplied'
+                                            : 'Hole distance not supplied',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .labelSmall
+                                            ?.copyWith(
+                                              color: AppTheme.textMuted,
+                                            ),
+                                      ),
                                     ],
                                   ),
                                 ),
-                                if (officialDistance != null)
-                                  Text('$officialDistance m')
-                                else if (estimate != null)
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Text('~$estimate m'),
-                                      Text(
-                                        'GPS line',
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.labelSmall,
-                                      ),
-                                    ],
-                                  )
-                                else
-                                  const Text('Distance N/A'),
                               ],
                             ),
                           );
@@ -498,6 +495,9 @@ class _TeeSetTile extends StatelessWidget {
                       children: [
                         if (tee.totalDistance > 0)
                           MetaPill('${tee.totalDistance} ${tee.distanceUnit}'),
+                        MetaPill(
+                          '${tee.holeDistancesMeters.length}/18 official hole distances',
+                        ),
                         MetaPill('Par ${tee.par}'),
                         if (unrated)
                           const MetaPill('Unrated', colour: AppTheme.textFaint)

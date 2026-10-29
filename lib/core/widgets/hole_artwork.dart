@@ -24,12 +24,19 @@ class HoleArtwork extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(16),
         child: imageUrl == null || imageUrl.isEmpty
-            ? CourseArtwork(seed: '$seed-${hole.number}', overlay: false)
+            ? CourseArtwork(
+                seed: '$seed-${hole.number}',
+                fallbackLabel: 'Hole ${hole.number} photo unavailable',
+                overlay: false,
+              )
             : Image.network(
                 imageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stack) =>
-                    CourseArtwork(seed: '$seed-${hole.number}', overlay: false),
+                errorBuilder: (context, error, stack) => CourseArtwork(
+                  seed: '$seed-${hole.number}',
+                  fallbackLabel: 'Hole ${hole.number} photo unavailable',
+                  overlay: false,
+                ),
               ),
       ),
     );

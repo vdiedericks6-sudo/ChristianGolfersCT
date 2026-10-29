@@ -112,7 +112,10 @@ class _PlayHeroCardScreen5 extends StatelessWidget {
               child: GoldButton(
                 label: 'New Round',
                 icon: Icons.add_circle_outline_rounded,
-                onPressed: () => context.push('/courses'),
+                // The Courses route is already a stateful-shell destination.
+                // Pushing it from /play can mount a second page with the same
+                // shell page key and trigger Navigator's reservation assert.
+                onPressed: () => context.go('/courses'),
               ),
             ),
           ],

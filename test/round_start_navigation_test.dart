@@ -26,7 +26,30 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      appRouter.go('/courses');
+      await tester.scrollUntilVisible(
+        find.text('Play Golf'),
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('Play Golf'));
+      await tester.pumpAndSettle();
+      expect(find.text('New Round'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.text('New Round'),
+        250,
+        scrollable: find.byType(Scrollable).first,
+      );
+      await tester.tap(find.text('New Round'));
+      await tester.pumpAndSettle();
+      expect(find.text('Christian Golfers Demo Course'), findsOneWidget);
+      expect(
+        tester.takeException(),
+        isNull,
+        reason:
+            'The Play Golf → New Round route must not reserve duplicate page keys.',
+      );
+
       await tester.pumpAndSettle();
       await tester.scrollUntilVisible(
         find.text('Christian Golfers Demo Course'),

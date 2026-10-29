@@ -166,7 +166,9 @@ class WordOfTheDay {
   ];
 
   static WordOfTheDay forDate(DateTime date) {
-    final dayIndex = date.difference(DateTime(date.year, 1, 1)).inDays;
+    final dayIndex = DateTime.utc(date.year, date.month, date.day)
+        .difference(DateTime.utc(date.year, 1, 1))
+        .inDays;
     return _readings[dayIndex % _readings.length];
   }
 }

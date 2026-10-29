@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/course_artwork.dart';
 import '../../../core/widgets/christian_golfers_logo.dart';
+import '../../faith/presentation/daily_verse_text.dart';
 import 'auth_error_message.dart';
 import 'auth_providers.dart';
 
@@ -120,19 +121,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const Spacer(),
 
                   // Verse / Quote
-                  Text(
-                    '“For I know the plans I have for you, declares the Lord, plans to give you hope and a future.”',
+                  DailyVerseText(
                     textAlign: TextAlign.center,
-                    style: AppTheme.body(
+                    verseStyle: AppTheme.body(
                       13.5,
                       colour: Colors.white.withValues(alpha: 0.95),
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Jeremiah 29:11',
-                    textAlign: TextAlign.center,
-                    style: AppTheme.body(
+                    referenceStyle: AppTheme.body(
                       12,
                       colour: AppTheme.primaryGreenLight,
                       weight: FontWeight.w600,

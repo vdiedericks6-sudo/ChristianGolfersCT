@@ -25,13 +25,13 @@ class AppTheme {
   static const darkNavyLight = Color(0xFF1E293B);
 
   /// Main app page background.
-  static const pageBg = Color(0xFFF4F6F9);
+  static const pageBg = Color(0xFFEDF3EF);
 
   /// Standard white card surface.
-  static const card = Color(0xFFFFFFFF);
+  static const card = Color(0xFFFAFCFA);
 
   /// Soft light grey card fill / secondary surface.
-  static const cardSecondary = Color(0xFFF1F5F9);
+  static const cardSecondary = Color(0xFFE7EFE9);
 
   /// Hairline dividers and borders.
   static const line = Color(0xFFE2E8F0);
@@ -234,7 +234,9 @@ class AppTheme {
           disabledBackgroundColor: cardSecondary,
           disabledForegroundColor: textFaint,
           minimumSize: const Size.fromHeight(50),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
           textStyle: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w700,
@@ -247,7 +249,9 @@ class AppTheme {
           foregroundColor: primaryGreen,
           minimumSize: const Size.fromHeight(48),
           side: const BorderSide(color: line, width: 1.4),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
+          ),
           textStyle: GoogleFonts.inter(
             fontSize: 13.5,
             fontWeight: FontWeight.w700,
@@ -271,7 +275,10 @@ class AppTheme {
         hintStyle: body(14, colour: textFaint),
         labelStyle: body(14, colour: textMuted),
         prefixIconColor: textMuted,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 12,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(24),
           borderSide: const BorderSide(color: line),
@@ -313,7 +320,7 @@ class AppTheme {
       ),
 
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: Colors.white,
+        backgroundColor: card,
         surfaceTintColor: Colors.transparent,
         indicatorColor: primaryGreenBg,
         height: 68,
@@ -371,9 +378,14 @@ class AppTheme {
         unselectedLabelColor: textMuted,
         indicatorColor: primaryGreen,
         dividerColor: line,
-        labelStyle: GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w700),
-        unselectedLabelStyle:
-            GoogleFonts.inter(fontSize: 13, fontWeight: FontWeight.w500),
+        labelStyle: GoogleFonts.inter(
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+        ),
+        unselectedLabelStyle: GoogleFonts.inter(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
       ),
 
       listTileTheme: const ListTileThemeData(
@@ -381,8 +393,9 @@ class AppTheme {
         textColor: textPrimary,
       ),
 
-      progressIndicatorTheme:
-          const ProgressIndicatorThemeData(color: primaryGreen),
+      progressIndicatorTheme: const ProgressIndicatorThemeData(
+        color: primaryGreen,
+      ),
       dividerTheme: const DividerThemeData(color: line, thickness: 1, space: 1),
     );
   }

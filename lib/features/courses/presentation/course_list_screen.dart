@@ -81,7 +81,7 @@ class _CourseListScreenState extends ConsumerState<CourseListScreen> {
                     color: AppTheme.textMuted,
                   ),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: AppTheme.card,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 16,
                     vertical: 12,
@@ -252,6 +252,7 @@ class _CourseCardScreen3 extends StatelessWidget {
                 child: CourseArtwork(
                   seed: course.id,
                   imageUrl: course.imageUrl,
+                  fallbackLabel: 'Course photo unavailable',
                   height: 72,
                 ),
               ),

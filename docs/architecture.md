@@ -47,6 +47,8 @@ The Flutter client holds only the project URL and publishable key. Supabase serv
 
 Navigation includes Profile, Privacy, Courses, Round Lobby, Live Round, Scorecard, Round Leaderboard and Admin Portal flows. In-app feature pages use the shared back button and system navigation. The bottom navigation is Home, Courses, Leagues, Fellowship and Profile.
 
+The Play Golf → New Round action switches to the Courses stateful-shell branch rather than pushing a second Courses page onto another navigator. Daily scripture is selected deterministically from the local calendar date and refreshes at midnight or when the app resumes.
+
 ### Runtime modes
 
 - **Live:** default build; Supabase Auth and database. `SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` Dart defines can override safe public defaults.
@@ -102,7 +104,7 @@ Public policy URLs:
 
 ## 6. Courses and guidance
 
-The bundled dataset is for discovery/seed support; live course and hole records are stored in Supabase. Tee colours supported by the feature include White, Yellow, Blue and Red. Official hole images and per-tee distances must be sourced from course owners or other licensed/verified sources. OSM tee/green coordinate distance is only a straight-line estimate. Shot suggestions use the golfer-selected lie and measured distance and are general guidance, not live weather, hazard or course strategy data. OpenStreetMap data requires attribution where displayed.
+The bundled dataset is for discovery/seed support; live course and hole records are stored in Supabase. Tee colours supported by the feature include White, Yellow, Blue and Red. A live catalog check on 29 October 2026 found 0 course photo URLs, 0 hole photo URLs and 0 per-tee hole distance records. The UI displays club-provided/licensed images and official distances when present and marks missing photos and estimates clearly. Images and official distances must be sourced from course owners or other licensed/verified sources. OSM tee/green coordinate distance is only a straight-line estimate. Shot suggestions use the golfer-selected lie and measured distance and are general guidance, not live weather, hazard or course strategy data. OpenStreetMap data requires attribution where displayed.
 
 ## 7. Notifications and wearable delivery
 

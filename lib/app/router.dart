@@ -163,7 +163,7 @@ class AppNavigationShell extends StatelessWidget {
       body: navigationShell,
       bottomNavigationBar: Container(
         decoration: const BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.card,
           border: Border(top: BorderSide(color: AppTheme.line)),
         ),
         padding: EdgeInsets.only(

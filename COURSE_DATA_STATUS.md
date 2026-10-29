@@ -5,6 +5,13 @@ The app currently ships with a 361-course catalog and 828 hole records covering
 nine holes recorded. The catalog and hole records are also loaded into the
 configured Supabase project.
 
+Live data check on 29 October 2026: 361 course rows, 828 hole rows, 36 tee
+sets, **0 course image URLs, 0 hole image URLs, and 0 tee-box/hole distance
+rows**. The app displays club-provided or licensed photos when present and
+clearly labels missing imagery instead of showing a fabricated course scene.
+Official per-hole distances appear by selected tee when supplied; GPS
+tee-to-green straight-line measurements remain explicitly marked estimates.
+
 Hole records contain par, stroke index, and OpenStreetMap tee/green GPS points.
 They do not provide surveyed tee-box positions, official per-tee distances,
 course ratings, or slope ratings. Distances calculated between GPS points are
@@ -27,6 +34,13 @@ directory and obtain permission to use each club's current scorecard and
 course/tee ratings. Refresh closed/opened venues and obtain club confirmation
 for hole order, par, stroke index, tee colours, and distance units. Preserve
 source URL and verification date with each record.
+
+The current database schema already supports course and hole `image_url`
+fields plus per-tee `tee_box_hole_distances`. To populate genuine course and
+hole photography and official distances, collect current, club-approved
+images and scorecards, then store the source/license and verification date.
+Do not attach the supplied general Cape Town golf photos to unrelated courses
+or convert GPS line estimates into tee-card yardage.
 
 Sources consulted:
 
