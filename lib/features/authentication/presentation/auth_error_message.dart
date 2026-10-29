@@ -11,6 +11,9 @@ String authErrorMessage(Object error) {
       case 'provider_disabled':
         return 'Google sign-in is not enabled for this project yet.';
       case 'validation_failed':
+        if (error.message.toLowerCase().contains('provider is not enabled')) {
+          return 'Google sign-in must be enabled in the Supabase project before you can continue.';
+        }
         return 'Sign-in could not be completed. Please try again.';
     }
 
