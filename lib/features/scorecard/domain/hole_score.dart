@@ -8,6 +8,9 @@ class HoleScore {
     required this.strokes,
     required this.putts,
     required this.penaltyStrokes,
+    this.sandShots = 0,
+    this.fairway,
+    this.greenInRegulation,
     required this.confirmed,
     this.updatedAt,
   });
@@ -18,6 +21,9 @@ class HoleScore {
   final int strokes;
   final int putts;
   final int penaltyStrokes;
+  final int sandShots;
+  final String? fairway;
+  final bool? greenInRegulation;
   final bool confirmed;
   final DateTime? updatedAt;
 
@@ -31,6 +37,9 @@ class HoleScore {
       strokes: asInt(data['strokes']),
       putts: asInt(data['putts']),
       penaltyStrokes: asInt(data['penalty_strokes']),
+      sandShots: asInt(data['sand_shots']),
+      fairway: data['fairway'] as String?,
+      greenInRegulation: data['green_in_regulation'] as bool?,
       confirmed: asBool(data['confirmed']),
       updatedAt: asDateOrNull(data['updated_at']),
     );

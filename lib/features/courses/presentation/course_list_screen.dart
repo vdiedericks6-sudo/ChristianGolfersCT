@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/course_artwork.dart';
+import '../../../core/widgets/app_back_button.dart';
 import '../../../core/widgets/christian_golfers_components.dart';
 import '../../../core/widgets/osm_attribution.dart';
 import '../domain/golf_course.dart';
@@ -56,10 +57,7 @@ class _CourseListScreenState extends ConsumerState<CourseListScreen> {
       appBar: AppBar(
         backgroundColor: AppTheme.darkNavy,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
-          onPressed: () => context.pop(),
-        ),
+        leading: const AppBackButton(),
         title: const Text('Courses'),
         centerTitle: true,
       ),

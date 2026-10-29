@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import '../../../core/widgets/app_back_button.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/christian_golfers_components.dart';
@@ -22,10 +22,7 @@ class _LeaguesScreenState extends State<LeaguesScreen> {
       appBar: AppBar(
         backgroundColor: AppTheme.darkNavy,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
-          onPressed: () => context.pop(),
-        ),
+        leading: const AppBackButton(),
         title: const Text('Leagues'),
         centerTitle: true,
       ),
@@ -68,8 +65,8 @@ class _LeaguesScreenState extends State<LeaguesScreen> {
               _selectedTabIndex == 0
                   ? 'League A Standings'
                   : _selectedTabIndex == 1
-                      ? 'League B Standings'
-                      : 'Social Standings',
+                  ? 'League B Standings'
+                  : 'Social Standings',
               style: AppTheme.body(15, weight: FontWeight.w800),
             ),
             const SizedBox(height: 12),
@@ -174,7 +171,10 @@ class _StandingsTableScreen4 extends StatelessWidget {
             children: [
               // Table Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: const BoxDecoration(
                   border: Border(bottom: BorderSide(color: AppTheme.line)),
                 ),
@@ -184,25 +184,41 @@ class _StandingsTableScreen4 extends StatelessWidget {
                       width: 28,
                       child: Text(
                         '#',
-                        style: AppTheme.body(11.5, weight: FontWeight.w700, colour: AppTheme.textMuted),
+                        style: AppTheme.body(
+                          11.5,
+                          weight: FontWeight.w700,
+                          colour: AppTheme.textMuted,
+                        ),
                       ),
                     ),
                     Expanded(
                       child: Text(
                         'Name',
-                        style: AppTheme.body(11.5, weight: FontWeight.w700, colour: AppTheme.textMuted),
+                        style: AppTheme.body(
+                          11.5,
+                          weight: FontWeight.w700,
+                          colour: AppTheme.textMuted,
+                        ),
                       ),
                     ),
                     SizedBox(
                       width: 36,
                       child: Text(
                         'L/S',
-                        style: AppTheme.body(11.5, weight: FontWeight.w700, colour: AppTheme.textMuted),
+                        style: AppTheme.body(
+                          11.5,
+                          weight: FontWeight.w700,
+                          colour: AppTheme.textMuted,
+                        ),
                       ),
                     ),
                     Text(
                       'Total',
-                      style: AppTheme.body(11.5, weight: FontWeight.w700, colour: AppTheme.textMuted),
+                      style: AppTheme.body(
+                        11.5,
+                        weight: FontWeight.w700,
+                        colour: AppTheme.textMuted,
+                      ),
                     ),
                   ],
                 ),
@@ -219,19 +235,26 @@ class _StandingsTableScreen4 extends StatelessWidget {
                   final isRank1 = item.position == 1;
 
                   return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
                     child: Row(
                       children: [
                         SizedBox(
                           width: 28,
                           child: CircleAvatar(
                             radius: 11,
-                            backgroundColor: isRank1 ? AppTheme.primaryGreen : AppTheme.cardSecondary,
+                            backgroundColor: isRank1
+                                ? AppTheme.primaryGreen
+                                : AppTheme.cardSecondary,
                             child: Text(
                               '${item.position}',
                               style: AppTheme.numeric(
                                 11,
-                                colour: isRank1 ? Colors.white : AppTheme.textMuted,
+                                colour: isRank1
+                                    ? Colors.white
+                                    : AppTheme.textMuted,
                               ),
                             ),
                           ),
@@ -249,7 +272,10 @@ class _StandingsTableScreen4 extends StatelessWidget {
                           width: 36,
                           child: Text(
                             'L',
-                            style: AppTheme.body(12.5, colour: AppTheme.textMuted),
+                            style: AppTheme.body(
+                              12.5,
+                              colour: AppTheme.textMuted,
+                            ),
                           ),
                         ),
                         Text(

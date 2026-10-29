@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -19,33 +17,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  static const _welcomeImages = <String>[
-    'assets/images/golf_welcome_table_mountain.jpg',
-    'assets/images/golf_welcome_table_mountain_lake.jpg',
-    'assets/images/golf_welcome_golf_course.jpg',
-  ];
-
   bool _busy = false;
-  int _welcomeImageIndex = 0;
-  Timer? _welcomeImageTimer;
-
-  @override
-  void initState() {
-    super.initState();
-    _welcomeImageTimer = Timer.periodic(const Duration(seconds: 5), (_) {
-      if (mounted) {
-        setState(() {
-          _welcomeImageIndex = (_welcomeImageIndex + 1) % _welcomeImages.length;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _welcomeImageTimer?.cancel();
-    super.dispose();
-  }
 
   Future<void> _signInWithGoogle() async {
     setState(() => _busy = true);
@@ -93,18 +65,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // The supplied Cape Town course photo is the app's first image.
-          AnimatedSwitcher(
-            duration: const Duration(milliseconds: 1200),
-            switchInCurve: Curves.easeInOut,
-            switchOutCurve: Curves.easeInOut,
-            child: Image.asset(
-              _welcomeImages[_welcomeImageIndex],
-              key: ValueKey(_welcomeImages[_welcomeImageIndex]),
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stack) =>
-                  const CourseArtwork(seed: 'login-bg', overlay: false),
-            ),
+          // Use the supplied Table Mountain photo as a full-screen landing image.
+          Image.asset(
+            'assets/images/golf_landing_table_mountain.jpeg',
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
+            errorBuilder: (context, error, stack) =>
+                const CourseArtwork(seed: 'login-bg', overlay: false),
           ),
 
           // Dark gradient overlay

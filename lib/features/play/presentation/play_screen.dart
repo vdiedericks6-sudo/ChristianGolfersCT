@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/course_artwork.dart';
+import '../../../core/widgets/app_back_button.dart';
 import '../../../core/widgets/christian_golfers_components.dart';
 
 class PlayScreen extends ConsumerWidget {
@@ -16,10 +17,7 @@ class PlayScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: AppTheme.darkNavy,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
-          onPressed: () => context.pop(),
-        ),
+        leading: const AppBackButton(),
         title: const Text('Play Golf'),
         centerTitle: true,
       ),
@@ -81,10 +79,7 @@ class _PlayHeroCardScreen5 extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [
-                    Color(0x330F172A),
-                    Color(0xD90F172A),
-                  ],
+                  colors: [Color(0x330F172A), Color(0xD90F172A)],
                 ),
               ),
             ),
@@ -154,21 +149,14 @@ class _PlayMenuItemScreen5 extends StatelessWidget {
               color: AppTheme.cardSecondary,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              icon,
-              size: 20,
-              color: AppTheme.primaryGreen,
-            ),
+            child: Icon(icon, size: 20, color: AppTheme.primaryGreen),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  title,
-                  style: AppTheme.body(14, weight: FontWeight.w700),
-                ),
+                Text(title, style: AppTheme.body(14, weight: FontWeight.w700)),
                 const SizedBox(height: 2),
                 Text(
                   subtitle,

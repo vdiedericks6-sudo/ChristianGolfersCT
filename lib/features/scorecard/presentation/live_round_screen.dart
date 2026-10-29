@@ -30,6 +30,9 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
   int _strokes = 4;
   int _putts = 2;
   int _penalties = 0;
+  int _sandShots = 0;
+  String? _fairway;
+  bool? _greenInRegulation;
   int? _loadedHole;
   bool _saving = false;
   bool _completing = false;
@@ -45,6 +48,9 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
         _strokes = score?.strokes ?? par;
         _putts = score?.putts ?? 2;
         _penalties = score?.penaltyStrokes ?? 0;
+        _sandShots = score?.sandShots ?? 0;
+        _fairway = score?.fairway;
+        _greenInRegulation = score?.greenInRegulation;
       });
     });
   }
@@ -61,6 +67,9 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
             strokes: _strokes,
             putts: _putts,
             penaltyStrokes: _penalties,
+            sandShots: _sandShots,
+            fairway: _fairway,
+            greenInRegulation: _greenInRegulation,
           );
 
       if (mounted) {
@@ -250,6 +259,9 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
                               strokes: _strokes,
                               putts: _putts,
                               penalties: _penalties,
+                              sandShots: _sandShots,
+                              fairway: _fairway,
+                              greenInRegulation: _greenInRegulation,
                               saving: _saving,
                               completing: _completing,
                               onStrokes: (value) =>
@@ -258,6 +270,12 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
                                   setState(() => _putts = value),
                               onPenalties: (value) =>
                                   setState(() => _penalties = value),
+                              onSandShots: (value) =>
+                                  setState(() => _sandShots = value),
+                              onFairway: (value) =>
+                                  setState(() => _fairway = value),
+                              onGreenInRegulation: (value) =>
+                                  setState(() => _greenInRegulation = value),
                               onSave: () => _saveScore(round.currentHole),
                               onMoveHole: (delta) =>
                                   _changeSharedHole(round.currentHole, delta),
@@ -339,11 +357,17 @@ class _HoleView extends StatelessWidget {
     required this.strokes,
     required this.putts,
     required this.penalties,
+    required this.sandShots,
+    required this.fairway,
+    required this.greenInRegulation,
     required this.saving,
     required this.completing,
     required this.onStrokes,
     required this.onPutts,
     required this.onPenalties,
+    required this.onSandShots,
+    required this.onFairway,
+    required this.onGreenInRegulation,
     required this.onSave,
     required this.onMoveHole,
     required this.onComplete,
@@ -364,11 +388,17 @@ class _HoleView extends StatelessWidget {
   final int strokes;
   final int putts;
   final int penalties;
+  final int sandShots;
+  final String? fairway;
+  final bool? greenInRegulation;
   final bool saving;
   final bool completing;
   final ValueChanged<int> onStrokes;
   final ValueChanged<int> onPutts;
   final ValueChanged<int> onPenalties;
+  final ValueChanged<int> onSandShots;
+  final ValueChanged<String?> onFairway;
+  final ValueChanged<bool?> onGreenInRegulation;
   final VoidCallback onSave;
   final ValueChanged<int> onMoveHole;
   final VoidCallback onComplete;
@@ -541,6 +571,49 @@ class _HoleView extends StatelessWidget {
             quickValues: const [0, 1, 2, 3],
             lastQuickIsPlus: true,
             onChanged: onPenalties,
+          ),
+        ),
+        const SizedBox(height: 12),
+        ChristianGolfersCard(
+          child: ScoreStepper(
+            label: 'Sand shots',
+            value: sandShots,
+            min: 0,
+            max: 10,
+            quickValues: const [0, 1, 2, 3],
+            lastQuickIsPlus: true,
+            onChanged: onSandShots,
+          ),
+        ),
+        const SizedBox(height: 12),
+        ChristianGolfersCard(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('FAIRWAY', style: AppTheme.label(10)),
+              const SizedBox(height: 10),
+              SegmentedButton<String?>(
+                emptySelectionAllowed: true,
+                multiSelectionEnabled: false,
+                segments: const [
+                  ButtonSegment<String?>(value: 'left', label: Text('Left')),
+                  ButtonSegment<String?>(value: 'hit', label: Text('Hit')),
+                  ButtonSegment<String?>(value: 'right', label: Text('Right')),
+                  ButtonSegment<String?>(value: 'missed', label: Text('Miss')),
+                ],
+                selected: fairway == null ? const {} : {fairway!},
+                onSelectionChanged: (values) =>
+                    onFairway(values.isEmpty ? null : values.first),
+              ),
+              const SizedBox(height: 8),
+              SwitchListTile.adaptive(
+                contentPadding: EdgeInsets.zero,
+                title: const Text('Green in regulation'),
+                value: greenInRegulation ?? false,
+                onChanged: (value) => onGreenInRegulation(value),
+              ),
+            ],
           ),
         ),
 

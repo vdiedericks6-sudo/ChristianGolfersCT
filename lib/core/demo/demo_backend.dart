@@ -819,6 +819,9 @@ class _DemoScoreRepository implements ScoreRepository {
     required int strokes,
     required int putts,
     required int penaltyStrokes,
+    int sandShots = 0,
+    String? fairway,
+    bool? greenInRegulation,
     bool confirmed = true,
   }) async {
     if (holeNumber < 1 || holeNumber > 18) {
@@ -846,6 +849,9 @@ class _DemoScoreRepository implements ScoreRepository {
         strokes: strokes,
         putts: putts,
         penaltyStrokes: penaltyStrokes,
+        sandShots: sandShots,
+        fairway: fairway,
+        greenInRegulation: greenInRegulation,
         confirmed: confirmed,
         updatedAt: DateTime.now(),
       ),

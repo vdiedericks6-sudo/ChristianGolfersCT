@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_back_button.dart';
 import '../../../core/widgets/christian_golfers_components.dart';
 import 'admin_dashboard_screen.dart';
 import '../../authentication/presentation/auth_providers.dart';
@@ -18,7 +18,7 @@ class AdminPortalScreen extends ConsumerWidget {
       loading: () =>
           const Scaffold(body: Center(child: CircularProgressIndicator())),
       error: (error, stack) => Scaffold(
-        appBar: AppBar(leading: const BackButton()),
+        appBar: AppBar(leading: const AppBackButton()),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -32,10 +32,7 @@ class AdminPortalScreen extends ConsumerWidget {
               backgroundColor: AppTheme.pageBg,
               appBar: AppBar(
                 backgroundColor: AppTheme.darkNavy,
-                leading: IconButton(
-                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18),
-                  onPressed: () => context.pop(),
-                ),
+                leading: const AppBackButton(),
                 title: const Text('Owner / captain sign-in'),
                 centerTitle: true,
               ),

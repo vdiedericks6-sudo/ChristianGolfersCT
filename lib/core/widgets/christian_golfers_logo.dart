@@ -18,9 +18,9 @@ class ChristianGolfersLogo extends StatelessWidget {
   final Color color;
 
   List<double> _colorMatrix(Color tint) => <double>[
-    0, 0, 0, 0, tint.red.toDouble(),
-    0, 0, 0, 0, tint.green.toDouble(),
-    0, 0, 0, 0, tint.blue.toDouble(),
+    0, 0, 0, 0, (tint.r * 255).roundToDouble(),
+    0, 0, 0, 0, (tint.g * 255).roundToDouble(),
+    0, 0, 0, 0, (tint.b * 255).roundToDouble(),
     0.2126, 0.7152, 0.0722, 0, 0,
   ];
 

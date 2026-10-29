@@ -13,6 +13,9 @@ abstract class ScoreRepository {
     required int strokes,
     required int putts,
     required int penaltyStrokes,
+    int sandShots = 0,
+    String? fairway,
+    bool? greenInRegulation,
     bool confirmed = true,
   });
 }

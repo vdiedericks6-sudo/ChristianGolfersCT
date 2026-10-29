@@ -56,6 +56,9 @@ class SupabaseScoreRepository implements ScoreRepository {
     required int strokes,
     required int putts,
     required int penaltyStrokes,
+    int sandShots = 0,
+    String? fairway,
+    bool? greenInRegulation,
     bool confirmed = true,
   }) async {
     if (holeNumber < 1 || holeNumber > 18) {
@@ -73,6 +76,13 @@ class SupabaseScoreRepository implements ScoreRepository {
     if (penaltyStrokes < 0 || penaltyStrokes > 10) {
       throw ArgumentError('Penalty strokes must be between 0 and 10.');
     }
+    if (sandShots < 0 || sandShots > 10) {
+      throw ArgumentError('Sand shots must be between 0 and 10.');
+    }
+    if (fairway != null &&
+        !const {'left', 'hit', 'right', 'missed'}.contains(fairway)) {
+      throw ArgumentError('Invalid fairway result.');
+    }
 
     final playerId = _currentUserId;
 
@@ -83,6 +93,9 @@ class SupabaseScoreRepository implements ScoreRepository {
       'strokes': strokes,
       'putts': putts,
       'penalty_strokes': penaltyStrokes,
+      'sand_shots': sandShots,
+      'fairway': fairway,
+      'green_in_regulation': greenInRegulation,
       'confirmed': confirmed,
       'updated_at': DateTime.now().toUtc().toIso8601String(),
       'updated_by': playerId,

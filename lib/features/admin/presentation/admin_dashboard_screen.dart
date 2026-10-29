@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_back_button.dart';
 import '../../../core/widgets/christian_golfers_components.dart';
+import '../../authentication/presentation/auth_providers.dart';
 import '../../handicap/domain/handicap_calculator.dart';
 import '../../leagues/domain/season_competition.dart';
 import '../data/admin_league_dashboard_repository.dart';
@@ -64,6 +65,87 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
     });
   }
 
+  Future<void> _inviteMember() async {
+    final name = TextEditingController();
+    final email = TextEditingController();
+    final formKey = GlobalKey<FormState>();
+    final invite = await showDialog<(String, String)>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Invite a golfer'),
+        content: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                controller: name,
+                textCapitalization: TextCapitalization.words,
+                decoration: const InputDecoration(labelText: 'Full name'),
+                validator: (value) => (value?.trim().isEmpty ?? true)
+                    ? 'Enter the golfer’s name'
+                    : null,
+              ),
+              TextFormField(
+                controller: email,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(labelText: 'Email address'),
+                validator: (value) => (value?.contains('@') ?? false)
+                    ? null
+                    : 'Enter a valid email',
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              if (formKey.currentState!.validate()) {
+                Navigator.pop(dialogContext, (
+                  name.text.trim(),
+                  email.text.trim(),
+                ));
+              }
+            },
+            child: const Text('Send invite'),
+          ),
+        ],
+      ),
+    );
+    name.dispose();
+    email.dispose();
+    if (invite == null || !mounted) return;
+
+    try {
+      final response = await ref
+          .read(supabaseClientProvider)
+          .functions
+          .invoke(
+            'admin-invite-member',
+            body: {'displayName': invite.$1, 'email': invite.$2},
+          );
+      if (response.status < 200 || response.status >= 300) {
+        throw StateError('Invite failed (HTTP ${response.status}).');
+      }
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Invitation sent to ${invite.$2}.')),
+        );
+      }
+      ref.invalidate(adminLeagueDashboardProvider(_filter));
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not invite golfer: $error')),
+        );
+      }
+    }
+  }
+
   String _date(DateTime? value) {
     if (value == null) return 'Date unavailable';
     final local = value.toLocal();
@@ -99,6 +181,12 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         leading: const AppBackButton(),
         title: const Text('League dashboard'),
         actions: [
+          if (_tab == _DashboardTab.members)
+            IconButton(
+              tooltip: 'Invite golfer',
+              onPressed: _inviteMember,
+              icon: const Icon(Icons.person_add_alt_1_rounded),
+            ),
           IconButton(
             tooltip: 'Refresh scores',
             onPressed: _refresh,

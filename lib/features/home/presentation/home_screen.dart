@@ -57,7 +57,7 @@ class _HomeHeaderHero extends StatelessWidget {
           height: 330,
           width: double.infinity,
           child: Image.asset(
-            'assets/images/golf_ball_tee_hero.jpg',
+            'assets/images/golf_home_sunset.jpeg',
             fit: BoxFit.cover,
             errorBuilder: (context, error, stack) =>
                 const CourseArtwork(seed: 'home-hero-bg', overlay: false),
@@ -70,11 +70,7 @@ class _HomeHeaderHero extends StatelessWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0xCC0F172A),
-                Color(0x880F172A),
-                Color(0xF2F4F6F9),
-              ],
+              colors: [Color(0xCC0F172A), Color(0x880F172A), Color(0xF2F4F6F9)],
               stops: [0.0, 0.6, 1.0],
             ),
           ),
@@ -117,10 +113,7 @@ class _HomeHeaderHero extends StatelessWidget {
                   colour: Colors.white.withValues(alpha: 0.85),
                 ),
               ),
-              Text(
-                name,
-                style: AppTheme.display(26, colour: Colors.white),
-              ),
+              Text(name, style: AppTheme.display(26, colour: Colors.white)),
               const SizedBox(height: 12),
 
               // Scripture quote
