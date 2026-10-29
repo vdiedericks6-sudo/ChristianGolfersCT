@@ -16,21 +16,26 @@ class HomeScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(currentProfileProvider).valueOrNull;
     final name = profile?.displayName.split(' ').first ?? 'David';
+    final greeting = _greetingForLocalTime();
 
     return Scaffold(
       backgroundColor: AppTheme.pageBg,
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _HomeHeaderHero(name: name),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
-              child: Column(
-                children: [
-                  const WordOfTheDayCard(),
-                  const SizedBox(height: 18),
-                  const _HomeQuickActionsGrid(),
-                ],
+            _HomeHeaderHero(name: name, greeting: greeting),
+            Transform.translate(
+              offset: const Offset(0, -14),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                child: WordOfTheDayCard(),
+              ),
+            ),
+            Transform.translate(
+              offset: const Offset(0, -26),
+              child: const Padding(
+                padding: EdgeInsets.fromLTRB(16, 8, 16, 28),
+                child: _HomeQuickActionsGrid(),
               ),
             ),
           ],
@@ -38,23 +43,33 @@ class HomeScreen extends ConsumerWidget {
       ),
     );
   }
+
+  String _greetingForLocalTime() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good Morning';
+    if (hour < 17) return 'Good Afternoon';
+    return 'Good Evening';
+  }
 }
 
 /// The hero header matching Screen 2 in the Christian Golfers Cape Town branding.
 class _HomeHeaderHero extends StatelessWidget {
-  const _HomeHeaderHero({required this.name});
+  const _HomeHeaderHero({required this.name, required this.greeting});
 
   final String name;
+  final String greeting;
 
   @override
   Widget build(BuildContext context) {
     final topPadding = MediaQuery.viewPaddingOf(context).top;
+    final viewportHeight = MediaQuery.sizeOf(context).height;
+    final heroHeight = (viewportHeight * 0.31).clamp(245.0, 275.0).toDouble();
 
     return Stack(
       children: [
         // Background scenic artwork
         SizedBox(
-          height: 330,
+          height: heroHeight,
           width: double.infinity,
           child: Image.asset(
             'assets/images/golf_home_sunset.jpeg',
@@ -65,13 +80,13 @@ class _HomeHeaderHero extends StatelessWidget {
         ),
         // Dark gradient overlay
         Container(
-          height: 330,
+          height: heroHeight,
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xCC0F172A), Color(0x880F172A), Color(0xF2F4F6F9)],
-              stops: [0.0, 0.6, 1.0],
+              colors: [Color(0x550B1114), Color(0x22151D20), Color(0xFF20292D)],
+              stops: [0.0, 0.52, 1.0],
             ),
           ),
         ),
@@ -103,18 +118,18 @@ class _HomeHeaderHero extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 12),
 
               // Greeting
               Text(
-                'Good Morning',
+                greeting,
                 style: AppTheme.body(
                   13.5,
                   colour: Colors.white.withValues(alpha: 0.85),
                 ),
               ),
               Text(name, style: AppTheme.display(26, colour: Colors.white)),
-              const SizedBox(height: 12),
+              const SizedBox(height: 6),
 
               // Scripture quote
               Text(
@@ -153,7 +168,7 @@ class _HomeQuickActionsGrid extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: 12,
       crossAxisSpacing: 12,
-      childAspectRatio: 1.45,
+      childAspectRatio: 1.52,
       children: [
         QuickActionTile(
           icon: Icons.outlined_flag,

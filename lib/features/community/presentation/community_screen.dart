@@ -14,7 +14,8 @@ class CommunityScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final friendships = ref.watch(friendshipsProvider);
-    final pendingCount = friendships.valueOrNull
+    final pendingCount =
+        friendships.valueOrNull
             ?.where((friend) => friend.needsMyAnswer)
             .length ??
         0;
@@ -41,7 +42,7 @@ class CommunityScreen extends ConsumerWidget {
               color: AppTheme.darkNavy,
               child: TabBar(
                 indicatorColor: AppTheme.primaryBlue,
-                labelColor: Colors.white,
+                labelColor: const Color(0xFF19201D),
                 unselectedLabelColor: AppTheme.textFaint,
                 tabs: [
                   Tab(
@@ -89,7 +90,7 @@ class _Pip extends StatelessWidget {
       child: Text(
         '$count',
         style: const TextStyle(
-          color: Colors.white,
+          color: const Color(0xFF19201D),
           fontSize: 11,
           fontWeight: FontWeight.w900,
         ),
@@ -117,7 +118,8 @@ class _CrewTab extends ConsumerWidget {
           return _EmptyBody(
             icon: Icons.group_add_rounded,
             title: 'No crew yet',
-            message: 'Add the golfers you play with by their email address. '
+            message:
+                'Add the golfers you play with by their email address. '
                 "Once they accept, you'll see their rounds and how you stack "
                 'up against them.',
             action: GoldButton(
@@ -139,8 +141,7 @@ class _CrewTab extends ConsumerWidget {
             children: [
               if (incoming.isNotEmpty) ...[
                 const _SectionLabel('Wants to add you'),
-                for (final friend in incoming)
-                  _RequestTile(friend: friend),
+                for (final friend in incoming) _RequestTile(friend: friend),
                 const SizedBox(height: 20),
               ],
               if (accepted.isNotEmpty) ...[
@@ -315,7 +316,9 @@ class _FriendTile extends ConsumerWidget {
 
                 if (confirmed != true) return;
 
-                await ref.read(communityRepositoryProvider).removeFriend(friend.id);
+                await ref
+                    .read(communityRepositoryProvider)
+                    .removeFriend(friend.id);
                 invalidateCommunity(ref);
               },
               itemBuilder: (context) => const [
@@ -337,8 +340,18 @@ class _ActivityTab extends ConsumerWidget {
   const _ActivityTab();
 
   static const _months = [
-    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec',
   ];
 
   String _when(DateTime at) {
@@ -363,7 +376,8 @@ class _ActivityTab extends ConsumerWidget {
           return const _EmptyBody(
             icon: Icons.timeline_rounded,
             title: 'Nothing yet',
-            message: 'When someone in your crew finishes a round, it shows up '
+            message:
+                'When someone in your crew finishes a round, it shows up '
                 'here with what they shot.',
           );
         }
@@ -411,7 +425,7 @@ class _ActivityTab extends ConsumerWidget {
                                   text: entry.isFullRound
                                       ? ' played ${entry.courseName}'
                                       : ' played ${entry.holes} holes at '
-                                          '${entry.courseName}',
+                                            '${entry.courseName}',
                                   style: AppTheme.body(13.5),
                                 ),
                               ],
@@ -464,7 +478,8 @@ class _StandingsTab extends ConsumerWidget {
           return const _EmptyBody(
             icon: Icons.emoji_events_rounded,
             title: 'No standings yet',
-            message: 'Once you and your crew have finished some full rounds, '
+            message:
+                'Once you and your crew have finished some full rounds, '
                 'this ranks everyone by scoring average over the last year.',
           );
         }
@@ -492,7 +507,10 @@ class _StandingsTab extends ConsumerWidget {
                         width: 26,
                         child: Text(
                           '${index + 1}',
-                          style: AppTheme.numeric(14, colour: AppTheme.textMuted),
+                          style: AppTheme.numeric(
+                            14,
+                            colour: AppTheme.textMuted,
+                          ),
                         ),
                       ),
                       Expanded(
@@ -500,14 +518,19 @@ class _StandingsTab extends ConsumerWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              isMe ? '${row.displayName} (you)' : row.displayName,
+                              isMe
+                                  ? '${row.displayName} (you)'
+                                  : row.displayName,
                               style: AppTheme.body(14, weight: FontWeight.w700),
                             ),
                             Text(
                               '${row.roundsPlayed} '
                               '${row.roundsPlayed == 1 ? 'round' : 'rounds'}'
                               '  ·  best ${row.bestGross}',
-                              style: AppTheme.body(11.5, colour: AppTheme.textMuted),
+                              style: AppTheme.body(
+                                11.5,
+                                colour: AppTheme.textMuted,
+                              ),
                             ),
                           ],
                         ),
@@ -519,12 +542,17 @@ class _StandingsTab extends ConsumerWidget {
                             row.averageGross.toStringAsFixed(1),
                             style: AppTheme.numeric(
                               20,
-                              colour: isMe ? AppTheme.primaryBlue : AppTheme.textPrimary,
+                              colour: isMe
+                                  ? AppTheme.primaryBlue
+                                  : AppTheme.textPrimary,
                             ),
                           ),
                           Text(
                             'average',
-                            style: AppTheme.label(9, colour: AppTheme.textMuted),
+                            style: AppTheme.label(
+                              9,
+                              colour: AppTheme.textMuted,
+                            ),
                           ),
                         ],
                       ),
@@ -616,11 +644,7 @@ class _EmptyBody extends StatelessWidget {
         const SizedBox(height: 40),
         Icon(icon, size: 54, color: AppTheme.primaryBlue),
         const SizedBox(height: 16),
-        Text(
-          title,
-          textAlign: TextAlign.center,
-          style: AppTheme.display(20),
-        ),
+        Text(title, textAlign: TextAlign.center, style: AppTheme.display(20)),
         const SizedBox(height: 8),
         Text(
           message,

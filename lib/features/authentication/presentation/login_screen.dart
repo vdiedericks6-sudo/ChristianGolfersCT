@@ -41,19 +41,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       context: context,
       isScrollControlled: true,
       useSafeArea: true,
-      builder: (sheetContext) => Padding(
-        padding: EdgeInsets.fromLTRB(
-          24,
-          24,
-          24,
-          MediaQuery.viewInsetsOf(sheetContext).bottom + 24,
-        ),
-        child: _EmailAccessSheet(
-          onGoogle: () {
-            Navigator.pop(sheetContext);
-            _signInWithGoogle();
-          },
-          onEmailComplete: () => Navigator.pop(sheetContext),
+      builder: (sheetContext) => FractionallySizedBox(
+        heightFactor: 0.85,
+        alignment: Alignment.bottomCenter,
+        child: SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            24,
+            16,
+            24,
+            MediaQuery.viewInsetsOf(sheetContext).bottom + 20,
+          ),
+          child: _EmailAccessSheet(
+            onGoogle: () {
+              Navigator.pop(sheetContext);
+              _signInWithGoogle();
+            },
+            onEmailComplete: () => Navigator.pop(sheetContext),
+          ),
         ),
       ),
     );
@@ -83,9 +87,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
                 colors: [
-                  Color(0x990F172A),
-                  Color(0xCC0F172A),
-                  Color(0xFA0F172A),
+                  Color(0x9920292D),
+                  Color(0xCC20292D),
+                  Color(0xFA20292D),
                 ],
                 stops: [0.0, 0.5, 1.0],
               ),
@@ -144,7 +148,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onPressed: _busy ? null : _chooseSignInMethod,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primaryGreen,
-                        foregroundColor: Colors.white,
+                        foregroundColor: const Color(0xFF19201D),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(26),
                         ),
@@ -158,13 +162,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             style: AppTheme.body(
                               15,
                               weight: FontWeight.w700,
-                              colour: Colors.white,
+                              colour: const Color(0xFF19201D),
                             ),
                           ),
                           const SizedBox(width: 8),
                           const Icon(
                             Icons.chevron_right_rounded,
-                            color: Colors.white,
+                            color: const Color(0xFF19201D),
                             size: 22,
                           ),
                         ],
@@ -272,7 +276,16 @@ class _EmailAccessSheetState extends ConsumerState<_EmailAccessSheet> {
           _register ? 'Create your account' : 'Welcome back',
           style: Theme.of(context).textTheme.titleLarge,
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
+        OutlinedButton.icon(
+          onPressed: _busy ? null : widget.onGoogle,
+          icon: const Icon(Icons.g_mobiledata),
+          label: const Text('Continue with Google'),
+        ),
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 4),
+          child: Divider(),
+        ),
         if (_register)
           TextFormField(
             controller: _name,
@@ -322,12 +335,6 @@ class _EmailAccessSheetState extends ConsumerState<_EmailAccessSheet> {
                 ? 'Already registered? Sign in'
                 : 'New here? Create an account',
           ),
-        ),
-        const Divider(),
-        OutlinedButton.icon(
-          onPressed: _busy ? null : widget.onGoogle,
-          icon: const Icon(Icons.g_mobiledata),
-          label: const Text('Continue with Google'),
         ),
       ],
     ),

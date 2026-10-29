@@ -145,7 +145,7 @@ class _SegmentPill extends StatelessWidget {
           style: AppTheme.body(
             13,
             weight: FontWeight.w700,
-            colour: selected ? Colors.white : AppTheme.textMuted,
+            colour: selected ? const Color(0xFF19201D) : AppTheme.textMuted,
           ),
         ),
       ),
@@ -253,7 +253,7 @@ class _StandingsTableScreen4 extends StatelessWidget {
                               style: AppTheme.numeric(
                                 11,
                                 colour: isRank1
-                                    ? Colors.white
+                                    ? const Color(0xFF19201D)
                                     : AppTheme.textMuted,
                               ),
                             ),

@@ -15,7 +15,7 @@ class WordOfTheDayCard extends StatelessWidget {
           border: AppTheme.line,
           radius: AppTheme.radiusCard,
         ),
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(13),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -39,23 +39,13 @@ class WordOfTheDayCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                const Spacer(),
-                const CircleAvatar(
-                  radius: 14,
-                  backgroundColor: AppTheme.darkNavy,
-                  child: Icon(
-                    Icons.arrow_forward_rounded,
-                    color: Colors.white,
-                    size: 14,
-                  ),
-                ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
               reading.reference,
               style: AppTheme.body(
-                15,
+                14,
                 weight: FontWeight.w800,
                 colour: AppTheme.textPrimary,
               ),
@@ -64,7 +54,7 @@ class WordOfTheDayCard extends StatelessWidget {
             Text(
               '“${reading.verse}”',
               style: AppTheme.body(
-                13,
+                12,
                 weight: FontWeight.w600,
                 colour: AppTheme.textPrimary,
               ),
@@ -73,7 +63,7 @@ class WordOfTheDayCard extends StatelessWidget {
             Text(
               reading.reflection,
               style: AppTheme.body(
-                12,
+                11.5,
                 weight: FontWeight.w500,
                 colour: AppTheme.textMuted,
               ),

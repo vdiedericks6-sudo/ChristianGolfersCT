@@ -127,7 +127,9 @@ class _CourseListScreenState extends ConsumerState<CourseListScreen> {
                         style: AppTheme.body(
                           12.5,
                           weight: FontWeight.w700,
-                          colour: selected ? Colors.white : AppTheme.textMuted,
+                          colour: selected
+                              ? const Color(0xFF19201D)
+                              : AppTheme.textMuted,
                         ),
                       ),
                     ),

@@ -2,17 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Christian Golfers Cape Town design system:
-/// Emerald Golf Green accent, Dark Navy headers, clean light page ground.
+/// Christian Golfers Cape Town dark golf-club design system.
 class AppTheme {
   const AppTheme._();
 
   // --- Brand Colors ---------------------------------------------------------
-  /// Vibrant Emerald Golf Green.
-  static const primaryGreen = Color(0xFF00B074);
-  static const primaryGreenDark = Color(0xFF059669);
-  static const primaryGreenLight = Color(0xFF10B981);
-  static const primaryGreenBg = Color(0xFFECFDF5);
+  /// Lime accent sampled from the approved scorecard direction.
+  static const primaryGreen = Color(0xFFD2EB35);
+  static const primaryGreenDark = Color(0xFFB6D52B);
+  static const primaryGreenLight = Color(0xFFE2F46A);
+  static const primaryGreenBg = Color(0xFF3A442A);
 
   /// Backward compatibility aliases
   static const primaryBlue = primaryGreen;
@@ -20,27 +19,27 @@ class AppTheme {
   static const primaryBlueLight = primaryGreenLight;
   static const primaryBlueBg = primaryGreenBg;
 
-  /// Dark Slate Navy for top app bars and dark surfaces.
-  static const darkNavy = Color(0xFF0F172A);
-  static const darkNavyLight = Color(0xFF1E293B);
+  /// Charcoal surfaces for the app shell, cards and app bars.
+  static const darkNavy = Color(0xFF20292D);
+  static const darkNavyLight = Color(0xFF2B3539);
 
-  /// Main app page background.
-  static const pageBg = Color(0xFFEDF3EF);
+  /// Main app page background, including safe areas and navigation shell.
+  static const pageBg = Color(0xFF20292D);
 
-  /// Standard white card surface.
-  static const card = Color(0xFFFAFCFA);
+  /// Standard raised charcoal surface.
+  static const card = Color(0xFF2B3539);
 
-  /// Soft light grey card fill / secondary surface.
-  static const cardSecondary = Color(0xFFE7EFE9);
+  /// Secondary surface used for controls and alternate scorecard rows.
+  static const cardSecondary = Color(0xFF333D41);
 
   /// Hairline dividers and borders.
-  static const line = Color(0xFFE2E8F0);
-  static const lineDark = Color(0xFF334155);
+  static const line = Color(0xFF3D484C);
+  static const lineDark = Color(0xFF465256);
 
   // --- Text Colors ----------------------------------------------------------
-  static const textPrimary = Color(0xFF0F172A);
-  static const textMuted = Color(0xFF64748B);
-  static const textFaint = Color(0xFF94A3B8);
+  static const textPrimary = Color(0xFFF2F4F2);
+  static const textMuted = Color(0xFFAAB3B2);
+  static const textFaint = Color(0xFF7F8A8B);
   static const textOnDark = Color(0xFFFFFFFF);
   static const onLight = Color(0xFFFFFFFF);
 
@@ -111,7 +110,7 @@ class AppTheme {
   static const greenGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
-    colors: [Color(0xFF059669), Color(0xFF00B074)],
+    colors: [Color(0xFFB6D52B), Color(0xFFD2EB35)],
   );
 
   static const blueGradient = greenGradient;
@@ -163,18 +162,18 @@ class AppTheme {
 
   // --- ThemeData ------------------------------------------------------------
   static ThemeData get theme {
-    final scheme = const ColorScheme.light(
+    final scheme = const ColorScheme.dark(
       primary: primaryGreen,
-      onPrimary: Colors.white,
+      onPrimary: Color(0xFF19201D),
       secondary: primaryGreenDark,
-      onSecondary: Colors.white,
+      onSecondary: Color(0xFF19201D),
       surface: card,
       onSurface: textPrimary,
       error: danger,
       onError: Colors.white,
     );
 
-    final base = ThemeData.light(useMaterial3: true);
+    final base = ThemeData.dark(useMaterial3: true);
 
     return base.copyWith(
       colorScheme: scheme,
@@ -230,7 +229,7 @@ class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           backgroundColor: primaryGreen,
-          foregroundColor: Colors.white,
+          foregroundColor: const Color(0xFF19201D),
           disabledBackgroundColor: cardSecondary,
           disabledForegroundColor: textFaint,
           minimumSize: const Size.fromHeight(50),
@@ -306,7 +305,7 @@ class AppTheme {
           ),
           foregroundColor: WidgetStateProperty.resolveWith(
             (states) => states.contains(WidgetState.selected)
-                ? Colors.white
+                ? const Color(0xFF19201D)
                 : textMuted,
           ),
           side: const WidgetStatePropertyAll(BorderSide(color: line)),

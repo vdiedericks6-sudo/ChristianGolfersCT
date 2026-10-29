@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../core/config/app_config.dart';
 import '../core/theme/app_theme.dart';
@@ -14,7 +15,7 @@ class ChristianGolfersApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.theme,
       darkTheme: AppTheme.theme,
-      themeMode: ThemeMode.light,
+      themeMode: ThemeMode.dark,
       routerConfig: appRouter,
       builder: (context, child) {
         if (child == null) return const SizedBox.shrink();
@@ -36,7 +37,17 @@ class ChristianGolfersApp extends StatelessWidget {
           );
         }
 
-        return _PhoneShell(child: app);
+        return AnnotatedRegion<SystemUiOverlayStyle>(
+          value: const SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.light,
+            systemNavigationBarColor: AppTheme.pageBg,
+            systemNavigationBarIconBrightness: Brightness.light,
+            systemNavigationBarDividerColor: AppTheme.pageBg,
+            systemNavigationBarContrastEnforced: false,
+          ),
+          child: _PhoneShell(child: app),
+        );
       },
     );
   }
@@ -56,7 +67,7 @@ class _PhoneShell extends StatelessWidget {
     if (width <= maxWidth) return child;
 
     return ColoredBox(
-      color: const Color(0xFF0F172A),
+      color: const Color(0xFF171F22),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: maxWidth),
@@ -73,10 +84,7 @@ class _PhoneShell extends StatelessWidget {
             ),
             child: MediaQuery(
               data: MediaQuery.of(context).copyWith(
-                size: Size(
-                  maxWidth,
-                  MediaQuery.sizeOf(context).height,
-                ),
+                size: Size(maxWidth, MediaQuery.sizeOf(context).height),
               ),
               child: child,
             ),

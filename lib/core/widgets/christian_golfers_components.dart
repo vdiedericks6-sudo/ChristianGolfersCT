@@ -8,7 +8,7 @@ import '../theme/app_theme.dart';
 // Surfaces
 // ---------------------------------------------------------------------------
 
-/// Standard white card: subtle border, soft lift, generous radius.
+/// Standard raised charcoal card with a subtle border and generous radius.
 class ChristianGolfersCard extends StatelessWidget {
   const ChristianGolfersCard({
     required this.child,
@@ -82,7 +82,7 @@ class SectionHeader extends StatelessWidget {
 // Actions
 // ---------------------------------------------------------------------------
 
-/// Primary call to action: full width vibrant green button with white label.
+/// Primary call to action: full width lime button with a dark label.
 class GoldButton extends StatelessWidget {
   const GoldButton({
     required this.label,
@@ -135,7 +135,7 @@ class GoldButton extends StatelessWidget {
                         dimension: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2.4,
-                          color: Colors.white,
+                          color: const Color(0xFF19201D),
                         ),
                       )
                     : Row(
@@ -146,7 +146,7 @@ class GoldButton extends StatelessWidget {
                               icon,
                               size: 19,
                               color: enabled
-                                  ? Colors.white
+                                  ? const Color(0xFF19201D)
                                   : AppTheme.textFaint,
                             ),
                             const SizedBox(width: 8),
@@ -157,7 +157,7 @@ class GoldButton extends StatelessWidget {
                               14,
                               weight: FontWeight.w700,
                               colour: enabled
-                                  ? Colors.white
+                                  ? const Color(0xFF19201D)
                                   : AppTheme.textFaint,
                             ),
                           ),
@@ -201,31 +201,27 @@ class QuickActionTile extends StatelessWidget {
 
     return ChristianGolfersCard(
       colour: bg,
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       onTap: onTap,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: 38,
-            height: 38,
+            width: 34,
+            height: 34,
             decoration: const BoxDecoration(
               color: AppTheme.primaryGreenBg,
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: ic, size: 20),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             label,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: AppTheme.body(
-              13.5,
-              weight: FontWeight.w700,
-              colour: tc,
-            ),
+            style: AppTheme.body(13.5, weight: FontWeight.w700, colour: tc),
           ),
           if (caption != null) ...[
             const SizedBox(height: 2),
@@ -233,10 +229,7 @@ class QuickActionTile extends StatelessWidget {
               caption!,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: AppTheme.body(
-                10.5,
-                colour: AppTheme.textMuted,
-              ),
+              style: AppTheme.body(10.5, colour: AppTheme.textMuted),
             ),
           ],
         ],
@@ -327,7 +320,11 @@ class StatTile extends StatelessWidget {
         Text(
           label,
           textAlign: TextAlign.center,
-          style: AppTheme.body(11, colour: AppTheme.textMuted, weight: FontWeight.w600),
+          style: AppTheme.body(
+            11,
+            colour: AppTheme.textMuted,
+            weight: FontWeight.w600,
+          ),
         ),
         if (caption != null) ...[
           const SizedBox(height: 2),
@@ -376,7 +373,11 @@ class MetaPill extends StatelessWidget {
           ],
           Text(
             text,
-            style: AppTheme.body(11, colour: foreground, weight: FontWeight.w700),
+            style: AppTheme.body(
+              11,
+              colour: foreground,
+              weight: FontWeight.w700,
+            ),
           ),
         ],
       ),
@@ -472,13 +473,42 @@ class ScoreBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     final mark = markFor(strokes, par);
 
-    final (Color border, Color text, BoxShape shape, double width) = switch (mark) {
-      ScoreMark.eagle => (AppTheme.primaryGreen, AppTheme.primaryGreen, BoxShape.circle, 2.4),
-      ScoreMark.birdie => (AppTheme.primaryGreen, AppTheme.primaryGreen, BoxShape.circle, 1.5),
-      ScoreMark.par => (Colors.transparent, AppTheme.textPrimary, BoxShape.rectangle, 0.0),
-      ScoreMark.bogey => (AppTheme.textMuted, AppTheme.textPrimary, BoxShape.rectangle, 1.5),
-      ScoreMark.doublePlus =>
-        (AppTheme.doubleBogey, AppTheme.doubleBogey, BoxShape.rectangle, 2.4),
+    final (
+      Color border,
+      Color text,
+      BoxShape shape,
+      double width,
+    ) = switch (mark) {
+      ScoreMark.eagle => (
+        AppTheme.primaryGreen,
+        AppTheme.primaryGreen,
+        BoxShape.circle,
+        2.4,
+      ),
+      ScoreMark.birdie => (
+        AppTheme.primaryGreen,
+        AppTheme.primaryGreen,
+        BoxShape.circle,
+        1.5,
+      ),
+      ScoreMark.par => (
+        Colors.transparent,
+        AppTheme.textPrimary,
+        BoxShape.rectangle,
+        0.0,
+      ),
+      ScoreMark.bogey => (
+        AppTheme.textMuted,
+        AppTheme.textPrimary,
+        BoxShape.rectangle,
+        1.5,
+      ),
+      ScoreMark.doublePlus => (
+        AppTheme.doubleBogey,
+        AppTheme.doubleBogey,
+        BoxShape.rectangle,
+        2.4,
+      ),
     };
 
     return Semantics(
@@ -530,7 +560,9 @@ class ScoreStepper extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(child: Text(label.toUpperCase(), style: AppTheme.label(11))),
+            Expanded(
+              child: Text(label.toUpperCase(), style: AppTheme.label(11)),
+            ),
             _StepButton(
               icon: Icons.remove_rounded,
               onTap: value > min ? () => onChanged(value - 1) : null,
@@ -649,7 +681,9 @@ class _QuickChip extends StatelessWidget {
                 text,
                 style: AppTheme.numeric(
                   16,
-                  colour: selected ? Colors.white : AppTheme.textPrimary,
+                  colour: selected
+                      ? const Color(0xFF19201D)
+                      : AppTheme.textPrimary,
                 ),
               ),
             ),
@@ -696,7 +730,11 @@ class EmptyState extends StatelessWidget {
               child: Icon(icon, color: AppTheme.primaryGreen, size: 30),
             ),
             const SizedBox(height: 16),
-            Text(title, style: AppTheme.display(22), textAlign: TextAlign.center),
+            Text(
+              title,
+              style: AppTheme.display(22),
+              textAlign: TextAlign.center,
+            ),
             const SizedBox(height: 8),
             Text(
               message,

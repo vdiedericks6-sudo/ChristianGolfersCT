@@ -28,7 +28,7 @@ Before submitting, open these links outside an authenticated session and verify 
 
 ## Required owner actions before submission
 
-1. **Build/version/signing:** create and securely back up the Play upload keystore; create local ignored `android/key.properties`; increment version/build number; build and inspect the signed AAB. Configure Play App Signing and retain the upload key safely.
+1. **Build/version/signing:** a new Play upload keystore and signed AAB are now prepared locally. Securely back up the keystore and local ignored `android/key.properties`; register the public upload certificate in Play Console, enable Play App Signing, and increment the version/build number for each subsequent release. If an upload key was already registered for this package, use it or reset it in Play Console before uploading this bundle.
 2. **Current device/API verification:** install the release candidate on supported Android versions and verify sign-in/sign-out/session restore, invite, round creation/join, score entry, round completion, standings, account deletion, links, back navigation, offline/error recovery, and accessibility/font scaling.
 3. **API and native compatibility:** confirm target SDK is at least API 36 for this release cycle. Verify 64-bit and 16 KB page-size compatibility of all shipped native dependencies before the applicable Play deadline.
 4. **Play Console identity:** confirm package registration, developer account verification, app name, category, support contact, countries, content rating and target audience. App is intended for adult golfers; verify all audience answers against the real product.
@@ -58,11 +58,11 @@ flutter build apk --debug
 adb install -r build\app\outputs\flutter-apk\app-debug.apk
 ```
 
-Debug installs use the debug signing key and do not prove Play release signing.
+Debug installs use the debug signing key and do not prove Play release signing. The release upload key is `android/app/christiangolfers-upload.jks`; its password and alias are stored in ignored `android/key.properties`. The public certificate to register with Play Console is `docs/android-upload-certificate.pem`. Never commit the keystore or `key.properties`.
 
 ## Outstanding environment gates
 
-- The local release upload keystore and `android/key.properties` are not present. They must be created and backed up by the release owner.
+- The release upload keystore and signed app bundle are present locally. The release owner must securely back up the keystore and `android/key.properties`, register the certificate, and configure Play App Signing in Play Console.
 - Supabase Auth leaked-password protection is currently reported disabled by the project's security advisor. Enable it before production accounts are onboarded.
 - Production SMTP/invitation/password reset delivery and live privacy URL accessibility need owner-side verification.
 - Play Console listing, Data safety, content rating, developer verification, app access instructions, and signing are Console work and cannot be completed from the source repository alone.

@@ -60,6 +60,9 @@ app.*.map.json
 .env
 .env.*
 !.env.example
+CGCT.json
+Christian Golfers Cape Town Credent.md
+email_addresses.csv
 tools/migration/id-map.json
 tools/migration/*service-account*.json
 

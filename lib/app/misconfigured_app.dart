@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../core/theme/app_theme.dart';
+
 /// Shown when SUPABASE_URL / SUPABASE_ANON_KEY were not passed at build time.
 class MisconfiguredApp extends StatelessWidget {
   const MisconfiguredApp({super.key});
@@ -8,8 +10,9 @@ class MisconfiguredApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
+      theme: AppTheme.theme,
       home: Scaffold(
-        backgroundColor: const Color(0xFF0F172A),
+        backgroundColor: AppTheme.pageBg,
         body: Center(
           child: Padding(
             padding: const EdgeInsets.all(28),
@@ -18,7 +21,7 @@ class MisconfiguredApp extends StatelessWidget {
               children: const [
                 Icon(
                   Icons.warning_amber_rounded,
-                  color: Color(0xFF0D6EFD),
+                  color: AppTheme.primaryGreen,
                   size: 48,
                 ),
                 SizedBox(height: 16),
@@ -26,7 +29,7 @@ class MisconfiguredApp extends StatelessWidget {
                   'Christian Golfers Cape Town is not configured',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: AppTheme.textPrimary,
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
                   ),
@@ -40,7 +43,7 @@ class MisconfiguredApp extends StatelessWidget {
                   'To open the local sample experience without backend keys, run with '
                   '--dart-define=CHRISTIAN_GOLFERS_DEMO=true',
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Color(0xFF94A3B8), height: 1.4),
+                  style: TextStyle(color: AppTheme.textMuted, height: 1.4),
                 ),
               ],
             ),
