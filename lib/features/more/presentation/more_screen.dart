@@ -66,22 +66,21 @@ class MoreScreen extends ConsumerWidget {
               onTap: () => context.push('/community'),
             ),
 
-            if (isAdmin) ...[
-              const SizedBox(height: 22),
-              const SectionHeader('Admin'),
-              _MoreTile(
-                icon: Icons.admin_panel_settings_rounded,
-                title: 'Admin Portal',
-                subtitle: 'Member handicaps and league settings',
-                onTap: () => context.push('/admin'),
-              ),
+            const SizedBox(height: 22),
+            const SectionHeader('League management'),
+            _MoreTile(
+              icon: Icons.admin_panel_settings_rounded,
+              title: 'Owner / captain dashboard',
+              subtitle: 'Sign in to review member scores and standings',
+              onTap: () => context.push('/admin'),
+            ),
+            if (isAdmin)
               _MoreTile(
                 icon: Icons.cloud_download_rounded,
                 title: 'Import course catalogue',
                 subtitle: 'Courses, holes and driving ranges',
                 onTap: () => context.push('/course-seed'),
               ),
-            ],
 
             const SizedBox(height: 22),
             const SectionHeader('Account'),
