@@ -4,8 +4,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'app/app.dart';
 import 'app/misconfigured_app.dart';
+import 'app/router.dart';
 import 'core/config/app_config.dart';
 import 'core/config/url_strategy.dart';
+import 'core/notifications/app_notification_service.dart';
 import 'core/supabase/supabase_config.dart';
 
 Future<void> main() async {
@@ -32,6 +34,14 @@ Future<void> main() async {
       ),
     );
   }
+
+  await AppNotificationService.initialize(
+    onTap: (payload) {
+      if (payload == null || !payload.startsWith('round:')) return;
+      final roundId = payload.substring('round:'.length);
+      if (roundId.isNotEmpty) appRouter.go('/rounds/$roundId/live');
+    },
+  );
 
   runApp(const ProviderScope(child: ChristianGolfersApp()));
 }

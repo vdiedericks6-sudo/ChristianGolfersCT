@@ -126,7 +126,7 @@ class ProfileScreen extends ConsumerWidget {
                 _ProfileMenuItemScreen6(
                   icon: Icons.notifications_none_rounded,
                   title: 'Notifications',
-                  onTap: () {},
+                  onTap: () => context.push('/notifications'),
                 ),
                 const SizedBox(height: 10),
                 _ProfileMenuItemScreen6(

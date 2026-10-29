@@ -104,11 +104,19 @@ Public policy URLs:
 
 The bundled dataset is for discovery/seed support; live course and hole records are stored in Supabase. Tee colours supported by the feature include White, Yellow, Blue and Red. Official hole images and per-tee distances must be sourced from course owners or other licensed/verified sources. OSM tee/green coordinate distance is only a straight-line estimate. Shot suggestions use the golfer-selected lie and measured distance and are general guidance, not live weather, hazard or course strategy data. OpenStreetMap data requires attribution where displayed.
 
-## 7. Assets and visual identity
+## 7. Notifications and wearable delivery
+
+`AppNotificationService` initializes `flutter_local_notifications` and posts Android/iOS local notifications. Android declares `POST_NOTIFICATIONS`; Android 13 and later require the golfer to grant runtime notification permission. The Notifications page reports permission state, requests it, opens Android app notification settings, and can send a local test alert. Tapping a round alert deep-links to that round's live scorecard.
+
+At present, round-start alerts are generated only for a golfer who has the round lobby open when another participant starts the round. They are not remote push notifications and will not reliably arrive when the app is closed or the lobby is not active. No Firebase Messaging/FCM project configuration or server-side push sender is present. Production background alerts require a Firebase Android app configuration, a push token registration design and a trusted server-side sender (for example a Supabase Edge Function using FCM credentials held only as server secrets), plus opt-in and token revocation handling.
+
+On Android, ordinary phone notifications can be bridged to a paired Wear OS watch by the Android/wearable notification system; the user must allow app notifications and enable notification sharing in the watch companion settings. The app does not have a Wear OS companion app or watch-specific data layer. Actual watch delivery must be verified on a paired watch and depends on its notification settings and connection.
+
+## 8. Assets and visual identity
 
 Official Christian Golfers Cape Town branding is provided from `assets/images/cgct_official_logo.jpeg` and reusable logo widgets. Welcome/home/courses visuals use the user-provided Cape Town golf imagery under `assets/images/`. The scorecard follows the dark navy and lime visual direction of the provided scorecard reference; score entry and round summary remain native Flutter widgets rather than an embedded screenshot.
 
-## 8. Android build and release
+## 9. Android build and release
 
 - Flutter project root: repository's `ChristianGolfersApp` directory.
 - Android namespace/application ID: `com.christiangolfers.capetown`.
@@ -119,18 +127,19 @@ Official Christian Golfers Cape Town branding is provided from `assets/images/cg
 - Release signing reads ignored `android/key.properties`; the signing keystore and passwords must be privately created, backed up and never committed. A debug install does not validate Play signing.
 - CI/release commands and the owner checklist are in `docs/google-play-release.md`.
 
-## 9. iOS provisioning status
+## 10. iOS provisioning status
 
 Flutter source can target iOS, but iOS provisioning is not complete. A macOS host with current Xcode, Apple Developer team, registered bundle identifier, signing certificate/profile, App Store Connect app record, privacy nutrition labels, and a physical-device/TestFlight build is required. Android keys cannot sign an iOS app. Confirm Apple team ownership and bundle ID before provisioning.
 
-## 10. Operational configuration and ownership
+## 11. Operational configuration and ownership
 
 Supabase project ownership, Auth provider setup, SMTP delivery for Auth invitations/password recovery, Auth leaked-password protection, Edge Function secrets, admin allowlist, course-source licenses, and production release credentials are operational settings. They are not recoverable from Flutter client code. The project has an Auth leaked-password-protection advisor warning that should be resolved in Supabase Auth → Password Security before launch. Test invitation and password recovery delivery with the club's production SMTP configuration.
 
-## 11. Known limitations / decision log
+## 12. Known limitations / decision log
 
 1. Course directory and official tee data are incomplete; do not claim every South African course or authoritative course handicap until source coverage and ratings are verified.
 2. Historical League A/B totals are visible as supplied standings, but no points algorithm was supplied; new points scoring requires the owner to specify a formula.
 3. Public privacy requests are queued for administrator review without notification. Establish a routine inbox review or add a monitored notification channel before broad launch.
 4. The current sample count is a snapshot and should be refreshed before a release or architecture revision.
 5. Admin secrets are not in the app. Allowlisting controls admin access; a pre-release username/password is not a safe client-side mechanism.
+6. Phone local notifications and Wear OS notification bridging are implemented, but remote notifications while the app is closed require FCM and trusted server configuration.

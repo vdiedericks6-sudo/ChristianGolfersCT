@@ -20,6 +20,7 @@ import '../features/profile/domain/user_profile.dart';
 import '../features/profile/presentation/edit_profile_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/privacy/presentation/privacy_screen.dart';
+import '../features/notifications/presentation/notifications_screen.dart';
 import '../features/rounds/presentation/join_link_screen.dart';
 import '../features/rounds/presentation/join_round_screen.dart';
 import '../features/rounds/presentation/round_lobby_screen.dart';
@@ -34,6 +35,10 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/privacy',
       builder: (context, state) => const PrivacyScreen(),
+    ),
+    GoRoute(
+      path: '/notifications',
+      builder: (context, state) => const NotificationsScreen(),
     ),
     GoRoute(
       path: '/edit-profile',

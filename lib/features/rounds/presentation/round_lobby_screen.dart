@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/notifications/app_notification_service.dart';
 import '../../../core/widgets/app_back_button.dart';
 import '../../../core/widgets/christian_golfers_components.dart';
 import '../../authentication/presentation/auth_providers.dart';
@@ -22,6 +25,7 @@ class RoundLobbyScreen extends ConsumerStatefulWidget {
 class _RoundLobbyScreenState extends ConsumerState<RoundLobbyScreen> {
   bool _starting = false;
   bool _navigatingToLiveRound = false;
+  String? _notifiedStartedRoundId;
 
   Future<void> _startRound() async {
     setState(() => _starting = true);
@@ -85,6 +89,16 @@ class _RoundLobbyScreenState extends ConsumerState<RoundLobbyScreen> {
             }
 
             if (round.isActive) {
+              if (round.hostUserId != currentUserId &&
+                  _notifiedStartedRoundId != round.id) {
+                _notifiedStartedRoundId = round.id;
+                unawaited(
+                  AppNotificationService.showRoundStarted(
+                    roundId: round.id,
+                    courseName: round.courseName,
+                  ),
+                );
+              }
               _openLiveRound();
               return const Center(child: CircularProgressIndicator());
             }

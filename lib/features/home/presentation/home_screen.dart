@@ -99,7 +99,7 @@ class _HomeHeaderHero extends StatelessWidget {
                     backgroundColor: Colors.white.withValues(alpha: 0.2),
                     iconColor: Colors.white,
                     size: 38,
-                    onTap: () => context.push('/more'),
+                    onTap: () => context.push('/notifications'),
                   ),
                 ],
               ),
