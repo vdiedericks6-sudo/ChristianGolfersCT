@@ -5,7 +5,7 @@ import '../../../core/auth/christian_golfer_user.dart';
 import '../../../core/supabase/supabase_config.dart';
 import 'auth_repository.dart';
 
-/// Google-only authentication on top of Supabase Auth.
+/// Supabase Auth implementation for email/password and optional Google sign-in.
 class SupabaseAuthRepository implements AuthRepository {
   SupabaseAuthRepository(this._client);
 

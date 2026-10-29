@@ -46,7 +46,8 @@ class ProfileScreen extends ConsumerWidget {
         ),
         data: (profile) {
           final name = profile?.displayName ?? 'David Erasmus';
-          final hcp = profile?.estimatedHandicapIndex?.toStringAsFixed(1) ?? '12.4';
+          final hcp =
+              profile?.estimatedHandicapIndex?.toStringAsFixed(1) ?? '12.4';
 
           return SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 28),
@@ -77,36 +78,22 @@ class ProfileScreen extends ConsumerWidget {
 
                 // 3 Column Stats Card matching Screen 6
                 ChristianGolfersCard(
-                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 16,
+                    horizontal: 12,
+                  ),
                   child: Row(
                     children: [
                       Expanded(
-                        child: StatTile(
-                          label: 'Handicap',
-                          value: hcp,
-                        ),
+                        child: StatTile(label: 'Handicap', value: hcp),
                       ),
-                      Container(
-                        height: 36,
-                        width: 1,
-                        color: AppTheme.line,
-                      ),
+                      Container(height: 36, width: 1, color: AppTheme.line),
                       Expanded(
-                        child: StatTile(
-                          label: 'Rounds',
-                          value: '8',
-                        ),
+                        child: StatTile(label: 'Rounds', value: '8'),
                       ),
-                      Container(
-                        height: 36,
-                        width: 1,
-                        color: AppTheme.line,
-                      ),
+                      Container(height: 36, width: 1, color: AppTheme.line),
                       Expanded(
-                        child: StatTile(
-                          label: 'Wins',
-                          value: '3',
-                        ),
+                        child: StatTile(label: 'Wins', value: '3'),
                       ),
                     ],
                   ),
@@ -146,6 +133,12 @@ class ProfileScreen extends ConsumerWidget {
                   icon: Icons.settings_outlined,
                   title: 'Settings',
                   onTap: () => context.push('/more'),
+                ),
+                const SizedBox(height: 10),
+                _ProfileMenuItemScreen6(
+                  icon: Icons.privacy_tip_outlined,
+                  title: 'Privacy & account deletion',
+                  onTap: () => context.push('/privacy'),
                 ),
                 const SizedBox(height: 10),
                 _ProfileMenuItemScreen6(
@@ -190,11 +183,7 @@ class _ProfileMenuItemScreen6 extends StatelessWidget {
               color: AppTheme.cardSecondary,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              icon,
-              size: 19,
-              color: AppTheme.textPrimary,
-            ),
+            child: Icon(icon, size: 19, color: AppTheme.textPrimary),
           ),
           const SizedBox(width: 12),
           Expanded(

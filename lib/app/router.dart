@@ -19,6 +19,7 @@ import '../features/play/presentation/play_screen.dart';
 import '../features/profile/domain/user_profile.dart';
 import '../features/profile/presentation/edit_profile_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
+import '../features/privacy/presentation/privacy_screen.dart';
 import '../features/rounds/presentation/join_link_screen.dart';
 import '../features/rounds/presentation/join_round_screen.dart';
 import '../features/rounds/presentation/round_lobby_screen.dart';
@@ -30,6 +31,10 @@ final GoRouter appRouter = GoRouter(
   routes: [
     GoRoute(path: '/', builder: (context, state) => const AuthGate()),
     GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+    GoRoute(
+      path: '/privacy',
+      builder: (context, state) => const PrivacyScreen(),
+    ),
     GoRoute(
       path: '/edit-profile',
       builder: (context, state) {
@@ -82,7 +87,10 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) =>
           RoundLeaderboardScreen(roundId: state.pathParameters['roundId']!),
     ),
-    GoRoute(path: '/admin', builder: (context, state) => const AdminPortalScreen()),
+    GoRoute(
+      path: '/admin',
+      builder: (context, state) => const AdminPortalScreen(),
+    ),
     GoRoute(path: '/more', builder: (context, state) => const MoreScreen()),
     GoRoute(path: '/play', builder: (context, state) => const PlayScreen()),
     GoRoute(

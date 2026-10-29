@@ -39,6 +39,7 @@ dependencies:
   google_fonts: ^8.2.1
   shared_preferences: ^2.5.5
   supabase_flutter: ^2.9.1
+  url_launcher: ^6.3.3
 
   # Web-only, imported conditionally from lib/core/config/url_strategy.dart
   # so the mobile builds still compile.

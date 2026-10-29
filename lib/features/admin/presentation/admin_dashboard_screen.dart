@@ -7,11 +7,12 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/app_back_button.dart';
 import '../../../core/widgets/christian_golfers_components.dart';
 import '../../authentication/presentation/auth_providers.dart';
+import '../data/admin_privacy_requests_repository.dart';
 import '../../handicap/domain/handicap_calculator.dart';
 import '../../leagues/domain/season_competition.dart';
 import '../data/admin_league_dashboard_repository.dart';
 
-enum _DashboardTab { standings, rounds, members }
+enum _DashboardTab { standings, rounds, members, privacy }
 
 class AdminDashboardScreen extends ConsumerStatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -45,6 +46,11 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
   Future<void> _refresh() async {
     ref.invalidate(adminLeagueDashboardProvider(_filter));
     await ref.read(adminLeagueDashboardProvider(_filter).future);
+  }
+
+  Future<void> _refreshPrivacyRequests() async {
+    ref.invalidate(adminPrivacyRequestsProvider);
+    await ref.read(adminPrivacyRequestsProvider.future);
   }
 
   Future<void> _chooseDateRange() async {
@@ -187,6 +193,12 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
               onPressed: _inviteMember,
               icon: const Icon(Icons.person_add_alt_1_rounded),
             ),
+          if (_tab == _DashboardTab.privacy)
+            IconButton(
+              tooltip: 'Refresh privacy requests',
+              onPressed: _refreshPrivacyRequests,
+              icon: const Icon(Icons.refresh_rounded),
+            ),
           IconButton(
             tooltip: 'Refresh scores',
             onPressed: _refresh,
@@ -282,6 +294,10 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                     value: _DashboardTab.members,
                     label: Text('Members'),
                   ),
+                  ButtonSegment(
+                    value: _DashboardTab.privacy,
+                    label: Text('Privacy'),
+                  ),
                 ],
                 selected: {_tab},
                 onSelectionChanged: (value) =>
@@ -292,6 +308,7 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
                 _DashboardTab.standings => _StandingsView(data: data),
                 _DashboardTab.rounds => _RoundsView(data: data, date: _date),
                 _DashboardTab.members => _MembersView(data: data),
+                _DashboardTab.privacy => const _PrivacyRequestsView(),
               },
             ],
           ),
@@ -651,6 +668,182 @@ class _MembersView extends StatelessWidget {
             ),
           ),
       ],
+    );
+  }
+}
+
+class _PrivacyRequestsView extends ConsumerWidget {
+  const _PrivacyRequestsView();
+
+  Future<void> _close(
+    BuildContext context,
+    WidgetRef ref,
+    AdminPrivacyRequest request,
+  ) async {
+    try {
+      await closeAdminPrivacyRequest(ref, request.id);
+      ref.invalidate(adminPrivacyRequestsProvider);
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not close request: $error')),
+        );
+      }
+    }
+  }
+
+  Future<void> _deleteAccount(
+    BuildContext context,
+    WidgetRef ref,
+    AdminPrivacyRequest request,
+  ) async {
+    var verified = false;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          title: const Text('Process account deletion'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'This permanently removes ${request.email} and the rounds they hosted, including those rounds’ player records and scores. Verify this request with the account owner at this email address before proceeding.',
+              ),
+              const SizedBox(height: 12),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                value: verified,
+                onChanged: (value) =>
+                    setDialogState(() => verified = value ?? false),
+                title: const Text(
+                  'I verified this request with the account owner.',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: verified
+                  ? () => Navigator.pop(dialogContext, true)
+                  : null,
+              style: FilledButton.styleFrom(backgroundColor: AppTheme.danger),
+              child: const Text('Delete account'),
+            ),
+          ],
+        ),
+      ),
+    );
+    if (confirmed != true || !context.mounted) return;
+
+    try {
+      final deleted = await deleteAdminPrivacyRequestAccount(ref, request.id);
+      ref.invalidate(adminPrivacyRequestsProvider);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              deleted
+                  ? 'The verified account and its linked records were deleted.'
+                  : 'No active app account matched that request. The request was closed.',
+            ),
+          ),
+        );
+      }
+    } catch (error) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not delete the account: $error')),
+        );
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final requests = ref.watch(adminPrivacyRequestsProvider);
+    return requests.when(
+      loading: () => const Center(child: CircularProgressIndicator()),
+      error: (error, stack) => Column(
+        children: [
+          Text('Could not load privacy requests. $error'),
+          TextButton(
+            onPressed: () => ref.invalidate(adminPrivacyRequestsProvider),
+            child: const Text('Try again'),
+          ),
+        ],
+      ),
+      data: (items) {
+        if (items.isEmpty) {
+          return const ChristianGolfersCard(
+            child: Text('No open privacy or account deletion requests.'),
+          );
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              'Review privacy questions and deletion requests. Verify the email owner before processing deletion.',
+              style: AppTheme.body(12, colour: AppTheme.textMuted),
+            ),
+            const SizedBox(height: 10),
+            for (final request in items)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 10),
+                child: ChristianGolfersCard(
+                  padding: const EdgeInsets.all(14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        request.type == 'account_deletion'
+                            ? 'Account deletion request'
+                            : 'Privacy question',
+                        style: AppTheme.body(14, weight: FontWeight.w800),
+                      ),
+                      Text(
+                        request.email,
+                        style: AppTheme.body(12, colour: AppTheme.primaryGreen),
+                      ),
+                      Text(
+                        '${request.createdAt?.toLocal() ?? 'Date unavailable'} · ${request.status}',
+                        style: AppTheme.body(10.5, colour: AppTheme.textMuted),
+                      ),
+                      if (request.message.isNotEmpty) ...[
+                        const SizedBox(height: 8),
+                        Text(request.message, style: AppTheme.body(12)),
+                      ],
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 8,
+                        children: [
+                          if (request.type == 'account_deletion')
+                            FilledButton.icon(
+                              onPressed: () =>
+                                  _deleteAccount(context, ref, request),
+                              icon: const Icon(Icons.delete_forever_outlined),
+                              label: const Text('Verify & delete'),
+                              style: FilledButton.styleFrom(
+                                backgroundColor: AppTheme.danger,
+                              ),
+                            ),
+                          OutlinedButton(
+                            onPressed: () => _close(context, ref, request),
+                            child: const Text('Close request'),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
     );
   }
 }

@@ -45,11 +45,13 @@ The `Christian Golfers Demo` Android Studio run configuration still uses the
 in-memory sample backend. Run the app normally without the demo define to use
 the live Supabase project. All database migrations, including the RPC
 permissions hardening, have been applied to that project in filename order.
-The database currently has an empty course catalog and admin allowlist. A
-pre-provisioned administrator must sign in and use Course Data Tools to import
-the bundled course catalog and hole data; administrators are granted access by
-adding their Supabase Auth user ID and sign-in email to
-`public.admin_allowlist`.
+The live database snapshot on 29 October 2026 has 361 course records, 828 hole
+records, and one allowlisted administrator. The current primary league admin is
+`vdiedericks6@gmail.com`; administrator access is granted to the corresponding
+Supabase Auth user through `public.admin_allowlist`. See
+[`COURSE_DATA_STATUS.md`](COURSE_DATA_STATUS.md) for data coverage and
+limitations, and [`docs/architecture.md`](docs/architecture.md) for the
+complete system architecture.
 
 ### Google sign-in setup
 
@@ -65,6 +67,11 @@ administrator allowlist and saves each completed round's gross score,
 handicap-adjusted net score, and placing. Round completion calculates course
 handicap from the player's Handicap Index, tee slope and course rating, then
 allocates handicap strokes by each hole's stroke index.
+
+The app provides account deletion from Profile and a public deletion request
+page for people who no longer have the app. The privacy policy, external
+deletion page, admin request inbox, Play release gates and signing guidance are
+documented in [`docs/google-play-release.md`](docs/google-play-release.md).
 
 ### Provision administrators before release
 
