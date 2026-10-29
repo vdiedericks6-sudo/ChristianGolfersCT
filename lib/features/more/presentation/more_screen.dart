@@ -61,7 +61,7 @@ class MoreScreen extends ConsumerWidget {
             ),
             _MoreTile(
               icon: Icons.groups_rounded,
-              title: 'Community',
+              title: 'Fellowship',
               subtitle: 'Your crew, their rounds, season standings',
               onTap: () => context.push('/community'),
             ),

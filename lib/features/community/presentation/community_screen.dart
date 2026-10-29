@@ -24,7 +24,7 @@ class CommunityScreen extends ConsumerWidget {
       appBar: AppBar(
         backgroundColor: AppTheme.darkNavy,
         elevation: 0,
-        title: const Text('Community'),
+        title: const Text('Fellowship'),
         centerTitle: true,
         actions: [
           IconButton(

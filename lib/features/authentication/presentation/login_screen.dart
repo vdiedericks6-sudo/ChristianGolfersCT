@@ -2,10 +2,9 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../../core/config/app_config.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/course_artwork.dart';
-import '../../../core/widgets/christian_golfers_mark.dart';
+import '../../../core/widgets/christian_golfers_logo.dart';
 import 'auth_error_message.dart';
 import 'auth_providers.dart';
 
@@ -78,29 +77,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const Spacer(),
 
                   // Circular Logo Icon
-                  const ChristianGolfersMark(size: 76),
-                  const SizedBox(height: 18),
-
-                  // App Name
-                  Text(
-                    'Christian Golfers',
-                    textAlign: TextAlign.center,
-                    style: AppTheme.display(28, colour: Colors.white),
+                  const ChristianGolfersLogo(
+                    width: 260,
+                    height: 140,
+                    color: Colors.white,
                   ),
-                  Text(
-                    'CAPE TOWN',
-                    textAlign: TextAlign.center,
-                    style: AppTheme.label(
-                      12,
-                      colour: AppTheme.primaryGreenLight,
-                      weight: FontWeight.w800,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 12),
 
                   // Subtitle
                   Text(
-                    'FAITH • GOLF • COMMUNITY',
+                    'FAITH • GOLF • FELLOWSHIP',
                     textAlign: TextAlign.center,
                     style: AppTheme.label(
                       10,
@@ -150,7 +136,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            demo ? 'Get Started' : 'Continue with Google',
+                            'Get Started',
                             style: AppTheme.body(
                               15,
                               weight: FontWeight.w700,

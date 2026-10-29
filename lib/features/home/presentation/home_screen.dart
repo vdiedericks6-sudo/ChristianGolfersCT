@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/course_artwork.dart';
-import '../../../core/widgets/christian_golfers_mark.dart';
+import '../../../core/widgets/christian_golfers_logo.dart';
 import '../../../core/widgets/christian_golfers_components.dart';
 import '../../faith/presentation/word_of_the_day_card.dart';
 import '../../profile/presentation/profile_providers.dart';
@@ -88,28 +88,14 @@ class _HomeHeaderHero extends StatelessWidget {
               // Top row: Logo, Brand title & notification icon
               Row(
                 children: [
-                  const ChristianGolfersMark(size: 44),
-                  const SizedBox(width: 10),
                   Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Christian Golfers',
-                          style: AppTheme.display(
-                            16,
-                            colour: Colors.white,
-                            spacing: 0,
-                          ),
-                        ),
-                        Text(
-                          'CAPE TOWN',
-                          style: AppTheme.label(
-                            9,
-                            colour: AppTheme.primaryGreenLight,
-                          ),
-                        ),
-                      ],
+                    child: const Align(
+                      alignment: Alignment.centerLeft,
+                      child: ChristianGolfersLogo(
+                        width: 158,
+                        height: 82,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                   CircleIconButton(
@@ -184,7 +170,7 @@ class _HomeQuickActionsGrid extends StatelessWidget {
         ),
         QuickActionTile(
           icon: Icons.people_outline_rounded,
-          label: 'Community',
+          label: 'Fellowship',
           caption: 'Connect & share',
           onTap: () => context.go('/community'),
         ),

@@ -183,7 +183,7 @@ class AppNavigationShell extends StatelessWidget {
             NavigationDestination(
               icon: Icon(Icons.people_outline_rounded),
               selectedIcon: Icon(Icons.people_rounded),
-              label: 'Community',
+              label: 'Fellowship',
             ),
             NavigationDestination(
               icon: Icon(Icons.person_outline_rounded),

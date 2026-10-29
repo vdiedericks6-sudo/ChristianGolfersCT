@@ -61,7 +61,7 @@ class WordOfTheDay {
     WordOfTheDay(
       reference: 'Romans 12:10',
       verse: 'Be kindly affectioned one to another with brotherly love; in honour preferring one another;',
-      reflection: 'Celebrate another golfer’s good shot as sincerely as your own. Community grows through honour.',
+      reflection: 'Celebrate another golfer’s good shot as sincerely as your own. Fellowship grows through honour.',
     ),
     WordOfTheDay(
       reference: 'Psalm 46:10',
@@ -111,7 +111,7 @@ class WordOfTheDay {
     WordOfTheDay(
       reference: '1 Peter 4:10',
       verse: 'As every man hath received the gift, even so minister the same one to another...',
-      reflection: 'Use your gifts to serve your community, whether by teaching, encouraging, or making room for others.',
+      reflection: 'Use your gifts to serve fellow golfers, whether by teaching, encouraging, or making room for others.',
     ),
     WordOfTheDay(
       reference: 'Proverbs 27:17',
@@ -146,7 +146,7 @@ class WordOfTheDay {
     WordOfTheDay(
       reference: 'Luke 6:31',
       verse: 'And as ye would that men should do to you, do ye also to them likewise.',
-      reflection: 'Respect, honesty, and kindness make a community stronger than any leaderboard.',
+      reflection: 'Respect, honesty, and kindness make fellowship stronger than any leaderboard.',
     ),
     WordOfTheDay(
       reference: 'Isaiah 40:31',
