@@ -1,0 +1,15 @@
+# HNA course source assessment — 2 November 2026
+
+HNA Find & Play (https://www.handicaps.co.za/find-and-play) is publicly searchable. Search by club name, select the matching suggestion, search, then open the result. The club pages inspected show 9/18-hole men/women categories, tee colour, course and slope ratings, par, stroke indexes and per-hole distances. Accessed in the rendered website; not an exhaustive audit of all listings. No official bulk data feed, licence or public API documentation was established during this review. Ask HNA for access and terms for app distribution, refresh, historical use and attribution before a bulk import. The separate WHS interoperability programme has its own terms (https://www.whs.com/articles/2024/2024-interoperability.html); those terms should not be treated as the HNA website's general terms.
+
+## Cross-checks
+
+- Stellenbosch: https://www.handicaps.co.za/club-detail?clubid=225 — HNA men's 18-hole page displays black 76.0/135, yellow 74.7/133, white 73.1/128, blue 69.6/122, red 67.7/116. The previously supplied 2024 club card has different ratings and some stroke indexes. HNA's men's black total displays 6609; the user-supplied black yardages convert to approximately 6633 metres. Units of the HNA page should be confirmed with the provider. Course layouts and validity dates need club/HNA confirmation. Do not overwrite the explicitly preserved club card or assign a rating to the user-supplied black distances based only on a colour match.
+- Bellville: https://www.handicaps.co.za/club-detail?clubid=454 — HNA men's white displayed distances, hole pars and indexes agree with the existing 18-hole club scorecard, but its men's ratings differ from the club website: white 71.4/132 versus 71.6/132; blue 68.6/122 versus 68.8/123; red 66.7/116 versus 66.8/116. The live app continues to label the club's values provisional pending confirmation. Female categories and other tees were not checked during this pilot.
+- Verified public contact numbers for these two clubs were filled only where missing, with the other data unchanged.
+
+## Safe import requirements
+
+Acquire an authorised machine-readable export or documented API, rights, refresh frequency, course/tee/layout identifiers, effective dates, measurement units, categories, and whether photos/coordinates are included. Reconcile club identities and nine/18/27-hole layouts; validate per-hole arrays and sums; compare ratings, par and indexes with supplied cards. Flag conflicts for club review and avoid altering rounds or old tee records. The current schema does not version hole indexes per round, so overwriting hole records could change historical calculations. Any official Handicap Index or score submission also needs separate provider authorisation.
+
+The current database snapshot has 361 active course entries nationwide, including 70 Western Cape entries; that count has not been verified against HNA and may include aliases, closed facilities or omissions. A full reconciliation and database import has not been completed.
