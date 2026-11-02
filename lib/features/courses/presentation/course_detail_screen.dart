@@ -218,7 +218,10 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                     error: (error, stackTrace) => Text('$error'),
                     data: (tees) {
                       if (tees.isEmpty) {
-                        return const Text('No tee sets are available.');
+                        return const Text(
+                          'No tee sets are available for this course yet. '
+                          'A club administrator needs to add the course tee data before a round can be created.',
+                        );
                       }
 
                       _selectedTeeId ??= tees.first.id;
@@ -231,7 +234,20 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                       ];
 
                       return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          if (standardTeeColours.any(
+                            (colour) => !tees.any(
+                              (tee) => tee.colour.toLowerCase() == colour.toLowerCase(),
+                            ),
+                          )) ...[
+                            Text(
+                              'Only tees with course data can be selected. '
+                              'Greyed-out colours need club-provided ratings and distances.',
+                              style: AppTheme.body(12, colour: AppTheme.textMuted),
+                            ),
+                            const SizedBox(height: 12),
+                          ],
                           for (final tee in tees)
                             _TeeSetTile(
                               tee: tee,

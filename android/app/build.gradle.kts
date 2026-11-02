@@ -12,6 +12,7 @@ val releaseKeyProperties = Properties().apply {
         propertiesFile.inputStream().use { load(it) }
     }
 }
+val sideBySideDebug = providers.gradleProperty("cgctSideBySide").orNull != "false"
 
 android {
     namespace = "com.christiangolfers.capetown"
@@ -45,9 +46,16 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        manifestPlaceholders["appLabel"] = "Christian Golfers"
     }
 
     buildTypes {
+        debug {
+            if (sideBySideDebug) {
+                applicationIdSuffix = ".debug"
+                manifestPlaceholders["appLabel"] = "Christian Golfers Debug"
+            }
+        }
         release {
             signingConfig = signingConfigs.getByName("release")
         }

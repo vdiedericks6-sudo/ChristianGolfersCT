@@ -36,6 +36,40 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
   int? _loadedHole;
   bool _saving = false;
   bool _completing = false;
+  int _editRevision = 0;
+  bool _dirty = false;
+
+  void _edit(VoidCallback change) {
+    setState(() {
+      change();
+      _editRevision++;
+      _dirty = true;
+    });
+  }
+
+  Future<bool> _confirmDiscard() async {
+    if (!_dirty) return true;
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Unsaved hole'),
+            content: const Text(
+              'Your changes to this hole have not been saved. Stay here to save them, or discard them.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Stay'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text('Discard changes'),
+              ),
+            ],
+          ),
+        ) ??
+        false;
+  }
 
   void _loadExistingScore(int holeNumber, HoleScore? score, int par) {
     if (_loadedHole == holeNumber) return;
@@ -45,6 +79,7 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
       if (!mounted) return;
 
       setState(() {
+        _dirty = false;
         _strokes = score?.strokes ?? par;
         _putts = score?.putts ?? 2;
         _penalties = score?.penaltyStrokes ?? 0;
@@ -56,6 +91,7 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
   }
 
   Future<void> _saveScore(int holeNumber) async {
+    final savedRevision = _editRevision;
     setState(() => _saving = true);
 
     try {
@@ -73,6 +109,7 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
           );
 
       if (mounted) {
+        if (_editRevision == savedRevision) setState(() => _dirty = false);
         ScaffoldMessenger.of(
           context,
         ).showSnackBar(const SnackBar(content: Text('Score saved.')));
@@ -91,6 +128,7 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
   Future<void> _changeSharedHole(int currentHole, int delta) async {
     final next = currentHole + delta;
     if (next < 1 || next > 18) return;
+    if (_saving || !await _confirmDiscard() || !mounted) return;
 
     try {
       await ref
@@ -107,6 +145,7 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
   }
 
   Future<void> _completeRound() async {
+    if (_saving || !await _confirmDiscard() || !mounted) return;
     setState(() => _completing = true);
 
     try {
@@ -138,6 +177,7 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
         leading: const AppBackButton(),
         title: const Text('Live round'),
         actions: [
+          IconButton(tooltip:'Hole view',onPressed:()=>context.push('/rounds/${widget.roundId}/hole-view'),icon:const Icon(Icons.map_outlined)),
           IconButton(
             tooltip: 'Leaderboard',
             onPressed: () =>
@@ -265,17 +305,17 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
                               saving: _saving,
                               completing: _completing,
                               onStrokes: (value) =>
-                                  setState(() => _strokes = value),
+                                  _edit(() => _strokes = value),
                               onPutts: (value) =>
-                                  setState(() => _putts = value),
+                                  _edit(() => _putts = value),
                               onPenalties: (value) =>
-                                  setState(() => _penalties = value),
+                                  _edit(() => _penalties = value),
                               onSandShots: (value) =>
-                                  setState(() => _sandShots = value),
+                                  _edit(() => _sandShots = value),
                               onFairway: (value) =>
-                                  setState(() => _fairway = value),
+                                  _edit(() => _fairway = value),
                               onGreenInRegulation: (value) =>
-                                  setState(() => _greenInRegulation = value),
+                                  _edit(() => _greenInRegulation = value),
                               onSave: () => _saveScore(round.currentHole),
                               onMoveHole: (delta) =>
                                   _changeSharedHole(round.currentHole, delta),
@@ -573,6 +613,11 @@ class _HoleView extends StatelessWidget {
             onChanged: onPenalties,
           ),
         ),
+        const SizedBox(height: 6),
+        Text(
+          'Enter strokes played above. Penalties are added to your gross score.',
+          style: AppTheme.body(11, colour: AppTheme.textMuted),
+        ),
         const SizedBox(height: 12),
         ChristianGolfersCard(
           child: ScoreStepper(
@@ -607,11 +652,20 @@ class _HoleView extends StatelessWidget {
                     onFairway(values.isEmpty ? null : values.first),
               ),
               const SizedBox(height: 8),
-              SwitchListTile.adaptive(
-                contentPadding: EdgeInsets.zero,
-                title: const Text('Green in regulation'),
-                value: greenInRegulation ?? false,
-                onChanged: (value) => onGreenInRegulation(value),
+              const Text('Green in regulation'),
+              const SizedBox(height: 8),
+              SegmentedButton<bool>(
+                emptySelectionAllowed: true,
+                segments: const [
+                  ButtonSegment(value: true, label: Text('Yes')),
+                  ButtonSegment(value: false, label: Text('No')),
+                ],
+                selected: greenInRegulation == null
+                    ? const <bool>{}
+                    : {greenInRegulation!},
+                onSelectionChanged: (values) => onGreenInRegulation(
+                  values.isEmpty ? null : values.first,
+                ),
               ),
             ],
           ),

@@ -14,6 +14,7 @@ class UserProfile {
     this.isVisitingGolfer = false,
     this.handicapSource,
     this.handicapVerifiedAt,
+    this.leagueOverride,
   });
 
   final String id;
@@ -26,6 +27,7 @@ class UserProfile {
   final bool isVisitingGolfer;
   final String? handicapSource;
   final DateTime? handicapVerifiedAt;
+  final String? leagueOverride;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -41,6 +43,7 @@ class UserProfile {
       isAdmin: asBool(data['is_admin']),
       isVisitingGolfer: asBool(data['is_visiting_golfer']),
       handicapSource: asStringOrNull(data['handicap_source']),
+      leagueOverride: asStringOrNull(data['league_override']),
       handicapVerifiedAt: data['handicap_verified_at'] == null
           ? null
           : asDate(data['handicap_verified_at']),
@@ -66,6 +69,7 @@ class UserProfile {
   }) {
     return UserProfile(
       id: id,
+      leagueOverride: leagueOverride,
       displayName: displayName ?? this.displayName,
       email: email ?? this.email,
       photoUrl: photoUrl ?? this.photoUrl,

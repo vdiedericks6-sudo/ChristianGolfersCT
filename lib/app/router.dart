@@ -6,6 +6,7 @@ import '../core/theme/app_theme.dart';
 import '../features/authentication/presentation/auth_gate.dart';
 import '../features/authentication/presentation/login_screen.dart';
 import '../features/community/presentation/community_screen.dart';
+import '../features/community/presentation/chat_hub_screen.dart';
 import '../features/courses/presentation/course_detail_screen.dart';
 import '../features/courses/presentation/course_list_screen.dart';
 import '../features/courses/presentation/course_seed_screen.dart';
@@ -24,6 +25,8 @@ import '../features/notifications/presentation/notifications_screen.dart';
 import '../features/rounds/presentation/join_link_screen.dart';
 import '../features/rounds/presentation/join_round_screen.dart';
 import '../features/rounds/presentation/round_lobby_screen.dart';
+import '../features/rounds/presentation/round_setup_screen.dart';
+import '../features/rounds/presentation/hole_view_screen.dart';
 import '../features/scorecard/presentation/live_round_screen.dart';
 import '../features/scorecard/presentation/scorecard_screen.dart';
 
@@ -32,6 +35,9 @@ final GoRouter appRouter = GoRouter(
   routes: [
     GoRoute(path: '/', builder: (context, state) => const AuthGate()),
     GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
+    GoRoute(path: '/courses', builder: (context, state) => CourseListScreen(selectForRound:state.uri.queryParameters['start']=='1')),
+    GoRoute(path:'/courses/:courseId/setup',builder:(context,state)=>RoundSetupScreen(courseId:state.pathParameters['courseId']!)),
+    GoRoute(path:'/rounds/:roundId/hole-view',builder:(context,state)=>HoleViewScreen(roundId:state.pathParameters['roundId']!)),
     GoRoute(
       path: '/privacy',
       builder: (context, state) => const PrivacyScreen(),
@@ -118,8 +124,8 @@ final GoRouter appRouter = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
-              path: '/courses',
-              builder: (context, state) => const CourseListScreen(),
+              path: '/chat',
+              builder: (context, state) => const ChatHubScreen(),
             ),
           ],
         ),
@@ -184,9 +190,9 @@ class AppNavigationShell extends StatelessWidget {
               label: 'Home',
             ),
             NavigationDestination(
-              icon: Icon(Icons.outlined_flag),
-              selectedIcon: Icon(Icons.flag_rounded),
-              label: 'Courses',
+              icon: Icon(Icons.chat_bubble_outline),
+              selectedIcon: Icon(Icons.chat_bubble),
+              label: 'Chat',
             ),
             NavigationDestination(
               icon: Icon(Icons.emoji_events_outlined),

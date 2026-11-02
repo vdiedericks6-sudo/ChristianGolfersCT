@@ -11,6 +11,8 @@ import '../data/admin_privacy_requests_repository.dart';
 import '../../handicap/domain/handicap_calculator.dart';
 import '../../leagues/domain/season_competition.dart';
 import '../data/admin_league_dashboard_repository.dart';
+import 'member_handicap_dialog.dart';
+import 'schedule_fourball_screen.dart';
 
 enum _DashboardTab { standings, rounds, members, privacy }
 
@@ -187,6 +189,15 @@ class _AdminDashboardScreenState extends ConsumerState<AdminDashboardScreen> {
         leading: const AppBackButton(),
         title: const Text('League dashboard'),
         actions: [
+          IconButton(
+            tooltip: 'Schedule fourball',
+            icon: const Icon(Icons.event_available),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<bool>(
+                builder: (_) => const ScheduleFourballScreen(),
+              ),
+            ),
+          ),
           if (_tab == _DashboardTab.members)
             IconButton(
               tooltip: 'Invite golfer',
@@ -569,7 +580,8 @@ class _RoundsView extends StatelessWidget {
                             ),
                             const SizedBox(height: 3),
                             Text(
-                              '${date(round.playedAt)} · ${round.status.toUpperCase()} · ${players.length}/4 golfers',
+                              '${date(round.playedAt)} · ${round.status.toUpperCase()} · ${players.length}/4 golfers'
+                              '${round.scheduledAt == null ? '' : '\nTee time: ${round.scheduledAt!.toLocal()}'}',
                               style: AppTheme.body(
                                 10.5,
                                 colour: AppTheme.textMuted,
@@ -583,6 +595,33 @@ class _RoundsView extends StatelessWidget {
                                 colour: AppTheme.textMuted,
                               ),
                             ),
+                            if (round.status == 'active') ...[
+                              const SizedBox(height: 6),
+                              Text(
+                                'Current hole: ${round.currentHole}',
+                                style: AppTheme.body(
+                                  12,
+                                  weight: FontWeight.w700,
+                                ),
+                              ),
+                              for (final player in players)
+                                Text(
+                                  '${player.displayName}: '
+                                  '${scores.where((s) => s.playerId == player.userId).fold<int>(0, (sum, s) => sum + s.gross)} gross · '
+                                  '${scores.where((s) => s.playerId == player.userId).length} holes recorded',
+                                  style: AppTheme.body(
+                                    11,
+                                    colour: AppTheme.textMuted,
+                                  ),
+                                ),
+                              Text(
+                                'Refreshes every 45 seconds',
+                                style: AppTheme.body(
+                                  10,
+                                  colour: AppTheme.textMuted,
+                                ),
+                              ),
+                            ],
                           ],
                         ),
                       ),
@@ -628,6 +667,15 @@ class _MembersView extends StatelessWidget {
               child: Row(
                 children: [
                   GolferAvatar(name: member.displayName, size: 42),
+                  IconButton(
+                    tooltip: 'Edit member handicap',
+                    icon: const Icon(Icons.edit_outlined),
+                    onPressed: () => showDialog<bool>(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (_) => MemberHandicapDialog(member: member),
+                    ),
+                  ),
                   const SizedBox(width: 11),
                   Expanded(
                     child: Column(

@@ -155,6 +155,26 @@ void main() {
   });
 
   group('PlayerStats', () {
+    test('counts only recorded fairways and greens, excluding par threes', () {
+      HoleScore score(int hole, {String? fairway, bool? gir}) => HoleScore(
+        roundId: 'r1', playerId: 'me', holeNumber: hole, strokes: 4,
+        putts: 2, penaltyStrokes: 0, confirmed: true,
+        fairway: fairway, greenInRegulation: gir,
+      );
+      final stats = PlayerStats.from([
+        RoundSummary(round: round(), holePars: holePars(), myScores: [
+          score(1, fairway: 'hit', gir: true),
+          score(2, fairway: 'left', gir: false),
+          score(3, fairway: 'hit'), // par three, no fairway opportunity
+          score(4), // unknown fields are not misses
+        ]),
+      ]);
+      expect(stats.fairwaysHit, 1);
+      expect(stats.fairwaysRecorded, 2);
+      expect(stats.greensHit, 1);
+      expect(stats.greensRecorded, 2);
+    });
+
     test('is empty with no rounds', () {
       expect(PlayerStats.from(const []).isEmpty, isTrue);
       expect(PlayerStats.from(const []).scoringAverage, isNull);

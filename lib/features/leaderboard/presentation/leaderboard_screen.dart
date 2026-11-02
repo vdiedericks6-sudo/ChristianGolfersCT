@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_theme.dart';
+import '../../../core/widgets/app_back_button.dart';
 import '../../history/domain/player_stats.dart';
 import '../../history/domain/round_summary.dart';
 import '../../history/presentation/history_providers.dart';
@@ -16,7 +17,12 @@ class LeaderboardScreen extends ConsumerWidget {
     final historyState = ref.watch(roundHistoryProvider);
     final statsState = ref.watch(playerStatsProvider);
 
-    return SafeArea(
+    return Scaffold(
+      appBar: AppBar(
+        leading: const AppBackButton(),
+        title: const Text('Round history'),
+      ),
+      body: SafeArea(
       child: RefreshIndicator(
         onRefresh: () async => ref.refresh(roundHistoryProvider.future),
         child: historyState.when(
@@ -70,6 +76,7 @@ class LeaderboardScreen extends ConsumerWidget {
             );
           },
         ),
+      ),
       ),
     );
   }
@@ -155,6 +162,20 @@ class _StatsGrid extends StatelessWidget {
         label: 'Putts',
         value: _oneDecimal(stats.averagePutts),
         caption: 'per round',
+      ),
+      _StatTile(
+        label: 'Fairways',
+        value: stats.fairwaysRecorded == 0
+            ? '--'
+            : '${(100 * stats.fairwaysHit / stats.fairwaysRecorded).round()}%',
+        caption: '${stats.fairwaysHit}/${stats.fairwaysRecorded} recorded',
+      ),
+      _StatTile(
+        label: 'Greens in regulation',
+        value: stats.greensRecorded == 0
+            ? '--'
+            : '${(100 * stats.greensHit / stats.greensRecorded).round()}%',
+        caption: '${stats.greensHit}/${stats.greensRecorded} recorded',
       ),
     ];
 

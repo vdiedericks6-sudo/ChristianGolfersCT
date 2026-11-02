@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/christian_golfers_components.dart';
 import '../../authentication/presentation/auth_providers.dart';
+import '../../history/presentation/history_providers.dart';
 import 'profile_providers.dart';
 
 class ProfileScreen extends ConsumerWidget {
@@ -13,6 +14,7 @@ class ProfileScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profileState = ref.watch(currentProfileProvider);
+    final statsState = ref.watch(playerStatsProvider);
 
     return Scaffold(
       backgroundColor: AppTheme.pageBg,
@@ -45,9 +47,11 @@ class ProfileScreen extends ConsumerWidget {
           ),
         ),
         data: (profile) {
-          final name = profile?.displayName ?? 'David Erasmus';
-          final hcp =
-              profile?.estimatedHandicapIndex?.toStringAsFixed(1) ?? '12.4';
+          final name = profile?.displayName ?? 'Golfer';
+          final hcp = profile?.estimatedHandicapIndex?.toStringAsFixed(1);
+          final stats = statsState.valueOrNull;
+          final rounds = stats == null ? '—' : '${stats.roundsPlayed}';
+          final best = stats?.bestGross?.toString() ?? '—';
 
           return SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 20, 16, 28),
@@ -71,7 +75,7 @@ class ProfileScreen extends ConsumerWidget {
 
                 // Subtitle / League & Handicap Index
                 Text(
-                  'League A • Handicap $hcp',
+                  hcp == null ? 'Handicap not set' : 'Estimated handicap $hcp',
                   style: AppTheme.body(12.5, colour: AppTheme.textMuted),
                 ),
                 const SizedBox(height: 20),
@@ -85,15 +89,15 @@ class ProfileScreen extends ConsumerWidget {
                   child: Row(
                     children: [
                       Expanded(
-                        child: StatTile(label: 'Handicap', value: hcp),
+                        child: StatTile(label: 'Handicap', value: hcp ?? '—'),
                       ),
                       Container(height: 36, width: 1, color: AppTheme.line),
                       Expanded(
-                        child: StatTile(label: 'Rounds', value: '8'),
+                        child: StatTile(label: 'Rounds', value: rounds),
                       ),
                       Container(height: 36, width: 1, color: AppTheme.line),
                       Expanded(
-                        child: StatTile(label: 'Wins', value: '3'),
+                        child: StatTile(label: 'Best gross', value: best),
                       ),
                     ],
                   ),
@@ -113,8 +117,8 @@ class ProfileScreen extends ConsumerWidget {
                 const SizedBox(height: 10),
                 _ProfileMenuItemScreen6(
                   icon: Icons.show_chart_rounded,
-                  title: 'Handicap History',
-                  onTap: () {},
+                  title: 'Round History',
+                  onTap: () => context.push('/leaderboards'),
                 ),
                 const SizedBox(height: 10),
                 _ProfileMenuItemScreen6(

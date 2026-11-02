@@ -14,6 +14,18 @@ final roundRepositoryProvider = Provider<RoundRepository>((ref) {
   return SupabaseRoundRepository(ref.watch(supabaseClientProvider));
 });
 
+final openRoundsProvider = FutureProvider.autoDispose<List<GolfRound>>((
+  ref,
+) async {
+  ref.watch(currentUserIdProvider);
+  final rounds = await ref.watch(roundRepositoryProvider).myRounds(limit: 500);
+  return rounds.where((r) => r.isWaiting || r.isActive).toList()..sort(
+    (a, b) => (a.scheduledAt ?? a.createdAt ?? DateTime(2000)).compareTo(
+      b.scheduledAt ?? b.createdAt ?? DateTime(2000),
+    ),
+  );
+});
+
 final roundProvider = StreamProvider.family<GolfRound?, String>((ref, roundId) {
   return ref.watch(roundRepositoryProvider).watchRound(roundId);
 });

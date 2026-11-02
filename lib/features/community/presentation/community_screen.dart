@@ -13,12 +13,6 @@ class CommunityScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final friendships = ref.watch(friendshipsProvider);
-    final pendingCount =
-        friendships.valueOrNull
-            ?.where((friend) => friend.needsMyAnswer)
-            .length ??
-        0;
 
     return Scaffold(
       backgroundColor: AppTheme.pageBg,
@@ -35,7 +29,7 @@ class CommunityScreen extends ConsumerWidget {
         ],
       ),
       body: DefaultTabController(
-        length: 3,
+        length: 2,
         child: Column(
           children: [
             Container(
@@ -45,18 +39,6 @@ class CommunityScreen extends ConsumerWidget {
                 labelColor: const Color(0xFF19201D),
                 unselectedLabelColor: AppTheme.textFaint,
                 tabs: [
-                  Tab(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text('Crew'),
-                        if (pendingCount > 0) ...[
-                          const SizedBox(width: 6),
-                          _Pip(count: pendingCount),
-                        ],
-                      ],
-                    ),
-                  ),
                   const Tab(text: 'Activity'),
                   const Tab(text: 'Standings'),
                 ],
@@ -64,7 +46,7 @@ class CommunityScreen extends ConsumerWidget {
             ),
             const Expanded(
               child: TabBarView(
-                children: [_CrewTab(), _ActivityTab(), _StandingsTab()],
+                children: [_ActivityTab(), _StandingsTab()],
               ),
             ),
           ],
@@ -74,29 +56,13 @@ class CommunityScreen extends ConsumerWidget {
   }
 }
 
-class _Pip extends StatelessWidget {
-  const _Pip({required this.count});
-
-  final int count;
-
+class FellowshipMembersScreen extends StatelessWidget {
+  const FellowshipMembersScreen({super.key});
   @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryBlue,
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(
-        '$count',
-        style: const TextStyle(
-          color: const Color(0xFF19201D),
-          fontSize: 11,
-          fontWeight: FontWeight.w900,
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text('Golfing friends')),
+    body: const _CrewTab(),
+  );
 }
 
 // -------------------------------------------------------------------------

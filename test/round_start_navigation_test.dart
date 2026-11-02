@@ -9,6 +9,59 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  testWidgets('course filter controls open and can be changed', (tester) async {
+    final demo = DemoBackend.seeded();
+    appRouter.go('/courses');
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          demoBackendProvider.overrideWith((ref) => demo),
+          currentUserIdProvider.overrideWithValue(DemoIds.you),
+        ],
+        child: const ChristianGolfersApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.byTooltip('Filter courses'));
+    await tester.pumpAndSettle();
+    expect(find.text('Course filters'), findsOneWidget);
+    await tester.tap(find.text('9 holes'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Clear filters'));
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    demo.dispose();
+  });
+
+  testWidgets('settings opens Fellowship without duplicating navigator keys', (
+    tester,
+  ) async {
+    final demo = DemoBackend.seeded();
+    appRouter.go('/more');
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          demoBackendProvider.overrideWith((ref) => demo),
+          currentUserIdProvider.overrideWithValue(DemoIds.you),
+        ],
+        child: const ChristianGolfersApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(
+      find.text('Fellowship'),
+      200,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.tap(find.text('Fellowship').first);
+    await tester.pumpAndSettle();
+    expect(find.text('Activity'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+    await tester.pumpWidget(const SizedBox.shrink());
+    demo.dispose();
+  });
+
   testWidgets(
     'starting a fourball opens the live round without duplicate page keys',
     (tester) async {
@@ -60,6 +113,13 @@ void main() {
       await tester.tap(find.text('Christian Golfers Demo Course').first);
       await tester.pumpAndSettle();
 
+      expect(find.text('Select tee box'), findsOneWidget);
+      await tester.tap(find.byType(RadioListTile<String>).first);
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Continue to round settings'));
+      await tester.pumpAndSettle();
+      expect(find.text('Round settings'), findsOneWidget);
+
       await tester.scrollUntilVisible(
         find.text('Create round'),
         500,
@@ -68,6 +128,11 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.text('Create round'));
       await tester.pumpAndSettle();
+      expect(
+        find.text('1 of 4'),
+        findsOneWidget,
+        reason: 'A newly created round seats only its host.',
+      );
 
       await tester.scrollUntilVisible(
         find.text('Start the round'),
@@ -85,6 +150,9 @@ void main() {
       );
 
       await tester.tap(find.text('Start the round'));
+      await tester.pumpAndSettle();
+      expect(find.text('Hole view'), findsOneWidget);
+      await tester.tap(find.text('Enter scores · Hole 1'));
       await tester.pumpAndSettle();
       expect(find.text('Live round'), findsOneWidget);
       expect(tester.takeException(), isNull);

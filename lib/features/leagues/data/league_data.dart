@@ -24,6 +24,11 @@ LeagueGroup leagueGroupFor(
   required double leagueBMaxHandicap,
 }) {
   if (member.isVisitingGolfer) return LeagueGroup.visiting;
+  switch (member.leagueOverride) {
+    case 'A': return LeagueGroup.leagueA;
+    case 'B': return LeagueGroup.leagueB;
+    case 'Social': return LeagueGroup.social;
+  }
 
   final handicap = member.estimatedHandicapIndex;
   if (handicap == null || handicap > leagueBMaxHandicap) {

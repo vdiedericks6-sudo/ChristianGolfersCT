@@ -6,6 +6,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/widgets/course_artwork.dart';
 import '../../../core/widgets/app_back_button.dart';
 import '../../../core/widgets/christian_golfers_components.dart';
+import '../../rounds/presentation/round_providers.dart';
 
 class PlayScreen extends ConsumerWidget {
   const PlayScreen({super.key});
@@ -28,6 +29,45 @@ class PlayScreen extends ConsumerWidget {
             // Hero Banner Card matching Screen 5
             _PlayHeroCardScreen5(),
             const SizedBox(height: 20),
+            Row(
+              children: [
+                const Expanded(child: Text('Your upcoming and active rounds')),
+                IconButton(
+                  tooltip: 'Refresh rounds',
+                  onPressed: () => ref.invalidate(openRoundsProvider),
+                  icon: const Icon(Icons.refresh),
+                ),
+              ],
+            ),
+            ref
+                .watch(openRoundsProvider)
+                .when(
+                  loading: () => const LinearProgressIndicator(),
+                  error: (_, _) => const Text(
+                    'Could not load your rounds. Tap refresh to retry.',
+                  ),
+                  data: (rounds) => rounds.isEmpty
+                      ? const Text('No upcoming rounds yet.')
+                      : Column(
+                          children: rounds.map((round) {
+                            final date = round.scheduledAt?.toLocal();
+                            return Card(
+                              child: ListTile(
+                                title: Text(round.courseName),
+                                subtitle: Text(
+                                  '${round.teeSetName} · ${round.isActive ? 'Hole ${round.currentHole}' : 'Lobby'}'
+                                  '${date == null ? '' : '\n${date.day}/${date.month}/${date.year} ${TimeOfDay.fromDateTime(date).format(context)}'}',
+                                ),
+                                trailing: const Icon(Icons.chevron_right),
+                                onTap: () => context.push(
+                                  '/rounds/${round.id}/${round.isActive ? 'live' : 'lobby'}',
+                                ),
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                ),
+            const SizedBox(height: 16),
 
             // Quick Menu Items matching Screen 5
             _PlayMenuItemScreen5(
@@ -63,7 +103,7 @@ class _PlayHeroCardScreen5 extends StatelessWidget {
     return ClipRRect(
       borderRadius: AppTheme.cardRadius,
       child: SizedBox(
-        height: 190,
+        height: 300,
         width: double.infinity,
         child: Stack(
           fit: StackFit.expand,
@@ -79,7 +119,7 @@ class _PlayHeroCardScreen5 extends StatelessWidget {
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Color(0x330F172A), Color(0xD90F172A)],
+                  colors: [Color(0x55182421), Color(0x00182421), Color(0xDD182421)],
                 ),
               ),
             ),
@@ -91,12 +131,12 @@ class _PlayHeroCardScreen5 extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Record your round',
+                    'Your next round starts here',
                     style: AppTheme.display(20, colour: Colors.white),
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Keep your scores, track your progress and see your handicap...',
+                    'Choose your course. Pick your tees. Play together.',
                     style: AppTheme.body(
                       12,
                       colour: Colors.white.withValues(alpha: 0.9),
@@ -112,10 +152,8 @@ class _PlayHeroCardScreen5 extends StatelessWidget {
               child: GoldButton(
                 label: 'New Round',
                 icon: Icons.add_circle_outline_rounded,
-                // The Courses route is already a stateful-shell destination.
-                // Pushing it from /play can mount a second page with the same
-                // shell page key and trigger Navigator's reservation assert.
-                onPressed: () => context.go('/courses'),
+                // Course selection is a standalone route, preserving Back.
+                onPressed: () => context.push('/courses?start=1'),
               ),
             ),
           ],

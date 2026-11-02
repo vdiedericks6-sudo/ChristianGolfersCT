@@ -12,7 +12,8 @@ import 'course_providers.dart';
 
 /// Browse the South African catalogue matching Screen 3 in the branding image.
 class CourseListScreen extends ConsumerStatefulWidget {
-  const CourseListScreen({super.key});
+  const CourseListScreen({this.selectForRound=false,super.key});
+  final bool selectForRound;
 
   @override
   ConsumerState<CourseListScreen> createState() => _CourseListScreenState();
@@ -23,6 +24,67 @@ class _CourseListScreenState extends ConsumerState<CourseListScreen> {
 
   String _query = '';
   String _selectedRegion = 'All';
+  bool _roundReadyOnly = false;
+  int? _holeCount;
+
+  Future<void> _showFilters() async {
+    await showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetContext) => StatefulBuilder(
+        builder: (context, updateSheet) => SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Course filters', style: AppTheme.display(22)),
+                SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Round-ready courses only'),
+                  value: _roundReadyOnly,
+                  onChanged: (value) {
+                    setState(() => _roundReadyOnly = value);
+                    updateSheet(() {});
+                  },
+                ),
+                const Text('Number of holes'),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 8,
+                  children: [
+                    for (final count in <int?>[null, 9, 18])
+                      ChoiceChip(
+                        label: Text(count == null ? 'All' : '$count holes'),
+                        selected: _holeCount == count,
+                        onSelected: (_) {
+                          setState(() => _holeCount = count);
+                          updateSheet(() {});
+                        },
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                TextButton(
+                  onPressed: () {
+                    setState(() {
+                      _selectedRegion = 'All';
+                      _roundReadyOnly = false;
+                      _holeCount = null;
+                    });
+                    updateSheet(() {});
+                  },
+                  child: const Text('Clear filters'),
+                ),
+              ],
+            ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
   final List<String> _regions = [
     'All',
@@ -58,7 +120,7 @@ class _CourseListScreenState extends ConsumerState<CourseListScreen> {
         backgroundColor: AppTheme.darkNavy,
         elevation: 0,
         leading: const AppBackButton(),
-        title: const Text('Courses'),
+        title: Text(widget.selectForRound?'Select course':'Courses'),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -76,9 +138,13 @@ class _CourseListScreenState extends ConsumerState<CourseListScreen> {
                     Icons.search_rounded,
                     color: AppTheme.textMuted,
                   ),
-                  suffixIcon: const Icon(
-                    Icons.tune_rounded,
-                    color: AppTheme.textMuted,
+                  suffixIcon: IconButton(
+                    tooltip: 'Filter courses',
+                    onPressed: _showFilters,
+                    icon: const Icon(
+                      Icons.tune_rounded,
+                      color: AppTheme.textMuted,
+                    ),
                   ),
                   filled: true,
                   fillColor: AppTheme.card,
@@ -157,6 +223,8 @@ class _CourseListScreenState extends ConsumerState<CourseListScreen> {
     final query = _query.trim().toLowerCase();
 
     final filtered = items.where((course) {
+      if (_roundReadyOnly && !course.playable) return false;
+      if (_holeCount != null && course.holes != _holeCount) return false;
       if (_selectedRegion != 'All' &&
           !course.province.toLowerCase().contains(
             _selectedRegion.toLowerCase(),
@@ -183,7 +251,7 @@ class _CourseListScreenState extends ConsumerState<CourseListScreen> {
           ...filtered.map((course) {
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
-              child: _CourseCardScreen3(course: course),
+              child: _CourseCardScreen3(course: course,selectForRound:widget.selectForRound),
             );
           }),
         const SizedBox(height: 8),
@@ -228,7 +296,8 @@ class _NoResults extends StatelessWidget {
 
 /// Course item card matching Screen 3 in the branding image.
 class _CourseCardScreen3 extends StatelessWidget {
-  const _CourseCardScreen3({required this.course});
+  const _CourseCardScreen3({required this.course,this.selectForRound=false});
+  final bool selectForRound;
 
   final GolfCourse course;
 
@@ -240,7 +309,7 @@ class _CourseCardScreen3 extends StatelessWidget {
 
     return ChristianGolfersCard(
       padding: EdgeInsets.zero,
-      onTap: () => context.push('/courses/${course.id}'),
+      onTap: () => context.push(selectForRound&&course.playable?'/courses/${course.id}/setup':'/courses/${course.id}'),
       child: Padding(
         padding: const EdgeInsets.all(12),
         child: Row(

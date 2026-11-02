@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../authentication/presentation/auth_providers.dart';
 import '../../courses/presentation/course_providers.dart';
 import '../../rounds/presentation/round_providers.dart';
 import '../../scorecard/presentation/score_providers.dart';
@@ -11,6 +12,8 @@ import '../domain/round_summary.dart';
 /// Four reads rather than one join: the rounds, my scores in them, the courses
 /// they were played on, and those courses' hole pars.
 final roundHistoryProvider = FutureProvider<List<RoundSummary>>((ref) async {
+  final userId = ref.watch(currentUserIdProvider);
+  if (userId == null) return const [];
   final rounds = await ref.watch(roundRepositoryProvider).myRounds();
 
   if (rounds.isEmpty) return const [];

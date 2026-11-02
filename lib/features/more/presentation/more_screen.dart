@@ -63,7 +63,7 @@ class MoreScreen extends ConsumerWidget {
               icon: Icons.groups_rounded,
               title: 'Fellowship',
               subtitle: 'Your crew, their rounds, season standings',
-              onTap: () => context.push('/community'),
+              onTap: () => context.go('/community'),
             ),
 
             const SizedBox(height: 22),

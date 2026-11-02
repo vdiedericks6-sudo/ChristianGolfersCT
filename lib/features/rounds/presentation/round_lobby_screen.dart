@@ -49,7 +49,7 @@ class _RoundLobbyScreenState extends ConsumerState<RoundLobbyScreen> {
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
-        context.go('/rounds/${widget.roundId}/live');
+        context.go('/rounds/${widget.roundId}/hole-view');
       }
     });
   }
@@ -112,6 +112,8 @@ class _RoundLobbyScreenState extends ConsumerState<RoundLobbyScreen> {
                 Text(round.courseName.toUpperCase(), style: AppTheme.label(10)),
                 const SizedBox(height: 5),
                 Text('Waiting to tee off', style: AppTheme.display(30)),
+                if (round.scheduledAt != null)
+                  Text('Scheduled: ${round.scheduledAt!.toLocal()} (local time)'),
                 const SizedBox(height: 4),
                 Text(
                   '${round.teeSetName} tees · Stroke play',

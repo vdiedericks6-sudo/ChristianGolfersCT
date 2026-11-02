@@ -15,6 +15,7 @@ class GolfRound {
     this.createdAt,
     this.startedAt,
     this.completedAt,
+    this.scheduledAt,
   });
 
   final String id;
@@ -30,6 +31,7 @@ class GolfRound {
   final DateTime? createdAt;
   final DateTime? startedAt;
   final DateTime? completedAt;
+  final DateTime? scheduledAt;
 
   bool get isWaiting => status == 'waiting';
   bool get isActive => status == 'active';
@@ -50,6 +52,7 @@ class GolfRound {
       createdAt: asDateOrNull(data['created_at']),
       startedAt: asDateOrNull(data['started_at']),
       completedAt: asDateOrNull(data['completed_at']),
+      scheduledAt: asDateOrNull(data['scheduled_at']),
     );
   }
 }

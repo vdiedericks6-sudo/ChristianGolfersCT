@@ -73,6 +73,7 @@ class AdminLeagueRound {
     required this.startedAt,
     required this.completedAt,
     required this.playedAt,
+    this.scheduledAt,
   });
 
   final String id;
@@ -87,6 +88,7 @@ class AdminLeagueRound {
   final DateTime? startedAt;
   final DateTime? completedAt;
   final DateTime? playedAt;
+  final DateTime? scheduledAt;
 
   factory AdminLeagueRound.fromJson(Json row) => AdminLeagueRound(
     id: asString(row['id']),
@@ -101,6 +103,7 @@ class AdminLeagueRound {
     startedAt: asDateOrNull(row['started_at']),
     completedAt: asDateOrNull(row['completed_at']),
     playedAt: asDateOrNull(row['played_at']),
+    scheduledAt: asDateOrNull(row['scheduled_at']),
   );
 }
 

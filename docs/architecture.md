@@ -1,6 +1,16 @@
 # Christian Golfers Cape Town — Architecture
 
-**Document status:** implementation architecture, 29 October 2026
+**Document status:** implementation architecture, updated 30 October 2026; see incremental implementation status below and feature inventory for remaining work.
+
+## Version 2 scheduling extension — 30 October 2026
+
+`ScheduleFourballScreen` reads the existing course and tee providers and the privileged member dashboard. It submits a local-time selection as UTC to `admin_schedule_fourball`. The RPC requires an authenticated allowlisted admin; validates members, course and tee; and inserts a waiting round plus its roster in one transaction. The first selected golfer becomes host. `scheduled_at`, `scheduled_by` and `scheduling_request` extend the existing rounds table without modifying historical rounds. An advisory transaction lock and unique creator/request index make retries idempotent. The UI locks submitted selections until confirmation to prevent a retry changing the intended allocation.
+
+Existing round/player RLS remains in effect. Allocated golfers discover waiting/active rounds through `openRoundsProvider` on Play Golf and enter the existing lobby/live routes. The host starts the round through the existing scoring flow. Dashboard filtering uses actual play dates where available, then scheduled date, then creation date, in Africa/Johannesburg. Device displays use local time.
+
+This implementation schedules one group per request, not a course tee booking or bulk tournament. Rescheduling, cancellation, player reassignment, multi-tee groups, push invitations and full offline synchronization are not implemented here. Admin and golfer acceptance testing must cover two separate signed-in devices. The current open-round list scans up to 500 recent rounds; server-side open-round pagination should replace this before larger-scale use.
+
+Course-source evaluation is documented in `docs/course-sources-2026-10-30.md`. `tool/check_golfapi_io.py` is a server/developer-side read-only coverage probe; credentials stay outside the APK. No production importer or provider data was added. Course imagery, contours, official handicap access and the owner's annual points schedule remain separate dependencies.
 
 **Repository:** `vdiedericks6-sudo/ChristianGolfersCT`
 
@@ -145,3 +155,13 @@ Supabase project ownership, Auth provider setup, SMTP delivery for Auth invitati
 4. The current sample count is a snapshot and should be refreshed before a release or architecture revision.
 5. Admin secrets are not in the app. Allowlisting controls admin access; a pre-release username/password is not a safe client-side mechanism.
 6. Phone local notifications and Wear OS notification bridging are implemented, but remote notifications while the app is closed require FCM and trusted server configuration.
+
+## Web administration portal — 30 October 2026
+Canonical source: admin-web/. Static JavaScript client uses the browser-safe Supabase publishable key and tab-scoped authentication. Server allowlist checks protect member and administrative writes. The new admin_products, admin_orders, admin_tasks and admin_audit tables use RLS; direct client writes are revoked. RPC transactions update stock and write audit records atomically. New profile classifications are protected against client self-assignment. See admin-web/README.md for scope and remaining gaps.
+
+Security advisor: guarded SECURITY DEFINER RPCs remain flagged for review (https://supabase.com/docs/guides/database/database-linter?lint=0029_authenticated_security_definer_function_executable). Non-admin rejection was tested. Existing leaked-password protection remains disabled (https://supabase.com/docs/guides/auth/password-security#password-strength-and-leaked-password-protection). No credentials or personal member records are bundled into the site.
+
+## Video-inspired round UI
+See docs/video-round-flow.md for the implemented selection flow, hole-photo viewer and map-data limitations.
+
+Private portal deployment succeeded: https://christian-golfers-admin.vdiedericks6.chatgpt.site . Site source commit fafa7c7c2bba2fb657f0818a9df57e6e7c06d423. The Sites deployment repository is separate; canonical website source is retained in admin-web/ for the app GitHub repository. GitHub synchronization remains pending. Browser handoff after publication failed; local preview had been inspected, and hosted deployment success was confirmed by Sites.

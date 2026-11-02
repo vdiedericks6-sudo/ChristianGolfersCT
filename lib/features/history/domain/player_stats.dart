@@ -14,6 +14,10 @@ class PlayerStats {
     required this.breakdown,
     required this.recentAverage,
     required this.trend,
+    required this.fairwaysHit,
+    required this.fairwaysRecorded,
+    required this.greensHit,
+    required this.greensRecorded,
   });
 
   /// Every completed round, including any cut short.
@@ -39,6 +43,11 @@ class PlayerStats {
   /// Recent average minus overall average. Negative means improving.
   final double? trend;
 
+  final int fairwaysHit;
+  final int fairwaysRecorded;
+  final int greensHit;
+  final int greensRecorded;
+
   bool get isEmpty => roundsPlayed == 0;
 
   static const empty = PlayerStats(
@@ -51,6 +60,10 @@ class PlayerStats {
     breakdown: <ScoreClass, int>{},
     recentAverage: null,
     trend: null,
+    fairwaysHit: 0,
+    fairwaysRecorded: 0,
+    greensHit: 0,
+    greensRecorded: 0,
   );
 
   factory PlayerStats.from(List<RoundSummary> summaries) {
@@ -83,7 +96,22 @@ class PlayerStats {
     }
 
     final breakdown = <ScoreClass, int>{};
+    var fairwaysHit = 0;
+    var fairwaysRecorded = 0;
+    var greensHit = 0;
+    var greensRecorded = 0;
     for (final summary in completed) {
+      for (final score in summary.myScores) {
+        final par = summary.holePars[score.holeNumber];
+        if (par != null && par > 3 && score.fairway != null) {
+          fairwaysRecorded++;
+          if (score.fairway == 'hit') fairwaysHit++;
+        }
+        if (score.greenInRegulation != null) {
+          greensRecorded++;
+          if (score.greenInRegulation == true) greensHit++;
+        }
+      }
       summary.breakdown.forEach((label, count) {
         breakdown[label] = (breakdown[label] ?? 0) + count;
       });
@@ -95,11 +123,11 @@ class PlayerStats {
       scoringAverage: scoringAverage,
       bestGross: lowest(full.map((summary) => summary.grossStrokes)),
       bestToPar: lowest(full.map((summary) => summary.toPar)),
-      averagePutts: mean(
-        full
-            .where((summary) => summary.putts > 0)
-            .map((summary) => summary.putts),
-      ),
+      averagePutts: mean(full.map((summary) => summary.putts)),
+      fairwaysHit: fairwaysHit,
+      fairwaysRecorded: fairwaysRecorded,
+      greensHit: greensHit,
+      greensRecorded: greensRecorded,
       breakdown: breakdown,
       recentAverage: recentAverage,
       trend: (scoringAverage == null || recentAverage == null || full.length < 3)
