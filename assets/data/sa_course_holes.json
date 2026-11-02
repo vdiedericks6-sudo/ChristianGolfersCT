@@ -6517,7 +6517,7 @@
   {
    "number": 1,
    "par": 4,
-   "strokeIndex": 1,
+   "strokeIndex": 7,
    "teeLatitude": -33.902848,
    "teeLongitude": 18.7095,
    "greenFrontLatitude": -33.905975,
@@ -6530,7 +6530,7 @@
   {
    "number": 2,
    "par": 5,
-   "strokeIndex": 2,
+   "strokeIndex": 11,
    "teeLatitude": -33.906284,
    "teeLongitude": 18.709903,
    "greenFrontLatitude": -33.906515,
@@ -6543,7 +6543,7 @@
   {
    "number": 3,
    "par": 3,
-   "strokeIndex": 3,
+   "strokeIndex": 13,
    "teeLatitude": -33.907117,
    "teeLongitude": 18.705113,
    "greenFrontLatitude": -33.907054,
@@ -6556,7 +6556,7 @@
   {
    "number": 4,
    "par": 4,
-   "strokeIndex": 4,
+   "strokeIndex": 3,
    "teeLatitude": -33.906819,
    "teeLongitude": 18.705648,
    "greenFrontLatitude": -33.906644,
@@ -6569,7 +6569,7 @@
   {
    "number": 5,
    "par": 4,
-   "strokeIndex": 5,
+   "strokeIndex": 1,
    "teeLatitude": -33.906943,
    "teeLongitude": 18.70959,
    "greenFrontLatitude": -33.909049,
@@ -6580,9 +6580,22 @@
    "greenBackLongitude": 18.706911
   },
   {
+   "number": 6,
+   "teeLatitude": 0,
+   "teeLongitude": 0,
+   "greenFrontLatitude": 0,
+   "greenFrontLongitude": 0,
+   "greenCentreLatitude": 0,
+   "greenCentreLongitude": 0,
+   "greenBackLatitude": 0,
+   "greenBackLongitude": 0,
+   "par": 4,
+   "strokeIndex": 17
+  },
+  {
    "number": 7,
    "par": 3,
-   "strokeIndex": 7,
+   "strokeIndex": 5,
    "teeLatitude": -33.907001,
    "teeLongitude": 18.710025,
    "greenFrontLatitude": -33.908575,
@@ -6595,7 +6608,7 @@
   {
    "number": 8,
    "par": 4,
-   "strokeIndex": 8,
+   "strokeIndex": 15,
    "teeLatitude": -33.90916,
    "teeLongitude": 18.710133,
    "greenFrontLatitude": -33.906612,
@@ -6621,7 +6634,7 @@
   {
    "number": 10,
    "par": 4,
-   "strokeIndex": 10,
+   "strokeIndex": 12,
    "teeLatitude": -33.901941,
    "teeLongitude": 18.709756,
    "greenFrontLatitude": -33.901606,
@@ -6634,7 +6647,7 @@
   {
    "number": 11,
    "par": 4,
-   "strokeIndex": 11,
+   "strokeIndex": 8,
    "teeLatitude": -33.901984,
    "teeLongitude": 18.713544,
    "greenFrontLatitude": -33.904781,
@@ -6647,7 +6660,7 @@
   {
    "number": 12,
    "par": 4,
-   "strokeIndex": 12,
+   "strokeIndex": 2,
    "teeLatitude": -33.90564,
    "teeLongitude": 18.713873,
    "greenFrontLatitude": -33.902411,
@@ -6660,7 +6673,7 @@
   {
    "number": 13,
    "par": 3,
-   "strokeIndex": 13,
+   "strokeIndex": 10,
    "teeLatitude": -33.901964,
    "teeLongitude": 18.713291,
    "greenFrontLatitude": -33.902218,
@@ -6673,7 +6686,7 @@
   {
    "number": 14,
    "par": 5,
-   "strokeIndex": 14,
+   "strokeIndex": 16,
    "teeLatitude": -33.902699,
    "teeLongitude": 18.711769,
    "greenFrontLatitude": -33.90605,
@@ -6686,7 +6699,7 @@
   {
    "number": 15,
    "par": 4,
-   "strokeIndex": 15,
+   "strokeIndex": 6,
    "teeLatitude": -33.906007,
    "teeLongitude": 18.713053,
    "greenFrontLatitude": -33.903272,
@@ -6699,7 +6712,7 @@
   {
    "number": 16,
    "par": 4,
-   "strokeIndex": 16,
+   "strokeIndex": 4,
    "teeLatitude": -33.903274,
    "teeLongitude": 18.710948,
    "greenFrontLatitude": -33.906311,
@@ -6712,7 +6725,7 @@
   {
    "number": 17,
    "par": 3,
-   "strokeIndex": 17,
+   "strokeIndex": 14,
    "teeLatitude": -33.906942,
    "teeLongitude": 18.712056,
    "greenFrontLatitude": -33.908057,
@@ -6724,7 +6737,7 @@
   },
   {
    "number": 18,
-   "par": 4,
+   "par": 5,
    "strokeIndex": 18,
    "teeLatitude": -33.906982,
    "teeLongitude": 18.711734,

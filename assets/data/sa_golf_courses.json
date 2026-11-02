@@ -7387,7 +7387,7 @@
   "name": "Kuilsrivier Golf Club",
   "country": "South Africa",
   "province": "Western Cape",
-  "city": null,
+  "city": "Kuils River",
   "address": null,
   "description": null,
   "website": null,
@@ -7396,14 +7396,14 @@
   "latitude": -33.90555,
   "longitude": 18.710352,
   "active": true,
-  "playable": false,
-  "dataStatus": "osm",
+  "playable": true,
+  "dataStatus": "scorecard-rating-unverified",
   "source": "OpenStreetMap",
   "sourceUrl": "https://www.openstreetmap.org/way/211752194",
   "osmType": "way",
   "osmId": 211752194,
-  "holes": null,
-  "par": null
+  "holes": 18,
+  "par": 72
  },
  {
   "id": "ladismith-golf-course",
