@@ -1,0 +1,7 @@
+# Arabella HNA scorecard — 2 November 2026
+
+The organiser supplied the HNA club page: https://www.handicaps.co.za/club-detail?clubid=192. The existing catalogue record is `arabella-country-estate`. Before import, it had no holes, tees or rounds. The migration adds HNA's 18-hole par and stroke indexes, four tee colours and eight male/female rating categories, with 18 distances each. Each tee total was validated before and after import. HNA's page shows the same par and indexes for the displayed 18-hole categories. Another published listing labels the matching 6,212 total in metres: https://flyawaygolf.com/golfs/arabella-country-estate. The HNA page does not itself visibly state distance units; HNA or the club should confirm them.
+
+The HNA men's yellow slope of 126 differs from the older GolfRSA 2023 A–L document's 127, and FlyAway also displays 127. Ratings can change; confirm the current competition card with HNA/the club before official handicap use. The HNA listing was preferred for this snapshot as requested; it does not establish provider authorisation for official handicap submission.
+
+No hole or green GPS coordinates, course photos or hole imagery were supplied in this source and none were created. Front/middle/back GPS and course imagery remain unavailable until sourced and verified separately. The older Western Cape readiness audit is a snapshot from before this import.
