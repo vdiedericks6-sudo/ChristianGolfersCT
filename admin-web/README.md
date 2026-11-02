@@ -27,3 +27,7 @@ Node tests cover HTML escaping, CSV injection, league overrides and South Africa
 Uses Supabase Google provider with PKCE, same-tab code exchange and callback URL cleanup. Return URL: https://christian-golfers-admin.vdiedericks6.chatgpt.site/ . Add this exact URL to Supabase Auth Redirect URLs without replacing mobile callbacks. Google Cloud continues to use https://cegmyadsnrvzlgpwoezu.supabase.co/auth/v1/callback . No Google secret is shipped to the browser. Private Sites access remains unchanged.
 
 Eight Node tests pass. Google provider is enabled. Full Google sign-in requires owner testing.
+
+## Shared administrator allowlist
+
+Open Administrators as the league owner, select Add administrator, choose the verified member and enter a reason. To revoke, use Revoke access on that member. Grant and revoke affect the same Supabase allowlist checked by Android and the portal. Ordinary admins cannot delegate access. The owner is protected against removal. Invite unregistered members from Members first. Each grant/revocation is recorded in Audit. The website also requires viewer access through its private Sites sharing settings. Use individual viewer grants when sharing the site.

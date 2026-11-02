@@ -5,8 +5,8 @@ import {esc,division,seasonRounds,csv} from './domain.js';
 const client=createClient(config.url,config.key,{auth:{storage:sessionStorage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,flowType:'pkce'}});
 const root=document.querySelector('#app'),dialog=document.querySelector('#editor');
 let data=null,section='Overview',query='',year=new Date().getFullYear(),demo=false,busy=false;
-const sections=['Overview','Members','Leagues','Rounds','Courses','Operations','Merchandise','Audit'];
-const icons=['◈','♙','⚑','◷','⌖','▤','◇','≡'];
+const sections=['Overview','Members','Leagues','Rounds','Courses','Operations','Merchandise','Audit','Administrators'];
+const icons=['◈','♙','⚑','◷','⌖','▤','◇','≡','⚿'];
 const money=x=>new Intl.NumberFormat('en-ZA',{style:'currency',currency:'ZAR'}).format(Number(x||0));
 const date=x=>x?new Intl.DateTimeFormat('en-ZA',{dateStyle:'medium',timeStyle:'short',timeZone:'Africa/Johannesburg'}).format(new Date(x)):'—';
 const pill=x=>`<span class="pill">${esc(x)}</span>`;
@@ -20,14 +20,17 @@ function login(message=''){
 async function load(){
  if(demo){render();return;}
  const allowed=await checked(client.rpc('is_admin'));if(!allowed){await client.auth.signOut();login('This account is not on the administrator allowlist.');return;}
- const [dashboard,members,products,orders,tasks,audit,courses]=await Promise.all([
+ const [dashboard,members,products,orders,tasks,audit,courses,accessDirectory]=await Promise.all([
   checked(client.rpc('admin_league_dashboard')),checked(client.rpc('admin_portal_members')),
   checked(client.from('admin_products').select('*').order('name')),
   checked(client.from('admin_orders').select('*').order('created_at',{ascending:false}).limit(1000)),
   checked(client.from('admin_tasks').select('*').order('due_date')),
   checked(client.from('admin_audit').select('*').order('created_at',{ascending:false}).limit(200)),
-  checked(client.from('courses').select('id,name,province,city,active,playable,data_status').order('name'))]);
- data={...dashboard,members,products,orders,tasks,audit,courses};render();
+  checked(client.from('courses').select('id,name,province,city,active,playable,data_status').order('name')),
+  checked(client.rpc('portal_admin_access_directory'))]);
+ data={...dashboard,members,products,orders,tasks,audit,courses,accessDirectory};
+ if(section==='Administrators'&&!accessDirectory)section='Overview';
+ render();
 }
 function table(headers,rows){return `<div class="tablewrap"><table><thead><tr>${headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows.length?rows.map(r=>`<tr>${r.map(c=>`<td>${c}</td>`).join('')}</tr>`).join(''):`<tr><td colspan="${headers.length}" class="empty">No records to show.</td></tr>`}</tbody></table></div>`;}
 const search=items=>items.filter(x=>JSON.stringify(x).toLowerCase().includes(query.toLowerCase()));
@@ -37,7 +40,7 @@ function stat(label,value,note){return `<div class="stat"><span class="muted">${
 function roundTable(rounds){return table(['Course / tee time','Host','Progress',''],rounds.map(r=>[`${esc(r.course_name)}<small>${date(r.scheduled_at||r.played_at)}</small>`,esc(r.host_name),pill(r.status==='active'?`Hole ${r.current_hole}`:r.status),btn('View scorecard','round',r.id)]));}
 function render(){
  if(!data)return;const rounds=seasonRounds(data.rounds,year),completed=rounds.filter(r=>r.status==='completed');
- root.innerHTML=`${demo?'<div class="sample">SAMPLE DATA · Preview only. Editing is disabled.</div>':''}<div class="layout"><aside><div class="brand"><img src="logo.jpeg" alt="CGCT logo"><div><strong>Christian Golfers</strong><small>CAPE TOWN · ADMIN</small></div></div><nav aria-label="Administration sections">${sections.map((s,i)=>`<button class="${section===s?'active':''}" data-action="nav" data-id="${s}"><span>${icons[i]}</span>${s}</button>`).join('')}</nav><footer><p>Faith. Fellowship. Fairways.</p><p>Private administration portal<br>Version 2</p>${btn('Sign out','logout')}</footer></aside><main><header class="topbar"><span class="muted">Clubhouse / <strong>${section}</strong></span><div>${btn('Refresh data','refresh')} ${btn(demo?'Exit preview':'Sign out','logout')}</div></header><div class="eyebrow">Your club, connected</div><h1>${section==='Overview'?'The clubhouse overview.':section}</h1><p class="muted">${({Overview:'A clear picture of your people, rounds and day-to-day operations.',Members:'Manage member records, handicap indexes and league assignments.',Leagues:'Membership by division and season performance, with history preserved.',Rounds:'Schedule fourballs and inspect every recorded score.',Courses:'Course availability and data coverage across South Africa.',Operations:'Keep the team aligned on the work that needs doing.',Merchandise:'Catalogue, stock and a manual order ledger. Prices in South African rand.',Audit:'Who changed what, when and why. Portal edits are recorded on the server.'})[section]}</p><div id="content"></div></main></div>`;
+ root.innerHTML=`${demo?'<div class="sample">SAMPLE DATA · Preview only. Editing is disabled.</div>':''}<div class="layout"><aside><div class="brand"><img src="logo.jpeg" alt="CGCT logo"><div><strong>Christian Golfers</strong><small>CAPE TOWN · ADMIN</small></div></div><nav aria-label="Administration sections">${sections.filter(s=>s!=='Administrators'||data.accessDirectory).map((s,i)=>`<button class="${section===s?'active':''}" data-action="nav" data-id="${s}"><span>${icons[i]}</span>${s}</button>`).join('')}</nav><footer><p>Faith. Fellowship. Fairways.</p><p>Private administration portal<br>Version 2</p>${btn('Sign out','logout')}</footer></aside><main><header class="topbar"><span class="muted">Clubhouse / <strong>${section}</strong></span><div>${btn('Refresh data','refresh')} ${btn(demo?'Exit preview':'Sign out','logout')}</div></header><div class="eyebrow">Your club, connected</div><h1>${section==='Overview'?'The clubhouse overview.':section}</h1><p class="muted">${({Overview:'A clear picture of your people, rounds and day-to-day operations.',Members:'Manage member records, handicap indexes and league assignments.',Leagues:'Membership by division and season performance, with history preserved.',Rounds:'Schedule fourballs and inspect every recorded score.',Courses:'Course availability and data coverage across South Africa.',Operations:'Keep the team aligned on the work that needs doing.',Merchandise:'Catalogue, stock and a manual order ledger. Prices in South African rand.',Administrators:'Manage administrator access for the mobile app and portal.',Audit:'Who changed what, when and why. Portal edits are recorded on the server.'})[section]}</p><div id="content"></div></main></div>`;
  const content=document.querySelector('#content');let html='';
  if(section==='Overview'){
   html=`<section class="hero"><div><div class="eyebrow">Faith • fellowship • fairways</div><h2>More time for the people.<br>Less time managing the details.</h2><p>Your members, leagues and group operations, together in one secure workspace.</p>${btn('Manage members','nav','Members',true)}</div><div class="stamp">CHRISTIAN<br>GOLFERS<br>CAPE TOWN</div></section><div class="stats">${stat('Registered members',data.members.length,`${data.members.filter(m=>m.membership_status==='active').length} active membership records`)}${stat('Rounds this year',rounds.length,`${completed.length} completed · ${year}`)}${stat('On the course',data.rounds.filter(r=>r.status==='active').length,'Active fourballs')}${stat('Open operations',data.tasks.filter(t=>t.status!=='done').length,'Tasks awaiting completion')}</div><div class="grid"><section class="card"><div class="sectionhead"><h2>Upcoming & live rounds</h2>${btn('View all','nav','Rounds')}</div>${roundTable(data.rounds.filter(r=>r.status!=='completed').slice(0,5))}</section><section class="card"><h2>Our fellowship</h2><p class="muted">Current membership by league</p>${['A','B','Social'].map(l=>{const n=data.members.filter(m=>league(m)===l).length;return `<div class="barrow"><span>${l==='Social'?l:'League '+l}</span><div class="bar"><i style="width:${100*n/Math.max(1,data.members.length)}%"></i></div><strong>${n}</strong></div>`;}).join('')}<div class="notice">Official season competition points await your approved points schedule.</div></section></div>`;
@@ -52,6 +55,15 @@ function render(){
  }else if(section==='Merchandise'){
   html=`<div class="stats">${stat('Catalogue items',data.products.length,'Products and variants')}${stat('Units in stock',data.products.reduce((s,p)=>s+p.stock,0),'Available stock after reservations')}${stat('Pending orders',data.orders.filter(o=>o.status==='pending').length,'Payment not confirmed')}${stat('Recorded sales',money(data.orders.filter(o=>['paid','fulfilled'].includes(o.status)).reduce((s,o)=>s+o.quantity*o.unit_price,0)),'Manual ledger · not reconciled payments')}</div><div class="toolbar">${btn('Add product','new','',true)}${btn('Record order','order')}</div>`+table(['Product / SKU','Price','Available','Status',''],data.products.map(p=>[`${esc(p.name)}<small>${esc(p.sku)}</small>`,money(p.price),p.stock,pill(p.active?'Active':'Archived'),btn('Edit','edit',p.id)]));
   html+='<h2>Order ledger</h2>'+table(['Member','Product','Quantity / total','Status',''],data.orders.map(o=>[esc(memberName(o.member_id)),esc(data.products.find(p=>p.id===o.product_id)?.name||'Unknown'),`${o.quantity} · ${money(o.quantity*o.unit_price)}`,pill(o.status),btn('Update','order',o.id)]))+'<div class="notice">New orders reserve stock. Cancellation restores it once. Marking an order paid is a manual record, not a payment transaction. Latest 1,000 orders shown.</div>';
+ }else if(section==='Administrators'&&data.accessDirectory){
+  const current=data.accessDirectory.filter(member=>member.admin);
+  html='<p>Choose a registered member with a verified email. Only the owner can grant or revoke administrator access.</p>'
+    +'<div class="notice">This website also uses private Sites sharing. Give a new administrator viewer access in the site’s sharing settings so they can reach the portal login.</div>'
+    +btn('Add administrator','grant-admin','',true)
+    +table(['Administrator','Email','Access',''],current.map(member=>[
+      esc(member.name||'Member'),esc(member.email),pill(member.owner?'Owner':'Administrator'),
+      member.owner?'Protected':btn('Revoke access','revoke-admin',member.id)
+    ]));
  }else if(section==='Audit'){html=table(['When','Administrator','Record','Reason',''],data.audit.map(a=>[date(a.created_at),esc(memberName(a.actor)),esc(a.entity),esc(a.reason),btn('Details','audit',String(a.id))]))+'<p class="muted">Latest 200 portal edits. Existing app operations and scheduling use their existing records and are not included in this audit list.</p>';}
  content.innerHTML=html;
  const q=document.querySelector('#search');if(q){q.value=query;q.oninput=e=>{query=e.target.value;const pos=q.selectionStart;render();document.querySelector('#search').focus();document.querySelector('#search').setSelectionRange(pos,pos);};}
@@ -84,6 +96,19 @@ async function action(e){const b=e.target.closest('[data-action]');if(!b||b.disa
  if(a==='google'){b.disabled=true;b.textContent='Connecting to Google…';try{await checked(client.auth.signInWithOAuth(googleSignInOptions(location.origin)));}catch(error){login(error.message||'Could not start Google sign-in. Please try again.');}return;}
  if(a==='nav'){section=id;query='';render();}if(a==='logout'){demo=false;dialog.close();await client.auth.signOut();login();}
  if(a==='refresh')await load();if(a==='close'&&!busy)dialog.close();if(a==='edit'||a==='new')await edit(id);
+ if(a==='grant-admin'||a==='revoke-admin'){
+  if(demo||!Array.isArray(data?.accessDirectory))return;
+  const grant=a==='grant-admin';
+  const options=data.accessDirectory.filter(member=>grant?!member.admin:member.id===id&&member.admin&&!member.owner)
+    .map(member=>[member.id,(member.name||'Member')+' · '+member.email]);
+  if(!options.length){toast('No eligible members. Invite a golfer under Members and have them complete registration first.');return;}
+  const selector=grant?[['','Choose a verified member'],...options]:options;
+  form(grant?'Add administrator':'Revoke administrator access',
+    field('member','Member',grant?'':id,'text',selector)+reason(),
+    async values=>{await checked(client.rpc('portal_set_admin_access',{
+      p_member_id:values.member,p_grant:grant,p_reason:values.reason
+    }));},grant?'Saving grants this member league, membership and operations administration in the app and portal.':'Saving removes administrative access in both the app and portal. The member account and scores are retained.');
+ }
  if(a==='order')order(id);if(a==='schedule')await schedule();if(a==='round')showRound(id);
  if(a==='audit'){const audit=data.audit.find(x=>String(x.id)===id);dialog.innerHTML=`<header><h2>Change details</h2>${btn('Close','close')}</header><pre>${esc(JSON.stringify(audit,null,2))}</pre>`;dialog.showModal();}
  if(a==='invite')form('Invite member',field('displayName','Full name')+field('email','Email address','','email'),async v=>{await checked(client.functions.invoke('admin-invite-member',{body:v}));},'Saving sends an invitation email with the app sign-in link.');
