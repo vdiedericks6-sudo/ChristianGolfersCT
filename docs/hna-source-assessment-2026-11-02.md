@@ -24,3 +24,10 @@ These are individual reconciliations, not a nationwide import. HNA's pages do no
 ## Tee availability — 2 November 2026
 
 At the organiser's request, women's rated tee records are kept for historical reference but hidden from new round selection across courses. Migration `20261102125048` disables currently identified women's tees; a trigger defaults newly imported women's-labelled tees to unavailable. The existing round-creation guard rejects unavailable tees, while historic rows and their distances/ratings remain unchanged. To introduce women's tee support later, review and retire the `hide_new_womens_tees` trigger, re-enable the intended categories, and verify round creation and player-level tee selection. Existing apps must respect `selectable`; the current Android build does so. The admin website source also filters on `selectable`, but a previously deployed website version may still display outdated choices until redeployed; the database rejects those selections.
+
+## Western Cape HNA update — 2 November 2026
+
+- [Milnerton](https://www.handicaps.co.za/club-detail?clubid=464): added men's yellow, white and red tees for its par-71 layout. HNA's 18 pars and stroke indexes matched the existing hole records, which were preserved. The HNA par-72 layout has a different par at hole 6 and is excluded until layouts have independent hole pars. Totals were verified after import.
+- [Royal Cape](https://www.handicaps.co.za/club-detail?clubid=468): added HNA's 18-hole pars, indexes and men's yellow, white and red tees. No existing holes, tees or rounds were present before import. Totals were verified after import.
+
+No GPS green geometry or course images were supplied. Distances are treated as metres: Royal Cape's totals match an independently labelled metre source (https://golftraxx.com/scorecard?course_name=Royal+Cape+Golf+Club&fulladdress=&static=true&zipcode=7800SA); Milnerton units need club/HNA confirmation. The remainder of the Western Cape catalogue has not yet been reconciled. Stellenbosch and Bellville remain unchanged as directed; HNA values for them differ from previously loaded cards.
