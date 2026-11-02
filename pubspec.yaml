@@ -46,6 +46,7 @@ dependencies:
   # so the mobile builds still compile.
   flutter_web_plugins:
     sdk: flutter
+  geolocator: ^14.0.1
 
 dev_dependencies:
   flutter_test:

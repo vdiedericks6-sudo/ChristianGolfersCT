@@ -118,6 +118,21 @@ void main() {
     expect(result.first.grossTotal, 10);
   });
 
+  test('players use their own tees and legacy players use the round tee', () {
+    const longer = TeeSet(id: 'long', name: 'Long', colour: 'Yellow',
+      courseRating: 74, slopeRating: 113, par: 72, totalDistance: 6500, distanceUnit: 'metres');
+    const group = [
+      RoundPlayer(userId: 'a', displayName: 'Alice', role: 'host', active: true, handicapIndex: 17, teeSetId: 'long'),
+      RoundPlayer(userId: 'b', displayName: 'Bob', role: 'player', active: true, handicapIndex: 17),
+    ];
+    final result = LeaderboardCalculator.calculate(players: group, scores: scores, holes: holes,
+      teeSet: tee, playerTeeSets: {'long': longer}, mode: LeaderboardMode.net, currentUserId: 'a');
+    expect(result.firstWhere((e) => e.playerId == 'a').netTotal, 7);
+    expect(result.firstWhere((e) => e.playerId == 'b').netTotal, 8);
+    expect(() => LeaderboardCalculator.calculate(players: group, scores: scores, holes: holes,
+      teeSet: tee, mode: LeaderboardMode.net, currentUserId: 'a'), throwsStateError);
+  });
+
   test('secondary gross view ranks lower gross score first', () {
     final result = LeaderboardCalculator.calculate(
       players: players,

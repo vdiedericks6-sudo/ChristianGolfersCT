@@ -19,6 +19,7 @@ class LeaderboardCalculator {
     required TeeSet? teeSet,
     required LeaderboardMode mode,
     required String? currentUserId,
+    Map<String, TeeSet> playerTeeSets = const {},
   }) {
     final holeMap = {for (final hole in holes) hole.number: hole};
 
@@ -36,12 +37,18 @@ class LeaderboardCalculator {
               .toList()
             ..sort((a, b) => a.holeNumber.compareTo(b.holeNumber));
 
-      final courseHandicap = player.handicapIndex != null && teeSet != null
+      final playerTee = player.teeSetId == null
+          ? teeSet
+          : playerTeeSets[player.teeSetId];
+      if (player.teeSetId != null && playerTee == null) {
+        throw StateError('The tee data for ${player.displayName} is unavailable.');
+      }
+      final courseHandicap = player.handicapIndex != null && playerTee != null
           ? HandicapCalculator.courseHandicap(
               handicapIndex: player.handicapIndex!,
-              slopeRating: teeSet.slopeRating,
-              courseRating: teeSet.courseRating,
-              par: teeSet.par,
+              slopeRating: playerTee.slopeRating,
+              courseRating: playerTee.courseRating,
+              par: playerTee.par,
             )
           : 0;
 

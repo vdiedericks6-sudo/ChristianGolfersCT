@@ -79,6 +79,7 @@ class _RoundLeaderboardScreenState
                           scores: scores,
                           holes: holes,
                           teeSet: teeSet,
+                            playerTeeSets: {for (final tee in tees) tee.id: tee},
                           mode: _mode,
                           currentUserId: currentUserId,
                         );

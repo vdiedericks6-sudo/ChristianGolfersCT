@@ -16,6 +16,7 @@ import '../../../core/widgets/hole_artwork.dart';
 import '../../rounds/domain/golf_round.dart';
 import '../domain/hole_score.dart';
 import 'score_providers.dart';
+import 'green_distance_card.dart';
 
 class LiveRoundScreen extends ConsumerStatefulWidget {
   const LiveRoundScreen({required this.roundId, super.key});
@@ -537,6 +538,7 @@ class _HoleView extends StatelessWidget {
           seed: '${round.courseId}-${hole.number}',
           height: 190,
         ),
+        GreenDistanceCard(key: ValueKey('gps-${hole.number}'), hole: hole),
         const SizedBox(height: 8),
         Text(
           officialDistance != null

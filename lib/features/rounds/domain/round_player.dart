@@ -10,6 +10,7 @@ class RoundPlayer {
     this.courseHandicap,
     this.playingHandicap,
     this.joinedAt,
+    this.teeSetId,
   });
 
   final String userId;
@@ -20,6 +21,7 @@ class RoundPlayer {
   final int? courseHandicap;
   final int? playingHandicap;
   final DateTime? joinedAt;
+  final String? teeSetId;
 
   bool get isHost => role == 'host';
 
@@ -33,6 +35,7 @@ class RoundPlayer {
       courseHandicap: asIntOrNull(data['course_handicap']),
       playingHandicap: asIntOrNull(data['playing_handicap']),
       joinedAt: asDateOrNull(data['joined_at']),
+      teeSetId: asStringOrNull(data['tee_set_id']),
     );
   }
 }
