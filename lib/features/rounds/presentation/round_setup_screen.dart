@@ -107,6 +107,10 @@ class _RoundSetupState extends ConsumerState<RoundSetupScreen> {
                     child: const Text('Retry tee data'),
                   ),
                   data: (items) {
+                    final ratedTees = items
+                        .where((tee) => tee.colour.toLowerCase() != 'unrated')
+                        .toList();
+                    final availableTees = ratedTees.isEmpty ? items : ratedTees;
                     final selected = items
                         .where((t) => t.id == _teeId)
                         .firstOrNull;
@@ -128,7 +132,7 @@ class _RoundSetupState extends ConsumerState<RoundSetupScreen> {
                         ],
                       );
                     return Column(
-                      children: items
+                      children: availableTees
                           .map(
                             (t) => Card(
                               child: RadioListTile<String>(

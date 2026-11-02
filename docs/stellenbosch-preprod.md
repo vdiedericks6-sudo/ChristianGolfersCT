@@ -25,3 +25,7 @@ After configuring the test project, run `build_preprod_apk.ps1 -SupabaseUrl <tes
 - Have the organiser supply the official competition points schedule before using annual points standings.
 
 On 2 November the existing 53 Flutter tests passed. These do not substitute for multiplayer device testing or verify real course data.
+
+## Organiser decision and club scorecard
+
+The organiser elected to use the existing live Supabase project for member testing. Test rounds and accounts are therefore live data. On 2 November, the supplied 2024 club scorecard confirmed the existing 18 pars and stroke indexes, including hole 18 as par 4. Eight rated tee categories and 18 distances each were loaded into the existing project by migration 20261102093838. The sums match the scorecard totals. The previous unrated tee remains for historical rounds. Verify with the club that the 2024 card remains current and confirm event format and competition points.
