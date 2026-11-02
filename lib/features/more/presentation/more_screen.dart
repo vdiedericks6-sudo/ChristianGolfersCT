@@ -69,6 +69,12 @@ class MoreScreen extends ConsumerWidget {
             const SizedBox(height: 22),
             const SectionHeader('League management'),
             _MoreTile(
+              icon: Icons.feedback_outlined,
+              title: 'Testing feedback',
+              subtitle: 'Report an issue or suggest an improvement',
+              onTap: () => context.push('/test-feedback'),
+            ),
+            _MoreTile(
               icon: Icons.admin_panel_settings_rounded,
               title: 'Owner / captain dashboard',
               subtitle: 'Sign in to review member scores and standings',

@@ -22,6 +22,7 @@ import '../features/profile/presentation/edit_profile_screen.dart';
 import '../features/profile/presentation/profile_screen.dart';
 import '../features/privacy/presentation/privacy_screen.dart';
 import '../features/notifications/presentation/notifications_screen.dart';
+import '../features/feedback/presentation/test_feedback_screen.dart';
 import '../features/rounds/presentation/join_link_screen.dart';
 import '../features/rounds/presentation/join_round_screen.dart';
 import '../features/rounds/presentation/round_lobby_screen.dart';
@@ -103,6 +104,7 @@ final GoRouter appRouter = GoRouter(
       builder: (context, state) => const AdminPortalScreen(),
     ),
     GoRoute(path: '/more', builder: (context, state) => const MoreScreen()),
+    GoRoute(path: '/test-feedback', builder: (context, state) => const TestFeedbackScreen()),
     GoRoute(path: '/play', builder: (context, state) => const PlayScreen()),
     GoRoute(
       path: '/leaderboards',
