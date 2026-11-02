@@ -119,6 +119,13 @@ void main() {
       await tester.tap(find.text('Continue to round settings'));
       await tester.pumpAndSettle();
       expect(find.text('Round settings'), findsOneWidget);
+      await tester.scrollUntilVisible(find.text('Starting hole'), 200, scrollable: find.byType(Scrollable).first);
+      await tester.drag(find.byType(ListView).first, const Offset(0, -250));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byType(DropdownButtonFormField<int>));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Hole 10').last);
+      await tester.pumpAndSettle();
 
       await tester.scrollUntilVisible(
         find.text('Create round'),
@@ -152,7 +159,7 @@ void main() {
       await tester.tap(find.text('Start the round'));
       await tester.pumpAndSettle();
       expect(find.text('Hole view'), findsOneWidget);
-      await tester.tap(find.text('Enter scores · Hole 1'));
+      await tester.tap(find.text('Enter scores · Hole 10'));
       await tester.pumpAndSettle();
       expect(find.text('Live round'), findsOneWidget);
       expect(tester.takeException(), isNull);

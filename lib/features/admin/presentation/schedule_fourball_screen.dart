@@ -190,6 +190,7 @@ class _ScheduleFourballState extends ConsumerState<ScheduleFourballScreen> {
                                 labelText: 'Tee for this group',
                               ),
                               items: tees
+                                  .where((t) => t.selectable)
                                   .map(
                                     (t) => DropdownMenuItem(
                                       value: t.id,

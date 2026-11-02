@@ -16,6 +16,7 @@ class RoundSetupScreen extends ConsumerStatefulWidget {
 
 class _RoundSetupState extends ConsumerState<RoundSetupScreen> {
   String? _teeId;
+  int _startingHole = 1;
   bool _review = false, _saving = false;
   String? _error;
   Future<void> _create() async {
@@ -25,7 +26,7 @@ class _RoundSetupState extends ConsumerState<RoundSetupScreen> {
         .valueOrNull;
     final tees =
         ref.read(courseTeeSetsProvider(widget.courseId)).valueOrNull ?? [];
-    final matches = tees.where((t) => t.id == _teeId);
+    final matches = tees.where((t) => t.id == _teeId && t.selectable);
     if (course == null || !course.playable || matches.isEmpty) return;
     setState(() {
       _saving = true;
@@ -34,7 +35,11 @@ class _RoundSetupState extends ConsumerState<RoundSetupScreen> {
     try {
       final id = await ref
           .read(roundRepositoryProvider)
-          .createRound(course: course, teeSet: matches.first);
+          .createRound(
+            course: course,
+            teeSet: matches.first,
+            startingHole: _startingHole,
+          );
       ref.invalidate(openRoundsProvider);
       if (mounted) context.go('/rounds/$id/lobby');
     } catch (_) {
@@ -52,6 +57,7 @@ class _RoundSetupState extends ConsumerState<RoundSetupScreen> {
   Widget build(BuildContext context) {
     final course = ref.watch(selectedCourseProvider(widget.courseId));
     final tees = ref.watch(courseTeeSetsProvider(widget.courseId));
+    final holes = ref.watch(courseHolesProvider(widget.courseId));
     return PopScope(
       canPop: !_saving,
       child: Scaffold(
@@ -107,14 +113,19 @@ class _RoundSetupState extends ConsumerState<RoundSetupScreen> {
                     child: const Text('Retry tee data'),
                   ),
                   data: (items) {
-                    final ratedTees = items
+                    final selectableTees = items
+                        .where((tee) => tee.selectable)
+                        .toList();
+                    final ratedTees = selectableTees
                         .where((tee) => tee.colour.toLowerCase() != 'unrated')
                         .toList();
-                    final availableTees = ratedTees.isEmpty ? items : ratedTees;
+                    final availableTees = ratedTees.isEmpty
+                        ? selectableTees
+                        : ratedTees;
                     final selected = items
-                        .where((t) => t.id == _teeId)
+                        .where((t) => t.id == _teeId && t.selectable)
                         .firstOrNull;
-                    if (items.isEmpty)
+                    if (selectableTees.isEmpty)
                       return const Text(
                         'Tee data must be supplied before starting a round.',
                       );
@@ -123,7 +134,43 @@ class _RoundSetupState extends ConsumerState<RoundSetupScreen> {
                         children: [
                           _setting('Tee box', selected.name),
                           _setting('Round format', 'Stroke play'),
-                          _setting('Starting hole', '1'),
+                          holes.when(
+                            loading: () => const LinearProgressIndicator(),
+                            error: (_, _) =>
+                                const Text('Unable to load holes.'),
+                            data: (items) {
+                              final numbers =
+                                  items
+                                      .map((h) => h.number)
+                                      .where((n) => n >= 1 && n <= 18)
+                                      .toSet()
+                                      .toList()
+                                    ..sort();
+                              if (numbers.isEmpty)
+                                return const Text('Hole data is unavailable.');
+                              final selectedHole =
+                                  numbers.contains(_startingHole)
+                                  ? _startingHole
+                                  : numbers.first;
+                              return DropdownButtonFormField<int>(
+                                value: selectedHole,
+                                decoration: const InputDecoration(
+                                  labelText: 'Starting hole',
+                                ),
+                                items: numbers
+                                    .map(
+                                      (n) => DropdownMenuItem(
+                                        value: n,
+                                        child: Text('Hole $n'),
+                                      ),
+                                    )
+                                    .toList(),
+                                onChanged: _saving
+                                    ? null
+                                    : (n) => setState(() => _startingHole = n!),
+                              );
+                            },
+                          ),
                           _setting('Round length', '18 holes'),
                           const SizedBox(height: 16),
                           const Text(
@@ -175,6 +222,11 @@ class _RoundSetupState extends ConsumerState<RoundSetupScreen> {
               onPressed:
                   _saving ||
                       _teeId == null ||
+                      (_review &&
+                          !(holes.valueOrNull?.any(
+                                (h) => h.number == _startingHole,
+                              ) ??
+                              false)) ||
                       course.valueOrNull?.playable != true
                   ? null
                   : () => _review ? _create() : setState(() => _review = true),

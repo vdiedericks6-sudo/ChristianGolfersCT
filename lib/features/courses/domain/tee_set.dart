@@ -11,8 +11,10 @@ class TeeSet {
     required this.totalDistance,
     required this.distanceUnit,
     this.holeDistancesMeters = const {},
+    this.selectable = true,
   });
 
+  final bool selectable;
   final String id;
   final String name;
   final String colour;
@@ -28,6 +30,7 @@ class TeeSet {
   factory TeeSet.fromJson(Json data) {
     return TeeSet(
       id: asString(data['id']),
+      selectable: asBool(data['selectable'], true),
       name: asString(data['name']),
       colour: asString(data['colour']),
       courseRating: asDouble(data['course_rating']),

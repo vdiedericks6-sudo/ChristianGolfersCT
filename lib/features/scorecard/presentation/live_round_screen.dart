@@ -127,8 +127,7 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
   }
 
   Future<void> _changeSharedHole(int currentHole, int delta) async {
-    final next = currentHole + delta;
-    if (next < 1 || next > 18) return;
+    final next = ((currentHole - 1 + delta + 18) % 18) + 1;
     if (_saving || !await _confirmDiscard() || !mounted) return;
 
     try {
@@ -178,7 +177,12 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
         leading: const AppBackButton(),
         title: const Text('Live round'),
         actions: [
-          IconButton(tooltip:'Hole view',onPressed:()=>context.push('/rounds/${widget.roundId}/hole-view'),icon:const Icon(Icons.map_outlined)),
+          IconButton(
+            tooltip: 'Hole view',
+            onPressed: () =>
+                context.push('/rounds/${widget.roundId}/hole-view'),
+            icon: const Icon(Icons.map_outlined),
+          ),
           IconButton(
             tooltip: 'Leaderboard',
             onPressed: () =>
@@ -307,8 +311,7 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
                               completing: _completing,
                               onStrokes: (value) =>
                                   _edit(() => _strokes = value),
-                              onPutts: (value) =>
-                                  _edit(() => _putts = value),
+                              onPutts: (value) => _edit(() => _putts = value),
                               onPenalties: (value) =>
                                   _edit(() => _penalties = value),
                               onSandShots: (value) =>
@@ -480,7 +483,7 @@ class _HoleView extends StatelessWidget {
                 children: [
                   _StepArrow(
                     icon: Icons.chevron_left_rounded,
-                    enabled: isHost && hole.number > 1,
+                    enabled: isHost,
                     onTap: () => onMoveHole(-1),
                     semantic: 'Previous hole',
                   ),
@@ -514,7 +517,7 @@ class _HoleView extends StatelessWidget {
                   ),
                   _StepArrow(
                     icon: Icons.chevron_right_rounded,
-                    enabled: isHost && hole.number < 18,
+                    enabled: isHost,
                     onTap: () => onMoveHole(1),
                     semantic: 'Next hole',
                   ),
@@ -665,9 +668,8 @@ class _HoleView extends StatelessWidget {
                 selected: greenInRegulation == null
                     ? const <bool>{}
                     : {greenInRegulation!},
-                onSelectionChanged: (values) => onGreenInRegulation(
-                  values.isEmpty ? null : values.first,
-                ),
+                onSelectionChanged: (values) =>
+                    onGreenInRegulation(values.isEmpty ? null : values.first),
               ),
             ],
           ),

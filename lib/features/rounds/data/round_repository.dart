@@ -7,6 +7,7 @@ abstract class RoundRepository {
   Future<String> createRound({
     required GolfCourse course,
     required TeeSet teeSet,
+    int startingHole = 1,
   });
 
   Future<String> joinRoundByCode(String rawCode);

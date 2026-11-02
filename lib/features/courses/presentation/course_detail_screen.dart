@@ -216,7 +216,10 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                   teeSets.when(
                     loading: () => const LinearProgressIndicator(),
                     error: (error, stackTrace) => Text('$error'),
-                    data: (tees) {
+                    data: (allTees) {
+                      final tees = allTees
+                          .where((tee) => tee.selectable)
+                          .toList();
                       if (tees.isEmpty) {
                         return const Text(
                           'No tee sets are available for this course yet. '
@@ -238,13 +241,18 @@ class _CourseDetailScreenState extends ConsumerState<CourseDetailScreen> {
                         children: [
                           if (standardTeeColours.any(
                             (colour) => !tees.any(
-                              (tee) => tee.colour.toLowerCase() == colour.toLowerCase(),
+                              (tee) =>
+                                  tee.colour.toLowerCase() ==
+                                  colour.toLowerCase(),
                             ),
                           )) ...[
                             Text(
                               'Only tees with course data can be selected. '
                               'Greyed-out colours need club-provided ratings and distances.',
-                              style: AppTheme.body(12, colour: AppTheme.textMuted),
+                              style: AppTheme.body(
+                                12,
+                                colour: AppTheme.textMuted,
+                              ),
                             ),
                             const SizedBox(height: 12),
                           ],

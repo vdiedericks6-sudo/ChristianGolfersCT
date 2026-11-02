@@ -27,14 +27,16 @@ class SupabaseRoundRepository implements RoundRepository {
   Future<String> createRound({
     required GolfCourse course,
     required TeeSet teeSet,
+    int startingHole = 1,
   }) async {
     final roundId = await _client.rpc<dynamic>(
-      'create_round',
+      'create_round_with_start',
       params: {
         'p_course_id': course.id,
         'p_course_name': course.name,
         'p_tee_set_id': teeSet.id,
         'p_tee_set_name': teeSet.name,
+        'p_starting_hole': startingHole,
       },
     );
 
@@ -106,11 +108,12 @@ class SupabaseRoundRepository implements RoundRepository {
       throw StateError('The round is no longer waiting to start.');
     }
 
-    await _rounds.update({
-      'status': 'active',
-      'current_hole': 1,
-      'started_at': DateTime.now().toUtc().toIso8601String(),
-    }).eq('id', roundId);
+    await _rounds
+        .update({
+          'status': 'active',
+          'started_at': DateTime.now().toUtc().toIso8601String(),
+        })
+        .eq('id', roundId);
   }
 
   @override

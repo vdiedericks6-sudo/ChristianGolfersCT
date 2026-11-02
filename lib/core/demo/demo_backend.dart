@@ -555,6 +555,7 @@ class _DemoRoundRepository implements RoundRepository {
   Future<String> createRound({
     required GolfCourse course,
     required TeeSet teeSet,
+    int startingHole = 1,
   }) async {
     final me = _me;
     final id = 'demo-round-${DateTime.now().millisecondsSinceEpoch}';
@@ -575,7 +576,7 @@ class _DemoRoundRepository implements RoundRepository {
       joinCode: code,
       format: 'strokePlay',
       status: 'waiting',
-      currentHole: 1,
+      currentHole: startingHole,
       createdAt: DateTime.now(),
     );
 
@@ -719,7 +720,7 @@ class _DemoRoundRepository implements RoundRepository {
     _backend._rounds[roundId] = _copy(
       round,
       status: 'active',
-      currentHole: 1,
+      currentHole: round.currentHole,
       startedAt: DateTime.now(),
     );
     _backend._bump();
