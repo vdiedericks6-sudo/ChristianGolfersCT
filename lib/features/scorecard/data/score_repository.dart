@@ -18,4 +18,20 @@ abstract class ScoreRepository {
     bool? greenInRegulation,
     bool confirmed = true,
   });
+
+  /// Captures a score for another player. It remains provisional until that
+  /// player confirms it; the server checks both players' round membership.
+  Future<void> saveGroupScore({
+    required String roundId,
+    required String playerId,
+    required int holeNumber,
+    required int strokes,
+    required int putts,
+    required int penaltyStrokes,
+    required bool expectedExists,
+    DateTime? expectedUpdatedAt,
+    int sandShots = 0,
+    String? fairway,
+    bool? greenInRegulation,
+  });
 }

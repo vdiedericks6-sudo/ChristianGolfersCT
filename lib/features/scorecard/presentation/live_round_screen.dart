@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 
 import '../../authentication/presentation/auth_providers.dart';
 import '../../courses/domain/golf_hole.dart';
@@ -15,6 +16,7 @@ import '../../../core/widgets/christian_golfers_components.dart';
 import '../../../core/widgets/hole_artwork.dart';
 import '../../rounds/domain/golf_round.dart';
 import '../domain/hole_score.dart';
+import '../domain/score_voice_parser.dart';
 import 'score_providers.dart';
 import 'green_distance_card.dart';
 
@@ -35,10 +37,124 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
   String? _fairway;
   bool? _greenInRegulation;
   int? _loadedHole;
+  String? _loadedPlayerId;
+  String? _loadedScoreVersion;
+  bool _loadedScoreExists = false;
+  DateTime? _loadedScoreUpdatedAt;
+  String? _selectedPlayerId;
   bool _saving = false;
   bool _completing = false;
   int _editRevision = 0;
   bool _dirty = false;
+  final _speech = SpeechToText();
+  bool _listening = false;
+  bool _voiceBusy = false;
+  String _voiceLanguage = 'en';
+  String _voiceMessage = 'Say “Hole seven, six strokes”.';
+
+  @override
+  void dispose() {
+    _speech.cancel();
+    super.dispose();
+  }
+
+  Future<void> _toggleVoice(int holeNumber, String playerId) async {
+    if (_listening) {
+      await _speech.stop();
+      if (mounted) setState(() => _listening = false);
+      return;
+    }
+    if (_voiceBusy) return;
+    setState(() => _voiceBusy = true);
+    try {
+      final available = await _speech.initialize(
+        onStatus: (status) {
+          if (mounted && (status == 'done' || status == 'notListening')) {
+            setState(() => _listening = false);
+          }
+        },
+        onError: (_) {
+          if (mounted) {
+            setState(() {
+              _listening = false;
+              _voiceMessage =
+                  'Could not hear a score. Try again or use the buttons.';
+            });
+          }
+        },
+      );
+      if (!available) {
+        if (mounted) {
+          setState(
+            () => _voiceMessage =
+                'Speech recognition unavailable or microphone permission denied.',
+          );
+        }
+        return;
+      }
+      final locales = await _speech.locales();
+      final matches = locales
+          .where(
+            (locale) => locale.localeId
+                .toLowerCase()
+                .replaceAll('-', '_')
+                .startsWith(_voiceLanguage),
+          )
+          .toList();
+      final za = matches.where(
+        (locale) =>
+            locale.localeId.toLowerCase().replaceAll('-', '_').endsWith('_za'),
+      );
+      final localeId = za.isNotEmpty
+          ? za.first.localeId
+          : (matches.isEmpty ? null : matches.first.localeId);
+      if (localeId == null && mounted) {
+        setState(
+          () => _voiceMessage =
+              'Selected language unavailable; using the phone default.',
+        );
+      }
+      await _speech.listen(
+        onResult: (result) {
+          if (!result.finalResult ||
+              !mounted ||
+              _loadedHole != holeNumber ||
+              _loadedPlayerId != playerId) {
+            return;
+          }
+          final spoken = result.recognizedWords;
+          final gross = ScoreVoiceParser.parse(spoken, currentHole: holeNumber);
+          if (gross == null || gross <= _penalties || gross - _penalties > 20) {
+            setState(
+              () => _voiceMessage =
+                  'Heard “$spoken”. Check the hole and score, then try again.',
+            );
+            return;
+          }
+          _edit(() {
+            _strokes = gross - _penalties;
+            _voiceMessage =
+                'Heard “$spoken”: $gross gross. Review and save below.';
+          });
+        },
+        listenOptions: SpeechListenOptions(
+          partialResults: false,
+          listenMode: ListenMode.confirmation,
+          localeId: localeId,
+        ),
+      );
+      if (mounted) setState(() => _listening = _speech.isListening);
+    } catch (_) {
+      if (mounted) {
+        setState(
+          () => _voiceMessage =
+              'Voice entry failed. You can still use the buttons.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _voiceBusy = false);
+    }
+  }
 
   void _edit(VoidCallback change) {
     setState(() {
@@ -72,12 +188,29 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
         false;
   }
 
-  void _loadExistingScore(int holeNumber, HoleScore? score, int par) {
-    if (_loadedHole == holeNumber) return;
+  void _loadExistingScore(
+    int holeNumber,
+    String playerId,
+    HoleScore? score,
+    int par,
+  ) {
+    final version = _scoreVersion(score);
+    final sameDraft = _loadedHole == holeNumber && _loadedPlayerId == playerId;
+    if (sameDraft && (_loadedScoreVersion == version || _dirty || _saving)) {
+      return;
+    }
     _loadedHole = holeNumber;
+    _loadedPlayerId = playerId;
+    _loadedScoreVersion = version;
+    _loadedScoreExists = score != null;
+    _loadedScoreUpdatedAt = score?.updatedAt;
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
+      if (!mounted ||
+          _loadedHole != holeNumber ||
+          _loadedPlayerId != playerId) {
+        return;
+      }
 
       setState(() {
         _dirty = false;
@@ -91,39 +224,70 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
     });
   }
 
-  Future<void> _saveScore(int holeNumber) async {
+  String _scoreVersion(HoleScore? score) => score == null
+      ? 'missing'
+      : '${score.updatedAt?.toUtc().toIso8601String()}|${score.strokes}|${score.putts}|${score.penaltyStrokes}|${score.sandShots}|${score.fairway}|${score.greenInRegulation}|${score.confirmed}';
+
+  Future<bool> _saveScore(
+    int holeNumber,
+    String playerId,
+    String? userId,
+  ) async {
     final savedRevision = _editRevision;
     setState(() => _saving = true);
 
     try {
-      await ref
-          .read(scoreRepositoryProvider)
-          .saveMyScore(
-            roundId: widget.roundId,
-            holeNumber: holeNumber,
-            strokes: _strokes,
-            putts: _putts,
-            penaltyStrokes: _penalties,
-            sandShots: _sandShots,
-            fairway: _fairway,
-            greenInRegulation: _greenInRegulation,
-          );
+      final repository = ref.read(scoreRepositoryProvider);
+      await repository.saveGroupScore(
+        roundId: widget.roundId,
+        playerId: playerId,
+        holeNumber: holeNumber,
+        strokes: _strokes,
+        putts: _putts,
+        penaltyStrokes: _penalties,
+        expectedExists: _loadedScoreExists,
+        expectedUpdatedAt: _loadedScoreUpdatedAt,
+        sandShots: _sandShots,
+        fairway: _fairway,
+        greenInRegulation: _greenInRegulation,
+      );
 
       if (mounted) {
         if (_editRevision == savedRevision) setState(() => _dirty = false);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Score saved.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              playerId == userId
+                  ? 'Score saved to the server.'
+                  : 'Score saved to the server; the player must confirm it.',
+            ),
+          ),
+        );
       }
+      return true;
     } catch (error) {
-      if (!mounted) return;
+      if (!mounted) return false;
 
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('$error')));
+      return false;
     } finally {
       if (mounted) setState(() => _saving = false);
     }
+  }
+
+  Future<void> _selectPlayer(String? playerId) async {
+    if (playerId == null || playerId == _selectedPlayerId || _saving) return;
+    if (!await _confirmDiscard() || !mounted) return;
+    await _speech.cancel();
+    if (!mounted) return;
+    setState(() {
+      _listening = false;
+      _dirty = false;
+      _selectedPlayerId = playerId;
+      _loadedPlayerId = null;
+    });
   }
 
   Future<void> _changeSharedHole(int currentHole, int delta) async {
@@ -217,7 +381,12 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stackTrace) => Center(child: Text('$error')),
               data: (holes) {
-                final hole = _holeForNumber(holes, round.currentHole);
+                // A host may move the shared hole while someone is editing.
+                // Keep their draft attached to its original hole until saved.
+                final editingHole = _dirty
+                    ? (_loadedHole ?? round.currentHole)
+                    : round.currentHole;
+                final hole = _holeForNumber(holes, editingHole);
                 if (hole == null) {
                   return const Center(child: Text('Hole data unavailable.'));
                 }
@@ -227,15 +396,36 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
                       const Center(child: CircularProgressIndicator()),
                   error: (error, stackTrace) => Center(child: Text('$error')),
                   data: (tees) {
-                    final tee = _teeForId(tees, round.teeSetId);
-
                     return playersState.when(
                       loading: () =>
                           const Center(child: CircularProgressIndicator()),
                       error: (error, stackTrace) =>
                           Center(child: Text('$error')),
                       data: (players) {
-                        final me = _playerForId(players, userId);
+                        final activePlayers = players
+                            .where((player) => player.active)
+                            .toList();
+                        final selectedId =
+                            activePlayers.any(
+                              (p) => p.userId == _selectedPlayerId,
+                            )
+                            ? _selectedPlayerId
+                            : userId;
+                        final selectedPlayer = _playerForId(
+                          activePlayers,
+                          selectedId,
+                        );
+                        if (selectedPlayer == null) {
+                          return const Center(
+                            child: Text(
+                              'You are not an active player in this round.',
+                            ),
+                          );
+                        }
+                        final tee = _teeForId(
+                          tees,
+                          selectedPlayer.teeSetId ?? round.teeSetId,
+                        );
 
                         return scoresState.when(
                           loading: () =>
@@ -245,17 +435,18 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
                           data: (scores) {
                             final existingScore = _scoreFor(
                               scores,
-                              userId,
-                              round.currentHole,
+                              selectedId,
+                              hole.number,
                             );
 
                             _loadExistingScore(
-                              round.currentHole,
+                              hole.number,
+                              selectedPlayer.userId,
                               existingScore,
                               hole.par,
                             );
 
-                            final handicapIndex = me?.handicapIndex;
+                            final handicapIndex = selectedPlayer.handicapIndex;
                             final courseHandicap =
                                 handicapIndex != null && tee != null
                                 ? HandicapCalculator.courseHandicap(
@@ -266,11 +457,13 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
                                   )
                                 : null;
 
-                            final playingHandicap = courseHandicap == null
-                                ? null
-                                : HandicapCalculator.playingHandicap(
-                                    courseHandicap: courseHandicap,
-                                  );
+                            final playingHandicap =
+                                selectedPlayer.playingHandicap ??
+                                (courseHandicap == null
+                                    ? null
+                                    : HandicapCalculator.playingHandicap(
+                                        courseHandicap: courseHandicap,
+                                      ));
 
                             final strokesReceived = playingHandicap == null
                                 ? 0
@@ -296,6 +489,38 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
                               players: players,
                               scores: scores,
                               userId: userId,
+                              selectedPlayer: selectedPlayer,
+                              onPlayerSelected: _selectPlayer,
+                              needsConfirmation:
+                                  existingScore != null &&
+                                  !existingScore.confirmed,
+                              scoreLocked:
+                                  existingScore?.confirmed == true &&
+                                  selectedPlayer.userId != userId,
+                              scoreConflict:
+                                  _dirty &&
+                                  _loadedScoreVersion !=
+                                      _scoreVersion(existingScore),
+                              onReloadScore: () => setState(() {
+                                _dirty = false;
+                                _loadedScoreVersion = null;
+                              }),
+                              groupOnDifferentHole:
+                                  hole.number != round.currentHole,
+                              voiceLanguage: _voiceLanguage,
+                              voiceMessage: _voiceMessage,
+                              listening: _listening,
+                              voiceBusy: _voiceBusy,
+                              onVoiceLanguage: (value) => setState(() {
+                                _voiceLanguage = value;
+                                _voiceMessage = value == 'af'
+                                    ? 'Sê “Putjie sewe, ses houe”.'
+                                    : 'Say “Hole seven, six strokes”.';
+                              }),
+                              onVoice: () => _toggleVoice(
+                                hole.number,
+                                selectedPlayer.userId,
+                              ),
                               isHost: isHost,
                               playingHandicap: playingHandicap,
                               strokesReceived: strokesReceived,
@@ -310,19 +535,42 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
                               saving: _saving,
                               completing: _completing,
                               onStrokes: (value) =>
-                                  _edit(() => _strokes = value),
+                                  _edit(() => _strokes = value - _penalties),
                               onPutts: (value) => _edit(() => _putts = value),
-                              onPenalties: (value) =>
-                                  _edit(() => _penalties = value),
+                              onPenalties: (value) => _edit(() {
+                                final gross = _strokes + _penalties;
+                                _penalties = value;
+                                _strokes = (gross - value).clamp(1, 20);
+                              }),
                               onSandShots: (value) =>
                                   _edit(() => _sandShots = value),
                               onFairway: (value) =>
                                   _edit(() => _fairway = value),
                               onGreenInRegulation: (value) =>
                                   _edit(() => _greenInRegulation = value),
-                              onSave: () => _saveScore(round.currentHole),
+                              onSave: () async {
+                                final saved = await _saveScore(
+                                  hole.number,
+                                  selectedPlayer.userId,
+                                  userId,
+                                );
+                                if (!saved ||
+                                    !mounted ||
+                                    _dirty ||
+                                    activePlayers.length < 2) {
+                                  return;
+                                }
+                                final index = activePlayers.indexWhere(
+                                  (p) => p.userId == selectedPlayer.userId,
+                                );
+                                await _selectPlayer(
+                                  activePlayers[(index + 1) %
+                                          activePlayers.length]
+                                      .userId,
+                                );
+                              },
                               onMoveHole: (delta) =>
-                                  _changeSharedHole(round.currentHole, delta),
+                                  _changeSharedHole(hole.number, delta),
                               onComplete: _completeRound,
                             );
                           },
@@ -393,6 +641,19 @@ class _HoleView extends StatelessWidget {
     required this.players,
     required this.scores,
     required this.userId,
+    required this.selectedPlayer,
+    required this.onPlayerSelected,
+    required this.needsConfirmation,
+    required this.scoreLocked,
+    required this.scoreConflict,
+    required this.onReloadScore,
+    required this.groupOnDifferentHole,
+    required this.voiceLanguage,
+    required this.voiceMessage,
+    required this.listening,
+    required this.voiceBusy,
+    required this.onVoiceLanguage,
+    required this.onVoice,
     required this.isHost,
     required this.playingHandicap,
     required this.strokesReceived,
@@ -424,6 +685,19 @@ class _HoleView extends StatelessWidget {
   final List<RoundPlayer> players;
   final List<HoleScore> scores;
   final String? userId;
+  final RoundPlayer selectedPlayer;
+  final ValueChanged<String?> onPlayerSelected;
+  final bool needsConfirmation;
+  final bool scoreLocked;
+  final bool scoreConflict;
+  final VoidCallback onReloadScore;
+  final bool groupOnDifferentHole;
+  final String voiceLanguage;
+  final String voiceMessage;
+  final bool listening;
+  final bool voiceBusy;
+  final ValueChanged<String> onVoiceLanguage;
+  final VoidCallback onVoice;
   final bool isHost;
   final int? playingHandicap;
   final int strokesReceived;
@@ -449,9 +723,24 @@ class _HoleView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final toPar = gross - hole.par;
+    final stableford = (2 + hole.par - net).clamp(0, 99);
     final officialDistance = tee?.holeDistancesMeters[hole.number];
     final gpsEstimate = hole.estimatedStraightLineMeters;
+    final activePlayers = players.where((player) => player.active).toList();
+    final allConfirmed =
+        activePlayers.isNotEmpty &&
+        activePlayers.every(
+          (player) =>
+              scores
+                  .where(
+                    (score) =>
+                        score.playerId == player.userId && score.confirmed,
+                  )
+                  .map((score) => score.holeNumber)
+                  .toSet()
+                  .length >=
+              18,
+        );
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 36),
@@ -483,7 +772,7 @@ class _HoleView extends StatelessWidget {
                 children: [
                   _StepArrow(
                     icon: Icons.chevron_left_rounded,
-                    enabled: isHost,
+                    enabled: isHost && !saving && !listening && !voiceBusy,
                     onTap: () => onMoveHole(-1),
                     semantic: 'Previous hole',
                   ),
@@ -517,7 +806,7 @@ class _HoleView extends StatelessWidget {
                   ),
                   _StepArrow(
                     icon: Icons.chevron_right_rounded,
-                    enabled: isHost,
+                    enabled: isHost && !saving && !listening && !voiceBusy,
                     onTap: () => onMoveHole(1),
                     semantic: 'Next hole',
                   ),
@@ -533,6 +822,263 @@ class _HoleView extends StatelessWidget {
               ],
             ],
           ),
+        ),
+
+        if (groupOnDifferentHole) ...[
+          const SizedBox(height: 10),
+          const Text(
+            'The group moved on. Save or discard your changes on this hole first.',
+          ),
+        ],
+        const SizedBox(height: 14),
+        DropdownButton<String>(
+          value: selectedPlayer.userId,
+          isExpanded: true,
+          hint: const Text('Score for'),
+          items: [
+            for (final player in players.where((player) => player.active))
+              DropdownMenuItem(
+                value: player.userId,
+                child: Text(
+                  player.userId == userId
+                      ? '${player.displayName} (you)'
+                      : player.displayName,
+                ),
+              ),
+          ],
+          onChanged: saving || listening || voiceBusy ? null : onPlayerSelected,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          scoreLocked
+              ? 'This player confirmed their score. Only they can change it.'
+              : selectedPlayer.userId == userId
+              ? (needsConfirmation
+                    ? 'Review and save to confirm this score.'
+                    : 'Enter your gross score, including penalties.')
+              : 'Scores entered for another player are provisional until they confirm them.',
+          style: AppTheme.body(11.5, colour: AppTheme.textMuted),
+        ),
+        if (selectedPlayer.teeSetId == null)
+          Text(
+            'Preview uses the round tee; individual tee selection is not yet available here.',
+            style: AppTheme.body(11, colour: AppTheme.textMuted),
+          ),
+        if (scoreConflict) ...[
+          const Text(
+            'This score changed on another device. Reload before saving to avoid overwriting it.',
+          ),
+          TextButton(
+            onPressed: onReloadScore,
+            child: const Text('Discard draft and reload'),
+          ),
+        ],
+
+        // --- Running total --------------------------------------------------
+        Row(
+          children: [
+            Expanded(
+              child: _Readout(label: 'Gross', value: '$gross', accent: true),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _Readout(
+                label: 'Net',
+                value: playingHandicap == null ? '--' : '$net',
+              ),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: _Readout(
+                label: 'Stableford',
+                value: playingHandicap == null ? '--' : '$stableford',
+              ),
+            ),
+          ],
+        ),
+
+        const SizedBox(height: 18),
+
+        // --- Entry ----------------------------------------------------------
+        IgnorePointer(
+          ignoring: saving || scoreLocked || scoreConflict,
+          child: Column(
+            children: [
+              ChristianGolfersCard(
+                child: ScoreStepper(
+                  label: 'Gross strokes',
+                  value: gross,
+                  min: penalties + 1,
+                  max: penalties + 20,
+                  onChanged: onStrokes,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ChristianGolfersCard(
+                child: ScoreStepper(
+                  label: 'Putts',
+                  value: putts,
+                  min: 0,
+                  max: 10,
+                  quickValues: const [0, 1, 2, 3, 4, 5],
+                  lastQuickIsPlus: true,
+                  onChanged: onPutts,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ChristianGolfersCard(
+                child: ScoreStepper(
+                  label: 'Penalties',
+                  value: penalties,
+                  min: 0,
+                  max: 10,
+                  quickValues: const [0, 1, 2, 3],
+                  lastQuickIsPlus: true,
+                  onChanged: onPenalties,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Gross includes penalties. Adjust penalties without counting them twice.',
+                style: AppTheme.body(11, colour: AppTheme.textMuted),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: SegmentedButton<String>(
+                      segments: const [
+                        ButtonSegment(value: 'en', label: Text('English')),
+                        ButtonSegment(value: 'af', label: Text('Afrikaans')),
+                      ],
+                      selected: {voiceLanguage},
+                      onSelectionChanged: listening || voiceBusy
+                          ? null
+                          : (value) => onVoiceLanguage(value.first),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: listening ? 'Stop listening' : 'Speak gross score',
+                    onPressed: voiceBusy ? null : onVoice,
+                    icon: Icon(
+                      listening
+                          ? Icons.stop_circle_outlined
+                          : Icons.mic_outlined,
+                    ),
+                  ),
+                ],
+              ),
+              Text(
+                voiceMessage,
+                style: AppTheme.body(11, colour: AppTheme.textMuted),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        GoldButton(
+          label: needsConfirmation && selectedPlayer.userId == userId
+              ? (activePlayers.length > 1
+                    ? 'Confirm, save & next player'
+                    : 'Confirm and save')
+              : (activePlayers.length > 1
+                    ? 'Save & next player'
+                    : 'Save hole ${hole.number}'),
+          icon: Icons.check_rounded,
+          busy: saving,
+          onPressed:
+              saving || listening || voiceBusy || scoreLocked || scoreConflict
+              ? null
+              : onSave,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Scores reach the dashboard after the server confirms the save.',
+          style: AppTheme.body(11, colour: AppTheme.textMuted),
+        ),
+        IgnorePointer(
+          ignoring: saving || scoreLocked || scoreConflict,
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+              ChristianGolfersCard(
+                child: ScoreStepper(
+                  label: 'Sand shots',
+                  value: sandShots,
+                  min: 0,
+                  max: 10,
+                  quickValues: const [0, 1, 2, 3],
+                  lastQuickIsPlus: true,
+                  onChanged: onSandShots,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ChristianGolfersCard(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('FAIRWAY', style: AppTheme.label(10)),
+                    const SizedBox(height: 10),
+                    SegmentedButton<String?>(
+                      emptySelectionAllowed: true,
+                      multiSelectionEnabled: false,
+                      segments: const [
+                        ButtonSegment<String?>(
+                          value: 'left',
+                          label: Text('Left'),
+                        ),
+                        ButtonSegment<String?>(
+                          value: 'hit',
+                          label: Text('Hit'),
+                        ),
+                        ButtonSegment<String?>(
+                          value: 'right',
+                          label: Text('Right'),
+                        ),
+                        ButtonSegment<String?>(
+                          value: 'missed',
+                          label: Text('Miss'),
+                        ),
+                      ],
+                      selected: fairway == null ? const {} : {fairway!},
+                      onSelectionChanged: (values) =>
+                          onFairway(values.isEmpty ? null : values.first),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text('Green in regulation'),
+                    const SizedBox(height: 8),
+                    SegmentedButton<bool>(
+                      emptySelectionAllowed: true,
+                      segments: const [
+                        ButtonSegment(value: true, label: Text('Yes')),
+                        ButtonSegment(value: false, label: Text('No')),
+                      ],
+                      selected: greenInRegulation == null
+                          ? const <bool>{}
+                          : {greenInRegulation!},
+                      onSelectionChanged: (values) => onGreenInRegulation(
+                        values.isEmpty ? null : values.first,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+
+        const SizedBox(height: 20),
+        GoldButton(
+          label: activePlayers.length > 1
+              ? 'Save & next player'
+              : 'Save hole ${hole.number}',
+          icon: Icons.check_rounded,
+          busy: saving,
+          onPressed:
+              saving || listening || voiceBusy || scoreLocked || scoreConflict
+              ? null
+              : onSave,
         ),
 
         const SizedBox(height: 14),
@@ -556,132 +1102,6 @@ class _HoleView extends StatelessWidget {
         _ShotAdviceCard(key: ValueKey('advice-${hole.number}')),
 
         const SizedBox(height: 14),
-
-        // --- Running total --------------------------------------------------
-        Row(
-          children: [
-            Expanded(
-              child: _Readout(label: 'Gross', value: '$gross', accent: true),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _Readout(
-                label: 'To par',
-                value: toPar == 0
-                    ? 'E'
-                    : toPar > 0
-                    ? '+$toPar'
-                    : '$toPar',
-                colour: toPar <= 0 ? AppTheme.positive : AppTheme.textPrimary,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _Readout(label: 'Net', value: '$net'),
-            ),
-          ],
-        ),
-
-        const SizedBox(height: 18),
-
-        // --- Entry ----------------------------------------------------------
-        ChristianGolfersCard(
-          child: ScoreStepper(
-            label: 'Strokes',
-            value: strokes,
-            min: 1,
-            max: 20,
-            onChanged: onStrokes,
-          ),
-        ),
-        const SizedBox(height: 12),
-        ChristianGolfersCard(
-          child: ScoreStepper(
-            label: 'Putts',
-            value: putts,
-            min: 0,
-            max: 10,
-            quickValues: const [0, 1, 2, 3, 4, 5],
-            lastQuickIsPlus: true,
-            onChanged: onPutts,
-          ),
-        ),
-        const SizedBox(height: 12),
-        ChristianGolfersCard(
-          child: ScoreStepper(
-            label: 'Penalties',
-            value: penalties,
-            min: 0,
-            max: 10,
-            quickValues: const [0, 1, 2, 3],
-            lastQuickIsPlus: true,
-            onChanged: onPenalties,
-          ),
-        ),
-        const SizedBox(height: 6),
-        Text(
-          'Enter strokes played above. Penalties are added to your gross score.',
-          style: AppTheme.body(11, colour: AppTheme.textMuted),
-        ),
-        const SizedBox(height: 12),
-        ChristianGolfersCard(
-          child: ScoreStepper(
-            label: 'Sand shots',
-            value: sandShots,
-            min: 0,
-            max: 10,
-            quickValues: const [0, 1, 2, 3],
-            lastQuickIsPlus: true,
-            onChanged: onSandShots,
-          ),
-        ),
-        const SizedBox(height: 12),
-        ChristianGolfersCard(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text('FAIRWAY', style: AppTheme.label(10)),
-              const SizedBox(height: 10),
-              SegmentedButton<String?>(
-                emptySelectionAllowed: true,
-                multiSelectionEnabled: false,
-                segments: const [
-                  ButtonSegment<String?>(value: 'left', label: Text('Left')),
-                  ButtonSegment<String?>(value: 'hit', label: Text('Hit')),
-                  ButtonSegment<String?>(value: 'right', label: Text('Right')),
-                  ButtonSegment<String?>(value: 'missed', label: Text('Miss')),
-                ],
-                selected: fairway == null ? const {} : {fairway!},
-                onSelectionChanged: (values) =>
-                    onFairway(values.isEmpty ? null : values.first),
-              ),
-              const SizedBox(height: 8),
-              const Text('Green in regulation'),
-              const SizedBox(height: 8),
-              SegmentedButton<bool>(
-                emptySelectionAllowed: true,
-                segments: const [
-                  ButtonSegment(value: true, label: Text('Yes')),
-                  ButtonSegment(value: false, label: Text('No')),
-                ],
-                selected: greenInRegulation == null
-                    ? const <bool>{}
-                    : {greenInRegulation!},
-                onSelectionChanged: (values) =>
-                    onGreenInRegulation(values.isEmpty ? null : values.first),
-              ),
-            ],
-          ),
-        ),
-
-        const SizedBox(height: 20),
-        GoldButton(
-          label: 'Save hole ${hole.number}',
-          icon: Icons.check_rounded,
-          busy: saving,
-          onPressed: saving ? null : onSave,
-        ),
 
         const SizedBox(height: 26),
         const SectionHeader('The group'),
@@ -715,8 +1135,14 @@ class _HoleView extends StatelessWidget {
 
         if (isHost) ...[
           const SizedBox(height: 12),
+          if (!allConfirmed)
+            const Text(
+              'All active players must confirm 18 holes before the round can be finished.',
+            ),
           TextButton.icon(
-            onPressed: completing ? null : onComplete,
+            onPressed: completing || listening || voiceBusy || !allConfirmed
+                ? null
+                : onComplete,
             icon: const Icon(Icons.flag_circle_rounded, size: 18),
             label: Text(
               completing ? 'Finishing...' : 'Finish this round for everyone',
@@ -871,13 +1297,11 @@ class _Readout extends StatelessWidget {
   const _Readout({
     required this.label,
     required this.value,
-    this.colour,
     this.accent = false,
   });
 
   final String label;
   final String value;
-  final Color? colour;
   final bool accent;
 
   @override
@@ -897,7 +1321,7 @@ class _Readout extends StatelessWidget {
             value,
             style: AppTheme.numeric(
               26,
-              colour: colour ?? (accent ? AppTheme.gold : AppTheme.textPrimary),
+              colour: accent ? AppTheme.gold : AppTheme.textPrimary,
             ),
           ),
         ],
@@ -960,6 +1384,7 @@ class _GroupRow extends StatelessWidget {
     final played = mine.length;
     final total = mine.fold<int>(0, (sum, s) => sum + s.totalStrokes);
     final thisHole = mine.where((s) => s.holeNumber == currentHole).toList();
+    final provisional = thisHole.isNotEmpty && !thisHole.first.confirmed;
 
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -991,7 +1416,9 @@ class _GroupRow extends StatelessWidget {
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  played == 0
+                  provisional
+                      ? 'Hole $currentHole awaiting player confirmation'
+                      : played == 0
                       ? 'No holes in yet'
                       : '$played ${played == 1 ? 'hole' : 'holes'} · $total strokes',
                   style: AppTheme.body(11.5, colour: AppTheme.textMuted),

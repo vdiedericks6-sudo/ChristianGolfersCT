@@ -1,16 +1,16 @@
 import {createClient} from '@supabase/supabase-js';
 import config from './config.json';
 import {googleSignInOptions,finishGoogleSignIn} from './oauth.js';
-import {esc,division,seasonRounds,csv} from './domain.js';
+import {esc,division,seasonRounds,csv,playDate,roundsOnDate,playerCard,provisionalNet} from './domain.js';
 const client=createClient(config.url,config.key,{auth:{storage:sessionStorage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,flowType:'pkce'}});
 const root=document.querySelector('#app'),dialog=document.querySelector('#editor');
-let data=null,section='Overview',query='',year=new Date().getFullYear(),demo=false,busy=false;
+let data=null,section='Overview',query='',year=new Date().getFullYear(),playDay=playDate({created_at:new Date().toISOString()}),demo=false,busy=false;
 const sections=['Overview','Members','Leagues','Rounds','Courses','Operations','Merchandise','Feedback','Audit','Administrators'];
 const icons=['◈','♙','⚑','◷','⌖','▤','◇','✎','≡','⚿'];
 const money=x=>new Intl.NumberFormat('en-ZA',{style:'currency',currency:'ZAR'}).format(Number(x||0));
 const date=x=>x?new Intl.DateTimeFormat('en-ZA',{dateStyle:'medium',timeStyle:'short',timeZone:'Africa/Johannesburg'}).format(new Date(x)):'—';
 const pill=x=>`<span class="pill">${esc(x)}</span>`;
-const btn=(text,action,id='',primary=false)=>`<button ${demo&&['edit','new','schedule','invite','order'].includes(action)?'disabled':''} class="${primary?'primary':''}" data-action="${action}" data-id="${esc(id)}">${esc(text)}</button>`;
+const btn=(text,action,id='',primary=false)=>`<button ${demo&&['edit','new','schedule','invite','order','score'].includes(action)?'disabled':''} class="${primary?'primary':''}" data-action="${action}" data-id="${esc(id)}">${esc(text)}</button>`;
 function toast(message){document.querySelector('#toast').textContent=message;setTimeout(()=>document.querySelector('#toast').textContent='',5500);}
 async function checked(request){const result=await request;if(result.error)throw result.error;return result.data;}
 function login(message=''){
@@ -50,7 +50,18 @@ function render(){
  }else if(section==='Leagues'){
   html=`<div class="toolbar"><label for="season">Season</label><select id="season">${Array.from(new Set([year,...data.rounds.map(r=>new Date(r.played_at||r.created_at).getFullYear())])).sort((a,b)=>b-a).map(y=>`<option ${y===year?'selected':''}>${y}</option>`).join('')}</select>${btn('Edit assignments','nav','Members')}</div><div class="notice">Competition points are not calculated until the official schedule is configured. Below: completed-round statistics, not official standings. League assignments shown are current, not historical snapshots.</div>`;
   const ids=new Set(completed.map(r=>r.id));html+=table(['Member','Current league','Completed rounds','Average gross','Best gross'],data.members.map(m=>{const rs=data.results.filter(r=>r.player_id===m.id&&ids.has(r.round_id));return [esc(m.display_name),pill(league(m)),rs.length,rs.length?(rs.reduce((s,r)=>s+r.gross_strokes,0)/rs.length).toFixed(1):'—',rs.length?Math.min(...rs.map(r=>r.gross_strokes)):'—'];}));
- }else if(section==='Rounds'){html=toolbar(btn('Schedule fourball','schedule','',true))+roundTable(search(data.rounds));
+ }else if(section==='Rounds'){
+  const matching=roundsOnDate(search(data.rounds),playDay), ids=new Set(matching.map(r=>r.id));
+  const players=data.players.filter(p=>ids.has(p.round_id));
+  html=toolbar(btn('Schedule fourball','schedule','',true)+btn('Export day scores','export-rounds'))
+   +`<div class="toolbar"><label for="play-day">Play date (South Africa)</label><input id="play-day" type="date" value="${esc(playDay)}"><button data-action="all-rounds">All dates</button><button data-action="today-rounds">Today</button></div>`
+   +`<div class="notice">${playDay?'Showing fourballs scheduled or started on '+esc(playDay):'Showing all dates'}. Scores appear after they sync to the database; use Refresh data for the latest. Gross is provisional while holes are missing or unconfirmed. Net is provisional and uses the round's shared tee, not each player's tee; verify handicaps and results before prize giving. Net is hidden for incomplete or unconfirmed cards.</div>`
+   +`<div class="sectionhead"><h2>Fourballs (${matching.length})</h2></div>`+roundTable(matching)
+   +`<div class="sectionhead" style="margin-top:28px"><h2>Player scores (${players.length})</h2></div>`
+   +table(['Player','Fourball / course','Round status','Holes entered','Confirmed','Gross so far','Net (shared tee, provisional)',''],players.map(p=>{
+     const r=matching.find(x=>x.id===p.round_id),card=playerCard(data.scores,p.round_id,p.user_id),result=data.results.find(x=>x.round_id===p.round_id&&x.player_id===p.user_id);
+     return [esc(p.display_name),`${esc(r.course_name)}<small>${esc(r.host_name)} · ${date(r.scheduled_at||r.started_at||r.played_at)}</small>`,pill(r.status),card.entered,`${card.confirmed}/${card.entered}`,card.gross??'—',provisionalNet(r,card,result)??'—',btn('View card','round',r.id)+(r.status==='active'?` ${btn('Enter score','score',`${r.id}|${p.user_id}`)}`:'')];
+   }));
  }else if(section==='Courses'){html=toolbar('')+table(['Course','Province','Availability','Data status'],search(data.courses).map(c=>[esc(c.name),esc(c.province),pill(c.active?(c.playable?'Round-ready':'Directory only'):'Inactive'),esc(c.data_status||'Not verified')]))+'<div class="notice">Course imports and verified tee / hole data are maintained through reviewed migrations. Missing imagery and ratings are not fabricated.</div>';
  }else if(section==='Operations'){html=toolbar(btn('New task','new','',true))+table(['Task','Owner','Due','Status',''],search(data.tasks).map(t=>[esc(t.title),esc(memberName(t.owner_id)),esc(t.due_date||'—'),pill(t.status),btn('Edit','edit',t.id)]));
  }else if(section==='Merchandise'){
@@ -70,6 +81,7 @@ function render(){
  content.innerHTML=html;
  const q=document.querySelector('#search');if(q){q.value=query;q.oninput=e=>{query=e.target.value;const pos=q.selectionStart;render();document.querySelector('#search').focus();document.querySelector('#search').setSelectionRange(pos,pos);};}
  const s=document.querySelector('#season');if(s)s.onchange=e=>{year=Number(e.target.value);render();};
+ const d=document.querySelector('#play-day');if(d)d.onchange=e=>{playDay=e.target.value;render();};
 }
 function toolbar(actions){return `<div class="toolbar"><input id="search" type="search" aria-label="Search ${section}" placeholder="Search ${section.toLowerCase()}…">${actions}</div>`;}
 function field(name,label,value='',type='text',options=null,required=true){return `<div><label for="f-${name}">${esc(label)}</label>${options?`<select id="f-${name}" name="${name}" ${required?'required':''}>${options.map(([v,l])=>`<option value="${esc(v)}" ${String(v)===String(value??'')?'selected':''}>${esc(l)}</option>`).join('')}</select>`:`<input id="f-${name}" name="${name}" type="${type}" value="${esc(value)}" ${required?'required':''} ${type==='number'?'step="any"':''}>`}</div>`;}
@@ -92,12 +104,35 @@ async function schedule(){
  const token=crypto.randomUUID();form('Schedule a fourball',field('course','Course','','text',[['','Choose course'],...data.courses.filter(c=>c.active&&c.playable).map(c=>[c.id,c.name])])+field('tee','Tee','','text',[['','Choose course first']])+field('when','Local tee time','','datetime-local')+[0,1,2,3].map(i=>field('player'+i,i===0?'Host':'Player '+(i+1),'','text',[['','Select member'],...data.members.map(m=>[m.id,m.display_name])],i===0)).join(''),async v=>{const players=[v.player0,v.player1,v.player2,v.player3].filter(Boolean);if(new Set(players).size!==players.length)throw Error('Select different members.');await checked(client.rpc('admin_schedule_fourball',{p_course_id:v.course,p_tee_set_id:v.tee,p_scheduled_at:new Date(v.when).toISOString(),p_player_ids:players,p_request_key:token}));},'Time uses this browser’s local timezone. The selected host starts the round in the app. This does not book a tee time with the course.');
  dialog.querySelector('[name=course]').onchange=async e=>{const course=e.target.value;const tees=await checked(client.from('tee_sets').select('id,name').eq('course_id',course).eq('selectable',true));if(dialog.querySelector('[name=course]')?.value===course)dialog.querySelector('[name=tee]').innerHTML='<option value="">Select tee</option>'+tees.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');};
 }
-function showRound(id){const r=data.rounds.find(r=>r.id===id),players=data.players.filter(p=>p.round_id===id);dialog.innerHTML=`<header><h2>${esc(r.course_name)}</h2>${btn('Close','close')}</header><p>${esc(r.tee_set_name)} · ${esc(r.status)} · Hole ${r.current_hole}</p>`+table(['Player',...Array.from({length:18},(_,i)=>i+1),'Gross'],players.map(p=>{const scores=data.scores.filter(s=>s.round_id===id&&s.player_id===p.user_id);return [esc(p.display_name),...Array.from({length:18},(_,i)=>{const s=scores.find(s=>s.hole_number===i+1);return s?Number(s.strokes)+Number(s.penalty_strokes||0):'—';}),scores.reduce((n,s)=>n+Number(s.strokes)+Number(s.penalty_strokes||0),0)];}))+ '<p class="muted">Gross includes recorded penalty strokes. Read-only score review; corrections require the audited scoring workflow.</p>';dialog.showModal();}
+function showRound(id){
+ const r=data.rounds.find(r=>r.id===id);if(!r)return;
+ const players=data.players.filter(p=>p.round_id===id);
+ dialog.innerHTML=`<header><h2>${esc(r.course_name)}</h2>${btn('Close','close')}</header><p>${date(r.scheduled_at||r.started_at||r.played_at)} · ${esc(r.tee_set_name)} · ${esc(r.status)} · Hole ${esc(r.current_hole)}</p>`
+  +table(['Player',...Array.from({length:18},(_,i)=>i+1),'Holes','Confirmed','Gross so far','Net (shared tee, provisional)',''],players.map(p=>{
+    const card=playerCard(data.scores,id,p.user_id),result=data.results.find(x=>x.round_id===id&&x.player_id===p.user_id);
+    return [esc(p.display_name),...card.holes.map(s=>s?`<span title="${esc(`${s.confirmed?'Confirmed':'Unconfirmed'} · ${s.putts??'—'} putts · ${s.penalty_strokes||0} penalties`)}">${Number(s.strokes)+Number(s.penalty_strokes||0)}${s.confirmed?'':'*'}</span>`:'—'),card.entered,`${card.confirmed}/${card.entered}`,card.gross??'—',provisionalNet(r,card,result)??'—',r.status==='active'?btn('Enter score','score',`${id}|${p.user_id}`):''];
+  }))+'<p class="muted">* Unconfirmed hole; — indicates no score. Gross includes recorded penalty strokes and is provisional for incomplete or unconfirmed cards. Net is provisional, uses the shared round tee and is hidden without 18 confirmed holes and a handicap index. Verify results before prize giving. Score editing is available only while the round is active.</p>';
+ dialog.showModal();
+}
+function editScore(id){
+ const [roundId,playerId]=id.split('|'),round=data.rounds.find(r=>r.id===roundId),player=data.players.find(p=>p.round_id===roundId&&p.user_id===playerId);
+ if(!round||!player||round.status!=='active')throw Error('Only active rounds can be edited.');
+ if(dialog.open)dialog.close();
+ let expectedExists=false,expectedUpdatedAt=null;
+ form(`Enter score · ${player.display_name}`,field('hole','Hole',round.current_hole||1,'text',Array.from({length:18},(_,i)=>[String(i+1),`Hole ${i+1}`]))+field('strokes','Strokes excluding penalties','','number')+field('putts','Putts',0,'number')+field('penalties','Penalty strokes',0,'number')+reason(),async v=>{
+   const stroke=Number(v.strokes),putts=Number(v.putts),penalties=Number(v.penalties),hole=Number(v.hole);
+   if(!Number.isInteger(stroke)||stroke<1||stroke>20||!Number.isInteger(putts)||putts<0||putts>10||!Number.isInteger(penalties)||penalties<0||penalties>10)throw Error('Enter whole strokes 1–20, putts 0–10 and penalties 0–10.');
+   await checked(client.rpc('admin_save_hole_score',{p_round_id:roundId,p_player_id:playerId,p_hole_number:hole,p_strokes:stroke,p_putts:putts,p_penalty_strokes:penalties,p_reason:v.reason,p_expected_updated_at:expectedUpdatedAt,p_expected_exists:expectedExists}));
+ },'Scores and corrections are saved to the shared round. Enter a reason for the audit trail. If the score changed after loading, saving is rejected; close this form and refresh to review the newer score.');
+ const updateHole=()=>{const score=data.scores.find(s=>s.round_id===roundId&&s.player_id===playerId&&s.hole_number===Number(dialog.querySelector('[name=hole]').value));expectedExists=!!score;expectedUpdatedAt=score?.updated_at??null;for(const [name,value] of Object.entries({strokes:score?.strokes??'',putts:score?.putts??0,penalties:score?.penalty_strokes??0}))dialog.querySelector(`[name=${name}]`).value=value;};
+ dialog.querySelector('[name=hole]').onchange=updateHole;updateHole();
+}
 root.addEventListener('click',action);dialog.addEventListener('click',action);dialog.addEventListener('cancel',e=>{if(busy)e.preventDefault();});
 async function action(e){const b=e.target.closest('[data-action]');if(!b||b.disabled)return;const a=b.dataset.action,id=b.dataset.id;try{
  if(a==='google'){b.disabled=true;b.textContent='Connecting to Google…';try{await checked(client.auth.signInWithOAuth(googleSignInOptions(location.origin)));}catch(error){login(error.message||'Could not start Google sign-in. Please try again.');}return;}
  if(a==='nav'){section=id;query='';render();}if(a==='logout'){demo=false;dialog.close();await client.auth.signOut();login();}
  if(a==='refresh')await load();if(a==='close'&&!busy)dialog.close();if(a==='edit'||a==='new')await edit(id);
+ if(a==='all-rounds'){playDay='';render();}if(a==='today-rounds'){playDay=playDate({created_at:new Date().toISOString()});render();}
  if(a==='grant-admin'||a==='revoke-admin'){
   if(demo||!Array.isArray(data?.accessDirectory))return;
   const grant=a==='grant-admin';
@@ -111,10 +146,15 @@ async function action(e){const b=e.target.closest('[data-action]');if(!b||b.disa
       p_member_id:values.member,p_grant:grant,p_reason:values.reason
     }));},grant?'Saving grants this member league, membership and operations administration in the app and portal.':'Saving removes administrative access in both the app and portal. The member account and scores are retained.');
  }
- if(a==='order')order(id);if(a==='schedule')await schedule();if(a==='round')showRound(id);
+ if(a==='order')order(id);if(a==='schedule')await schedule();if(a==='round')showRound(id);if(a==='score')editScore(id);
  if(a==='audit'){const audit=data.audit.find(x=>String(x.id)===id);dialog.innerHTML=`<header><h2>Change details</h2>${btn('Close','close')}</header><pre>${esc(JSON.stringify(audit,null,2))}</pre>`;dialog.showModal();}
  if(a==='invite')form('Invite member',field('displayName','Full name')+field('email','Email address','','email'),async v=>{await checked(client.functions.invoke('admin-invite-member',{body:v}));},'Saving sends an invitation email with the app sign-in link.');
  if(a==='export'){const blob=new Blob([csv([['Name','Email','Handicap','League','Membership'],...data.members.map(m=>[m.display_name,m.email,m.handicap,league(m),m.membership_status])])],{type:'text/csv;charset=utf-8'});const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='cgct-members.csv';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);}
+ if(a==='export-rounds'){
+  const rounds=roundsOnDate(search(data.rounds),playDay),ids=new Set(rounds.map(r=>r.id));
+  const rows=data.players.filter(p=>ids.has(p.round_id)).map(p=>{const r=rounds.find(x=>x.id===p.round_id),card=playerCard(data.scores,p.round_id,p.user_id),result=data.results.find(x=>x.round_id===p.round_id&&x.player_id===p.user_id);return [playDate(r),r.course_name,r.host_name,r.status,p.display_name,...card.holes.map(s=>s?Number(s.strokes)+Number(s.penalty_strokes||0):''),card.entered,card.confirmed,card.gross??'',provisionalNet(r,card,result)??''];});
+  const blob=new Blob([csv([['Play date','Course','Host','Round status','Player',...Array.from({length:18},(_,i)=>`Hole ${i+1}`),'Holes entered','Confirmed holes','Gross so far','Net provisional - shared tee'],...rows])],{type:'text/csv;charset=utf-8'});const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=`cgct-scores-${playDay||'all-dates'}.csv`;link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+ }
  if(a==='demo'){demo=true;data={members:[{id:'sample',display_name:'Sample golfer',email:'sample@example.test',handicap:14.2,league:'B',membership_status:'active'}],rounds:[],players:[],scores:[],results:[],products:[],orders:[],tasks:[],audit:[],courses:[],feedback:[],league_a_max_handicap:12,league_b_max_handicap:24};render();}
  }catch(error){toast(error.message||'Unable to complete action.');}}
 client.auth.onAuthStateChange(event=>{if(event==='SIGNED_OUT'&&!demo){data=null;dialog.close();login();}});

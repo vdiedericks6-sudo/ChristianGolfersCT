@@ -824,6 +824,73 @@ class _DemoScoreRepository implements ScoreRepository {
     String? fairway,
     bool? greenInRegulation,
     bool confirmed = true,
+  }) => _saveScore(
+    roundId: roundId,
+    playerId: _me,
+    holeNumber: holeNumber,
+    strokes: strokes,
+    putts: putts,
+    penaltyStrokes: penaltyStrokes,
+    sandShots: sandShots,
+    fairway: fairway,
+    greenInRegulation: greenInRegulation,
+    confirmed: confirmed,
+  );
+
+  @override
+  Future<void> saveGroupScore({
+    required String roundId,
+    required String playerId,
+    required int holeNumber,
+    required int strokes,
+    required int putts,
+    required int penaltyStrokes,
+    required bool expectedExists,
+    DateTime? expectedUpdatedAt,
+    int sandShots = 0,
+    String? fairway,
+    bool? greenInRegulation,
+  }) async {
+    final existing = (_backend._scores[roundId] ?? <HoleScore>[])
+        .where(
+          (score) =>
+              score.playerId == playerId && score.holeNumber == holeNumber,
+        )
+        .firstOrNull;
+    if ((existing != null) != expectedExists ||
+        (existing != null && existing.updatedAt != expectedUpdatedAt)) {
+      throw StateError(
+        'Score changed on another device. Reload and try again.',
+      );
+    }
+    if (existing?.confirmed == true && playerId != _me) {
+      throw StateError('Only the player can edit their confirmed score.');
+    }
+    await _saveScore(
+      roundId: roundId,
+      playerId: playerId,
+      holeNumber: holeNumber,
+      strokes: strokes,
+      putts: putts,
+      penaltyStrokes: penaltyStrokes,
+      sandShots: sandShots,
+      fairway: fairway,
+      greenInRegulation: greenInRegulation,
+      confirmed: playerId == _me,
+    );
+  }
+
+  Future<void> _saveScore({
+    required String roundId,
+    required String playerId,
+    required int holeNumber,
+    required int strokes,
+    required int putts,
+    required int penaltyStrokes,
+    required int sandShots,
+    required String? fairway,
+    required bool? greenInRegulation,
+    required bool confirmed,
   }) async {
     if (holeNumber < 1 || holeNumber > 18) {
       throw ArgumentError('Hole number must be between 1 and 18.');
@@ -840,12 +907,12 @@ class _DemoScoreRepository implements ScoreRepository {
 
     final card = _backend._scores[roundId] ?? <HoleScore>[];
     card.removeWhere(
-      (score) => score.playerId == _me && score.holeNumber == holeNumber,
+      (score) => score.playerId == playerId && score.holeNumber == holeNumber,
     );
     card.add(
       HoleScore(
         roundId: roundId,
-        playerId: _me,
+        playerId: playerId,
         holeNumber: holeNumber,
         strokes: strokes,
         putts: putts,

@@ -114,4 +114,36 @@ class SupabaseScoreRepository implements ScoreRepository {
 
     return rows.map(HoleScore.fromJson).toList(growable: false);
   }
+
+  @override
+  Future<void> saveGroupScore({
+    required String roundId,
+    required String playerId,
+    required int holeNumber,
+    required int strokes,
+    required int putts,
+    required int penaltyStrokes,
+    required bool expectedExists,
+    DateTime? expectedUpdatedAt,
+    int sandShots = 0,
+    String? fairway,
+    bool? greenInRegulation,
+  }) async {
+    await _client.rpc(
+      'save_group_hole_score',
+      params: {
+        'p_round_id': roundId,
+        'p_player_id': playerId,
+        'p_hole_number': holeNumber,
+        'p_strokes': strokes,
+        'p_putts': putts,
+        'p_penalty_strokes': penaltyStrokes,
+        'p_expected_exists': expectedExists,
+        'p_expected_updated_at': expectedUpdatedAt?.toUtc().toIso8601String(),
+        'p_sand_shots': sandShots,
+        'p_fairway': fairway,
+        'p_green_in_regulation': greenInRegulation,
+      },
+    );
+  }
 }

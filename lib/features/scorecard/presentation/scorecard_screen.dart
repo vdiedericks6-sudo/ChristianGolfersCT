@@ -178,6 +178,13 @@ class _Card extends StatelessWidget {
                 '$teeName tees · ${holes.length} holes',
                 style: AppTheme.body(12.5, colour: AppTheme.textMuted),
               ),
+              if (scores.any((score) => !score.confirmed)) ...[
+                const SizedBox(height: 6),
+                Text(
+                  '* Awaiting player confirmation; totals include provisional scores.',
+                  style: AppTheme.body(11, colour: AppTheme.textMuted),
+                ),
+              ],
             ],
           ),
         ),
@@ -306,7 +313,24 @@ class _Card extends StatelessWidget {
       return Text('·', style: AppTheme.numeric(16, colour: AppTheme.textFaint));
     }
 
-    return ScoreBadge(strokes: strokes, par: hole.par, size: 32);
+    final provisional = scores.any(
+      (score) =>
+          score.playerId == player.userId &&
+          score.holeNumber == hole.number &&
+          !score.confirmed,
+    );
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        ScoreBadge(strokes: strokes, par: hole.par, size: 32),
+        if (provisional)
+          Positioned(
+            right: -3,
+            top: -4,
+            child: Text('*', style: AppTheme.label(11, colour: AppTheme.gold)),
+          ),
+      ],
+    );
   }
 
   Widget _nineTotal(RoundPlayer player, List<GolfHole> nine) {

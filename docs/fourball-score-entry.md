@@ -1,0 +1,11 @@
+# Fourball score entry and prize-giving review
+
+During an active round, a golfer selects an active member of their fourball, enters that member's gross score (including penalties), putts and other statistics, and saves. The score is stored in Supabase as strokes excluding the separately recorded penalties, so the gross total includes penalties exactly once. Saving can advance to the next player without moving the entire group's shared hole.
+
+Entries made for another golfer are provisional. That golfer must sign in, review and save their own score to confirm it. A playing partner cannot overwrite a confirmed score. Score changes through the new workflow are version checked and audited; a conflicting edit must be reloaded and reviewed. The device must have a connection to save: this workflow does not provide an offline queue. Optional English/Afrikaans voice input requires review before saving and depends on the device's speech recognition service and microphone permission.
+
+In the private admin portal, open **Rounds**, choose the South African play date, and refresh to see database-synced fourballs and cards. The administrator can enter or correct a hole while a round is active, supplying a reason. These entries require the golfer's confirmation and are logged. Export the day's cards as CSV when needed. Missing and provisional scores are marked; completed-round edits are blocked until an audited recalculation workflow exists.
+
+Completion currently requires 18 confirmed scores for every active player. The database does not yet persist a 9-hole round length. The result calculation also uses the shared round tee, not an independently saved tee for each player. Gross scores can be reviewed, but handicap-adjusted results are provisional and must be verified before prize giving. Official competition points remain unavailable until the owner supplies the rules.
+
+Backend migrations `fourball_score_entry` and `require_score_confirmation` must both be applied before using the new app or portal. Rollback-only database checks cover group permissions, confirmation, version conflicts, audit, completion and completed-card protection. Real authenticated multi-device, speech recognition and prize-day acceptance testing remain necessary.
