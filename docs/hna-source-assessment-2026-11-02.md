@@ -31,3 +31,12 @@ At the organiser's request, women's rated tee records are kept for historical re
 - [Royal Cape](https://www.handicaps.co.za/club-detail?clubid=468): added HNA's 18-hole pars, indexes and men's yellow, white and red tees. No existing holes, tees or rounds were present before import. Totals were verified after import.
 
 No GPS green geometry or course images were supplied. Distances are treated as metres: Royal Cape's totals match an independently labelled metre source (https://golftraxx.com/scorecard?course_name=Royal+Cape+Golf+Club&fulladdress=&static=true&zipcode=7800SA); Milnerton units need club/HNA confirmation. The remainder of the Western Cape catalogue has not yet been reconciled. Stellenbosch and Bellville remain unchanged as directed; HNA values for them differ from previously loaded cards.
+
+## HNA reconciliation — resumed 3 November 2026
+
+- Clovelly (HNA 456): 18 holes, three men's tee categories and 54 distances. Source: https://www.handicaps.co.za/club-detail?clubid=456.
+- Westlake (HNA 473): 18 holes, three men's tee categories and 54 distances. Source: https://www.handicaps.co.za/club-detail?clubid=473.
+- George (HNA 434): matched the main 18-hole layout; replaced placeholder pars and indexes where no rounds existed; five men's tee categories and 90 distances; existing map coordinates retained. Source: https://www.handicaps.co.za/club-detail?clubid=434. The club publishes metres at https://www.georgegolfclub.co.za/index.php/the-club; some ratings differ, so the HNA snapshot was used per organiser instruction.
+- Erinvale (HNA 460): matched pars, replaced placeholder indexes where no rounds existed, retained mapped coordinates, added four men's tee categories and 72 distances. Source: https://www.handicaps.co.za/club-detail?clubid=460.
+
+Each migration validates distances and totals. HNA does not visibly label distance units: Clovelly and Westlake metres remain assumptions requiring club confirmation. Their imports do not create hole photos or GPS locations. This is an incremental update; it does not imply all Western Cape courses are reconciled. Existing Stellenbosch and Bellville cards are preserved as requested.
