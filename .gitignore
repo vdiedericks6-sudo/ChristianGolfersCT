@@ -55,6 +55,9 @@ app.*.map.json
 # Local scratch and generated backups
 .phase9*/
 *.bak
+/.tmp-scorecard-*.png
+/.tmp-stellenbosch-scorecard.pdf
+/.video-review/
 
 # Secrets - never commit
 .env

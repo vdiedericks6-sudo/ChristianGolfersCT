@@ -1,0 +1,357 @@
+Province,Course Name,Town,Holes,Status,Type
+Western Cape,Pearl Valley Jack Nicklaus Signature,Paarl,18,Active,Parkland/Estate
+Western Cape,The Links at Fancourt,George,18,Active,Links
+Western Cape,Montagu Golf Course at Fancourt,George,18,Active,Parkland/Estate
+Western Cape,Outeniqua Golf Course at Fancourt,George,18,Active,Parkland/Estate
+Western Cape,Arabella Golf Club,Kleinmond,18,Active,Coastal/Estate
+Western Cape,Royal Cape Golf Club,Cape Town,18,Active,Parkland
+Western Cape,De Zalze Golf Club,Stellenbosch,18,Active,Parkland/Estate
+Western Cape,Erinvale Golf Club,Somerset West,18,Active,Parkland/Estate
+Western Cape,Pinnacle Point Beach & Golf Resort,Mossel Bay,18,Active,Clifftop/Coastal
+Western Cape,Pezula Championship Golf Course,Knysna,18,Active,Clifftop/Coastal
+Western Cape,Simola Jack Nicklaus Signature,Knysna,18,Active,Estate/Parkland
+Western Cape,Steenberg Golf Club,Cape Town,18,Active,Parkland/Estate
+Western Cape,King David Mowbray Golf Club,Cape Town,18,Active,Parkland
+Western Cape,Clovelly Country Club,Fish Hoek,18,Active,Parkland/Valley
+Western Cape,Atlantic Beach Links,Melkbosstrand,18,Active,Links
+Western Cape,Hermanus Golf Club,Hermanus,27,Active,Parkland
+Western Cape,George Golf Club,George,18,Active,Parkland
+Western Cape,Oubaai Golf Club,Herolds Bay,18,Active,Coastal/Links
+Western Cape,Stellenbosch Golf Club,Stellenbosch,18,Active,Parkland
+Western Cape,Milnerton Golf Club,Milnerton,18,Active,Links
+Western Cape,Bellville Golf Club,Bellville,18,Active,Parkland
+Western Cape,Durbanville Golf Club,Durbanville,18,Active,Parkland
+Western Cape,Kuils River Golf Club,Kuils River,18,Active,Parkland
+Western Cape,Parow Golf Club,Parow,18,Active,Parkland
+Western Cape,Rondebosch Golf Club,Cape Town,18,Active,Parkland
+Western Cape,Westlake Golf Club,Tokai,18,Active,Parkland
+Western Cape,Metropolitan Golf Club,Mouille Point,9,Active,Parkland
+Western Cape,Somerset West Golf Club,Somerset West,18,Active,Parkland
+Western Cape,Strand Golf Club,Strand,18,Active,Parkland
+Western Cape,Paarl Golf Club (Boschenmeer),Paarl,27,Active,Parkland/Estate
+Western Cape,Devonvale Golf & Wine Estate,Stellenbosch,18,Active,Parkland/Estate
+Western Cape,Goose Valley Golf Club,Plettenberg Bay,18,Active,Estate/Parkland
+Western Cape,Plettenberg Bay Country Club,Plettenberg Bay,18,Active,Parkland
+Western Cape,Knysna Golf Club,Knysna,18,Active,Parkland/Estuary
+Western Cape,Mossel Bay Golf Club,Mossel Bay,18,Active,Coastal
+Western Cape,Kingswood Golf Estate,George,18,Active,Links/Estate
+Western Cape,Langebaan Golf & Sports Club,Langebaan,18,Active,Coastal/Estate
+Western Cape,Greenways Golf Estate,Strand,9,Active,Estate
+Western Cape,Helderberg Village Golf Club,Somerset West,9,Active,Estate
+Western Cape,Simon's Town Country Club,Simon's Town,9,Active,Coastal
+Western Cape,The River Club Golf Course,Observatory,9,Active,Executive/Driving Range
+Western Cape,Fairview Golf Estate,Gordon's Bay,9,Active,Estate
+Western Cape,Malmesbury Golf Club,Malmesbury,9,Active,Rural Parkland
+Western Cape,Wellington Golf Club,Wellington,9,Active,Rural Parkland
+Western Cape,Ceres Golf & Eco Estate,Ceres,9,Active,Rural Parkland
+Western Cape,Worcester Golf Club,Worcester,18,Active,Parkland
+Western Cape,Robertson Golf Club,Robertson,18,Active,Parkland
+Western Cape,Silwerstrand Golf & River Estate,Robertson,18,Active,Estate/River
+Western Cape,Montagu Golf Club,Montagu,9,Active,Rural Parkland
+Western Cape,Swellendam Golf Course,Swellendam,9,Active,Rural Parkland
+Western Cape,Bredasdorp Golf Club,Bredasdorp,9,Active,Rural Parkland
+Western Cape,Bonnievale Golf Club,Bonnievale,9,Active,Rural Parkland
+Western Cape,Caledon Golf Club,Caledon,9,Active,Rural Parkland
+Western Cape,Clanwilliam Golf Club,Clanwilliam,9,Active,Rural Parkland
+Western Cape,Citrusdal Golf Club,Citrusdal,9,Active,Rural Parkland
+Western Cape,Darling Golf Club,Darling,9,Active,Rural Parkland
+Western Cape,Moorreesburg Golf Club,Moorreesburg,9,Active,Rural Parkland
+Western Cape,Porterville Golf Club,Porterville,9,Active,Rural Parkland
+Western Cape,Vredenburg Golf Club,Vredenburg,9,Active,Coastal/Rural
+Western Cape,Shelley Point Golf Club,St Helena Bay,9,Active,Coastal/Estate
+Western Cape,Lamberts Bay Golf Club,Lamberts Bay,9,Active,Coastal/Sand Greens
+Western Cape,Gansbaai Golf Club,Gansbaai,9,Active,Coastal
+Western Cape,Kleinmond Golf Course,Kleinmond,9,Active,Coastal
+Western Cape,Theewaterskloof Golf Club,Villiersdorp,9,Active,Lakeside/Estate
+Western Cape,Oudtshoorn Golf Club,Oudtshoorn,18,Active,Karoo Parkland
+Western Cape,Beaufort West Golf Club,Beaufort West,9,Active,Karoo Parkland
+Western Cape,Albertinia Golf Club,Albertinia,9,Active,Rural Parkland
+Western Cape,Riversdale Golf Club,Riversdale,9,Active,Rural Parkland
+Western Cape,Heidelberg Golf Club (Cape),Heidelberg,9,Active,Rural Parkland
+Western Cape,Boggomsbaai Golf Club,Boggomsbaai,9,Active,Coastal
+Western Cape,Dolphin Creek Golf Estate,Great Brak River,9,Active,Estate
+Western Cape,Fynbos Golf and Country Estate,Storms River / Eersterivier,9,Active,Estate/Coastal
+Western Cape,Berg River Golf Club,Velddrif,9,Active,Coastal/Rural
+Gauteng,Glendower Golf Club,Edenvale,18,Active,Parkland
+Gauteng,The Club at Steyn City,Midrand,18,Active,Parkland/Estate
+Gauteng,Royal Johannesburg & Kensington (East),Johannesburg,18,Active,Parkland
+Gauteng,Royal Johannesburg & Kensington (West),Johannesburg,18,Active,Parkland
+Gauteng,Blair Atholl Golf & Equestrian Estate,Lanseria,18,Active,Parkland/Estate
+Gauteng,The Country Club Johannesburg (Woodmead),Sandton,18,Active,Parkland
+Gauteng,The Country Club Johannesburg (Rocklands),Sandton,18,Active,Parkland
+Gauteng,Serengeti Golf Estate (Jack Nicklaus),Kempton Park,18,Active,Parkland/Estate
+Gauteng,The Els Club Copperleaf,Centurion,18,Active,Parkland/Estate
+Gauteng,Bryanston Country Club,Sandton,18,Active,Parkland
+Gauteng,Dainfern Golf & Country Club,Sandton,18,Active,Parkland/Estate
+Gauteng,Pretoria Country Club,Pretoria,18,Active,Parkland
+Gauteng,Randpark Golf Club (Firethorn),Randburg,18,Active,Parkland
+Gauteng,Randpark Golf Club (Bushwillow),Randburg,18,Active,Parkland
+Gauteng,Eagle Canyon Country Club,Roodepoort,18,Active,Estate/Quarry
+Gauteng,Kyalami Country Club,Midrand,18,Active,Parkland
+Gauteng,Modderfontein Golf Club,Modderfontein,18,Active,Parkland
+Gauteng,Silver Lakes Golf & Wildlife Estate,Pretoria,18,Active,Parkland/Estate
+Gauteng,Centurion Country Club,Centurion,18,Active,Parkland/Estate
+Gauteng,Ebotse Links Golf Course,Benoni,18,Active,Inland Links
+Gauteng,Benoni Country Club,Benoni,18,Active,Parkland
+Gauteng,Germiston Golf Club,Germiston,18,Active,Parkland
+Gauteng,Glenvista Country Club,Johannesburg,18,Active,Parkland/Valley
+Gauteng,Killarney Country Club,Johannesburg,18,Active,Parkland
+Gauteng,Jackal Creek Golf Club,Roodepoort,18,Active,Estate/Parkland
+Gauteng,Eye of Africa Golf & Residential Estate,Eikenhof,18,Active,Inland Links/Estate
+Gauteng,Zwartkop Country Club,Centurion,18,Active,Parkland
+Gauteng,Irene Country Club,Centurion,18,Active,Parkland
+Gauteng,Waterkloof Golf Club,Pretoria,18,Active,Parkland
+Gauteng,Woodhill Country Club,Pretoria,18,Active,Parkland/Estate
+Gauteng,Akasia Golf Club,Akasia,18,Active,Parkland
+Gauteng,Wingate Park Country Club,Pretoria,18,Active,Parkland
+Gauteng,Pretoria Golf Club,Pretoria,18,Active,Parkland
+Gauteng,Services Golf Club,Pretoria,18,Active,Parkland
+Gauteng,Pebble Rock Golf Club,Pretoria North,18,Active,Bushveld/Estate
+Gauteng,The Wanderers Golf Club,Illovo,18,Active,Parkland
+Gauteng,Parkview Golf Club,Parkview,18,Active,Parkland
+Gauteng,Houghton Golf Club,Houghton,18,Active,Parkland
+Gauteng,CMR Golf Club,Roodepoort,18,Active,Parkland
+Gauteng,Ruimsig Country Club,Roodepoort,18,Active,Parkland
+Gauteng,Krugersdorp Golf Club,Krugersdorp,18,Active,Parkland
+Gauteng,ERPM Golf Club,Boksburg,18,Active,Parkland
+Gauteng,State Mines Country Club,Brakpan,18,Active,Parkland
+Gauteng,The Lake Club Benoni,Benoni,18,Active,Parkland
+Gauteng,Pollak Park Golf Club,Springs,18,Active,Parkland
+Gauteng,Springs Country Club,Springs,18,Active,Parkland
+Gauteng,Reading Country Club,Alberton,18,Active,Parkland
+Gauteng,Maccauvlei Golf Club,Vereeniging,18,Active,Parkland
+Gauteng,Riviera on Vaal Country Club,Vereeniging,18,Active,River/Resort
+Gauteng,Emfuleni Golf Estate,Vanderbijlpark,18,Active,River/Estate
+Gauteng,Heron Banks Golf Estate,Vaal River,18,Active,River/Estate
+Gauteng,Bronkhorstspruit Golf Club,Bronkhorstspruit,18,Active,Parkland
+Gauteng,Cullinan Golf Club,Cullinan,9,Active,Rural Parkland
+Gauteng,Heidelberg Golf Club (Gauteng),Heidelberg,18,Active,Parkland
+Gauteng,Leeuwkop Golf Club,Sunninghill,18,Active,Parkland
+Gauteng,Avion Park Golf Club,Kempton Park,9,Active,Parkland
+Gauteng,Kempton Park Golf Club,Kempton Park,18,Active,Parkland
+Gauteng,Crown Mines Golf Club,Johannesburg,18,Historical/Closed,Parkland
+Gauteng,Durban Deep Golf Club,Roodepoort,18,Historical/Closed,Mining Parkland
+Gauteng,Goldfields West Golf Club,Carletonville,18,Active,Mining Parkland
+Gauteng,Blyvooruitzicht Golf Club,Carletonville,18,Active,Mining Parkland
+KwaZulu-Natal,Durban Country Club,Durban,18,Active,Semi-Links/Coastal
+KwaZulu-Natal,Beachwood Golf Course (DCC),Durban North,18,Historical/Closed,Semi-Links/Coastal
+KwaZulu-Natal,Cotswold Downs Golf Course,Hillcrest,18,Active,Parkland/Estate
+KwaZulu-Natal,Zimbali Country Club,Ballito,18,Active,Coastal/Forest
+KwaZulu-Natal,Mount Edgecombe CC (Course 1),Mount Edgecombe,18,Active,Parkland/Estate
+KwaZulu-Natal,Mount Edgecombe CC (Course 2),Mount Edgecombe,18,Active,Parkland/Estate
+KwaZulu-Natal,Prince's Grant Golf Estate,Stanger,18,Active,Coastal/Links
+KwaZulu-Natal,San Lameer Country Club,Southbroom,18,Active,Coastal/Parkland
+KwaZulu-Natal,Gowrie Farm Golf Course,Nottingham Road,12,Active,Inland Links
+KwaZulu-Natal,Bosch Hoek Golf Club & Lodge,Balgowan,9,Active,Parkland
+KwaZulu-Natal,Champagne Sports Resort,Central Drakensberg,18,Active,Mountain/Parkland
+KwaZulu-Natal,Selborne Golf Estate,Pennington,18,Active,Coastal/Estate
+KwaZulu-Natal,Simbithi Country Club,Ballito,18,Active,Executive/Estate
+KwaZulu-Natal,Royal Durban Golf Club,Durban,18,Active,Inland Links
+KwaZulu-Natal,Kloof Country Club,Kloof,18,Active,Parkland
+KwaZulu-Natal,Victoria Country Club,Pietermaritzburg,18,Active,Parkland
+KwaZulu-Natal,Southbroom Golf Club,Southbroom,18,Active,Coastal
+KwaZulu-Natal,Port Shepstone Country Club,Port Shepstone,18,Active,Coastal/Parkland
+KwaZulu-Natal,Margate Country Club,Margate,18,Active,Coastal/Parkland
+KwaZulu-Natal,Amanzimtoti Country Club,Amanzimtoti,18,Active,Coastal
+KwaZulu-Natal,Bluff National Park Golf Club,Durban,18,Active,Parkland/Wetland
+KwaZulu-Natal,Papwa Sewgolum Golf Course (Windsor Park),Durban,18,Active,Municipal Parkland
+KwaZulu-Natal,Umkomaas Golf Club,Umkomaas,18,Active,Coastal
+KwaZulu-Natal,Scottburgh Golf Club,Scottburgh,18,Active,Coastal
+KwaZulu-Natal,Port Edward Country Club,Port Edward,9,Active,Coastal
+KwaZulu-Natal,Harding Golf Club,Harding,9,Active,Rural Parkland
+KwaZulu-Natal,Kokstad Golf Club,Kokstad,9,Active,Rural Parkland
+KwaZulu-Natal,Underberg Country Club,Underberg,9,Active,Mountain Parkland
+KwaZulu-Natal,Cathedral Peak Golf Club,Drakensberg,9,Active,Mountain/Resort
+KwaZulu-Natal,Drakensberg Gardens Golf Club,Drakensberg,18,Active,Mountain/Resort
+KwaZulu-Natal,Greytown Country Club,Greytown,9,Active,Rural Parkland
+KwaZulu-Natal,Estcourt Golf Club,Estcourt,9,Active,Rural Parkland
+KwaZulu-Natal,Ladysmith Country Club,Ladysmith,9,Active,Rural Parkland
+KwaZulu-Natal,Dundee Country Club,Dundee,18,Active,Rural Parkland
+KwaZulu-Natal,Glencoe Correctional Services GC,Glencoe,9,Active,Rural Parkland
+KwaZulu-Natal,Newcastle Golf Club,Newcastle,18,Active,Parkland
+KwaZulu-Natal,Kilbarchan Golf Club,Newcastle,9,Active,Rural Parkland
+KwaZulu-Natal,Utrecht Golf Club,Utrecht,9,Active,Rural Parkland
+KwaZulu-Natal,Vryheid Country Club,Vryheid,9,Active,Rural Parkland
+KwaZulu-Natal,Paulpietersburg Country Club,Paulpietersburg,9,Active,Rural Parkland
+KwaZulu-Natal,Pongola Golf Club,Pongola,9,Active,Rural Parkland
+KwaZulu-Natal,Empangeni Country Club,Empangeni,18,Active,Parkland
+KwaZulu-Natal,Richards Bay Country Club,Richards Bay,18,Active,Coastal/Parkland
+KwaZulu-Natal,Eshowe Hills Eco Estate,Eshowe,18,Active,Estate/Forest
+KwaZulu-Natal,Amatikulu Country Club,Amatikulu,9,Active,Rural Parkland
+KwaZulu-Natal,Darnall Country Club,Darnall,9,Active,Rural Parkland
+KwaZulu-Natal,St Cathrys Golf Club,Kranskop,9,Active,Rural Estate
+KwaZulu-Natal,Cato Ridge Country Club,Cato Ridge,9,Active,Rural Parkland
+KwaZulu-Natal,Camelot Country Club,Hillcrest,9,Active,Estate
+KwaZulu-Natal,Richmond Country Club,Richmond,9,Active,Rural Parkland
+KwaZulu-Natal,Mooi River Country Club,Mooi River,9,Active,Rural Parkland
+KwaZulu-Natal,Sakabula Golf Course,Howick,18,Active,Rural Parkland
+Mpumalanga,Leopard Creek Private Golf Estate,Malelane,18,Active,Bushveld/Estate
+Mpumalanga,Highland Gate Golf & Trout Estate,Dullstroom,18,Active,Mountain/Links
+Mpumalanga,Graceland Country Club,Secunda,18,Active,Inland Links
+Mpumalanga,White River Country Club,White River,18,Active,Parkland
+Mpumalanga,Nelspruit Golf Club,Nelspruit,18,Active,Bushveld
+Mpumalanga,Sabi River Sun Golf Course,Hazyview,18,Active,Bushveld/Resort
+Mpumalanga,Kruger Park Lodge Golf Course,Hazyview,9,Active,Bushveld/Resort
+Mpumalanga,Skukuza Golf Club,Kruger National Park,9,Active,Bushveld/Wild
+Mpumalanga,Middelburg Country Club,Middelburg,18,Active,Parkland
+Mpumalanga,Witbank Golf Club,eMalahleni,18,Active,Parkland
+Mpumalanga,Bank Golf Club,Witbank,9,Active,Mining Parkland
+Mpumalanga,Greenside Colliery Golf Club,Witbank,9,Active,Mining Parkland
+Mpumalanga,Kranspoort Golf Club,Loskop Dam,9,Active,Bushveld/Estate
+Mpumalanga,Ermelo Country Club,Ermelo,18,Active,Parkland
+Mpumalanga,Standerton Golf Club,Standerton,9,Active,Rural Parkland
+Mpumalanga,Bethal Golf Club,Bethal,9,Active,Rural Parkland
+Mpumalanga,Volksrust Golf Club,Volksrust,9,Active,Rural Parkland
+Mpumalanga,Piet Retief Country Club,Piet Retief,9,Active,Rural Parkland
+Mpumalanga,Barberton Golf Club,Barberton,9,Active,Rural Parkland
+Mpumalanga,Badplaas Golf Club,Badplaas,9,Active,Resort Parkland
+Mpumalanga,Sabie Country Club,Sabie,9,Active,Mountain Parkland
+Mpumalanga,Pilgrim's Rest Golf Course,Pilgrim's Rest,9,Active,Historical Mountain
+Mpumalanga,Lydenburg Golf Club,Mashishing,9,Active,Rural Parkland
+Mpumalanga,Belfast Golf Club,eMakhazeni,9,Active,Rural Parkland
+Mpumalanga,Carolina Golf Club,Carolina,9,Active,Rural Parkland
+Mpumalanga,Amersfoort Golf Club,Amersfoort,9,Active,Rural Parkland
+Mpumalanga,Morgenzon Golf Club,Morgenzon,9,Active,Rural Parkland
+Mpumalanga,Arnot Golf Club,Rietkuil,9,Active,Power Station Parkland
+North West,Gary Player Country Club,Sun City,18,Active,Bushveld/Parkland
+North West,Lost City Golf Course,Sun City,18,Active,Desert/Bushveld
+North West,Pecanwood Golf & Country Club,Hartbeespoort,18,Active,Parkland/Estate
+North West,Magalies Park Golf Club,Hartbeespoort,18,Active,Parkland/Resort
+North West,Seasons Eco Golf Estate (Brits),Brits,18,Active,Bushveld/Estate
+North West,Sandy Lane Golf Club,Hartbeespoort,9,Active,Lakeside Estate
+North West,Leopard Park Golf Club,Mahikeng,18,Active,Bushveld
+North West,Rustenburg Golf Club,Rustenburg,18,Active,Parkland
+North West,Potchefstroom Country Club,Potchefstroom,18,Active,Parkland
+North West,Klerksdorp Golf Club,Klerksdorp,18,Active,Parkland
+North West,Orkney Golf Club,Orkney,18,Active,River Parkland
+North West,Lichtenburg Golf Club,Lichtenburg,9,Active,Rural Parkland
+North West,Zeerust Country Club,Zeerust,9,Active,Rural Parkland
+North West,Thabazimbi Golf Club,Thabazimbi,9,Active,Bushveld
+North West,Mooinooi Golf Club,Mooinooi,9,Active,Mining Parkland
+North West,Chrome Golf Club,Mooinooi,9,Active,Mining Parkland
+North West,Amandelbult Golf Club,Swartklip,9,Active,Mining Bushveld
+North West,Christiana Golf Club,Christiana,9,Active,Rural Parkland
+North West,Delareyville Golf Club,Delareyville,9,Active,Rural Parkland
+North West,Ventersdorp Golf Club,Ventersdorp,9,Active,Rural Parkland
+North West,Wolmaransstad Golf Club,Wolmaransstad,9,Active,Rural Parkland
+North West,Leeudoringstad Golf Club,Leeudoringstad,9,Active,Rural Parkland
+North West,Schweizer-Reneke Golf Club,Schweizer-Reneke,9,Active,Rural Parkland
+North West,Sannieshof Golf Club,Sannieshof,9,Active,Rural Parkland
+North West,Bloemhof Golf Club,Bloemhof,9,Active,Rural Parkland
+Limpopo,Elements Private Golf Reserve,Bela-Bela,18,Active,Bushveld/Estate
+Limpopo,Euphoria Golf & Lifestyle Estate,Mookgophong,18,Active,Bushveld/Estate
+Limpopo,Hans Merensky Golf Club,Phalaborwa,18,Active,Bushveld/Wild
+Limpopo,Koro Creek Bushveld Golf Estate,Modimolle,18,Active,Bushveld/Estate
+Limpopo,Zebula Country Club & Spa,Bela-Bela,18,Active,Bushveld/Resort
+Limpopo,Legend Golf & Safari Resort,Mookgophong,18,Active,Bushveld/Resort
+Limpopo,Polokwane Golf Club,Polokwane,18,Active,Parkland
+Limpopo,Tzaneen Country Club,Tzaneen,18,Active,Subtropical Parkland
+Limpopo,Chrome Park Golf Club,Mokopane,9,Active,Mining Parkland
+Limpopo,Kameeldoring Golf Club,Mokopane,18,Active,Bushveld
+Limpopo,Warmbaths Golf Club,Bela-Bela,9,Active,Bushveld
+Limpopo,Naboomspruit Golf Club,Mookgophong,9,Active,Bushveld
+Limpopo,Nylstroom Golf Club,Modimolle,9,Active,Bushveld
+Limpopo,Drakensig Golf Club,Hoedspruit,9,Active,Air Force / Bushveld
+Limpopo,Makhado Golf Club (Louis Trichardt),Makhado,9,Active,Mountain Parkland
+Limpopo,Messina Golf Club,Musina,9,Active,Bushveld
+Limpopo,Thohoyandou Golf Course,Thohoyandou,9,Unrated/Minimal Data,Rural Parkland
+Limpopo,Groblersdal Golf Club,Groblersdal,9,Active,Agricultural Parkland
+Limpopo,Marble Hall Golf Club,Marble Hall,9,Active,Agricultural Parkland
+Limpopo,Amandelbult Bushveld GC,North Limpopo,9,Active,Bushveld
+Limpopo,Crocodile Golf Course,Thabazimbi border,9,Unrated/Minimal Data,Bushveld
+Eastern Cape,St Francis Links Golf Club,St Francis Bay,18,Active,Links
+Eastern Cape,St Francis Bay Golf Club,St Francis Bay,18,Active,Coastal
+Eastern Cape,Humewood Golf Club,Gqeberha,18,Active,Links
+Eastern Cape,East London Golf Club,East London,18,Active,Coastal/Parkland
+Eastern Cape,Wild Coast Sun Country Club,Port Edward / Bizana,18,Active,Coastal/Resort
+Eastern Cape,Wedgewood Golf & Country Estate,Gqeberha,18,Active,Parkland/Estate
+Eastern Cape,Port Elizabeth Golf Club (The Grey),Gqeberha,18,Active,Parkland
+Eastern Cape,Walmer Golf Club (Little Walmer),Gqeberha,9,Active,Urban Parkland
+Eastern Cape,Sardinia Bay Golf Club,Gqeberha,9,Active,Coastal
+Eastern Cape,West Bank Golf Club,East London,18,Active,Coastal Parkland
+Eastern Cape,Gonubie Golf Club,Gonubie,9,Active,Coastal
+Eastern Cape,Olivewood Private Estate & Golf Club,Chintsa,18,Active,Coastal/Estate
+Eastern Cape,Bushman Sands Golf Club,Alicedale,18,Active,Bushveld/Estate
+Eastern Cape,Royal Port Alfred Golf Club,Port Alfred,18,Active,Coastal/Links
+Eastern Cape,Katberg Eco Golf Estate,Katberg,18,Active,Mountain/Estate
+Eastern Cape,Zwartenbosch Golf & Lifestyle Estate,Humansdorp,9,Active,Estate/Parkland
+Eastern Cape,Fish River Sun Golf Course,Port Alfred,18,Historical/Closed,Coastal Links
+Eastern Cape,Grahamstown Golf Club (The Belmont),Makhanda,18,Active,Parkland
+Eastern Cape,Graaff-Reinet Golf Club,Graaff-Reinet,9,Active,Karoo Parkland
+Eastern Cape,Cradock Golf Club,Cradock,9,Active,Karoo Parkland
+Eastern Cape,Aliwal North Golf Club,Aliwal North,9,Active,Rural Parkland
+Eastern Cape,Queenstown Golf Club,Komani,18,Active,Parkland
+Eastern Cape,Mthatha Country Club,Mthatha,9,Active,Rural Parkland
+Eastern Cape,Butterworth Country Club,Gcuwa,9,Active,Rural Parkland
+Eastern Cape,Port St Johns Golf Club,Port St Johns,9,Unrated/Minimal Data,Coastal Rural
+Eastern Cape,Burgersdorp Golf Club,Burgersdorp,9,Active,Karoo Parkland
+Eastern Cape,Barkly East Golf Club,Barkly East,9,Active,Mountain Parkland
+Eastern Cape,Elliot Golf Club,Khowa,9,Active,Mountain Parkland
+Eastern Cape,Dordrecht Golf Club,Dordrecht,9,Active,Mountain Parkland
+Eastern Cape,Cathcart Golf Club,Cathcart,9,Active,Rural Parkland
+Eastern Cape,Bedford Golf Club,Bedford,9,Active,Rural Parkland
+Eastern Cape,Adelaide Golf Club,Adelaide,9,Active,Rural Parkland
+Eastern Cape,Fort Beaufort Golf Club,Fort Beaufort,9,Active,Rural Parkland
+Eastern Cape,Alexandria Golf Club,Alexandria,9,Active,Coastal Rural
+Eastern Cape,Kirkwood Golf Club,Kirkwood,9,Active,Agricultural Parkland
+Eastern Cape,Aberdeen Golf Club,Aberdeen,9,Active,Karoo Sand Greens
+Free State,Clarens Golf & Trout Estate,Clarens,18,Active,Mountain/Estate
+Free State,Parys Golf & Country Estate,Parys,18,Active,River/Estate
+Free State,Vaal de Grace Golf Estate,Parys,18,Active,River/Estate
+Free State,Bloemfontein Golf Club,Bloemfontein,18,Active,Parkland
+Free State,Schoeman Park Golf Club,Bloemfontein,18,Active,Parkland
+Free State,Oppenheimer Park Golf Club,Welkom,18,Active,Parkland
+Free State,Goldfields West Golf Club (FS),Welkom,18,Active,Mining Parkland
+Free State,Bethlehem Golf Club,Bethlehem,18,Active,Parkland
+Free State,Harrismith Country Club,Harrismith,18,Active,Mountain Parkland
+Free State,Kroonstad Country Club,Kroonstad,18,Active,Parkland
+Free State,Sasolburg Golf Club,Sasolburg,18,Active,Parkland
+Free State,Ficksburg Golf Club,Ficksburg,9,Active,Rural Parkland
+Free State,Ladybrand Golf Club,Ladybrand,9,Active,Rural Parkland
+Free State,Clocolan Golf Club,Clocolan,9,Active,Rural Parkland
+Free State,Frankfort Golf Club,Frankfort,9,Active,Rural Parkland
+Free State,Heilbron Golf Club,Heilbron,9,Active,Rural Parkland
+Free State,Reitz Golf Club,Reitz,9,Active,Rural Parkland
+Free State,Senekal Golf Club,Senekal,9,Active,Rural Parkland
+Free State,Vrede Golf Club,Vrede,9,Active,Rural Parkland
+Free State,Bothaville Golf Club,Bothaville,9,Active,Rural Parkland
+Free State,Viljoenskroon Country Club,Viljoenskroon,9,Active,Rural Parkland
+Free State,Wesselsbron Golf Club,Wesselsbron,9,Active,Rural Parkland
+Free State,Bultfontein Golf Club,Bultfontein,9,Active,Rural Parkland
+Free State,Hoopstad Golf Club,Hoopstad,9,Active,Rural Parkland
+Free State,Brandfort Golf Club,Brandfort,9,Active,Rural Parkland
+Free State,Dewetsdorp Golf Club,Dewetsdorp,9,Active,Rural Parkland
+Free State,Zastron Golf Club,Zastron,9,Active,Rural Parkland
+Free State,Rouxville Golf Club,Rouxville,9,Unrated/Minimal Data,Rural Sand Greens
+Free State,Bethulie Golf Club,Bethulie,9,Active,Rural Parkland
+Free State,Edenburg Golf Club,Edenburg,9,Active,Rural Sand Greens
+Free State,Fauresmith Golf Club,Fauresmith,9,Active,Rural Sand Greens
+Free State,Koffiefontein Golf Club,Koffiefontein,9,Active,Mining Parkland
+Free State,Jagersfontein Golf Club,Jagersfontein,9,Unrated/Minimal Data,Mining Sand Greens
+Free State,Allanridge Golf Club,Allanridge,9,Unrated/Minimal Data,Mining Parkland
+Free State,Theunissen Golf Club,Theunissen,9,Active,Rural Parkland
+Free State,Winburg Golf Club,Winburg,9,Active,Rural Parkland
+Free State,Excelsior Golf Club,Excelsior,9,Active,Rural Sand Greens
+Free State,Tempe Golf Club,Bloemfontein,9,Active,Military Parkland
+Free State,Black Mountain Golf Club,Thaba Nchu,9,Active,Resort Parkland
+Northern Cape,Sishen Golf Club,Kathu,18,Active,Kalahari Forest
+Northern Cape,Upington Golf Club,Upington,18,Active,Desert/Parkland
+Northern Cape,Kimberley Golf Club,Kimberley,18,Active,Parkland
+Northern Cape,De Aar Country Club,De Aar,18,Active,Karoo/Parkland
+Northern Cape,Springbok Golf Club,Springbok,9,Active,Namaqualand Parkland
+Northern Cape,Kuruman Golf Club,Kuruman,9,Active,Kalahari Parkland
+Northern Cape,Douglas Golf Club,Douglas,9,Active,River Parkland
+Northern Cape,Prieska Golf Club,Prieska,9,Active,Karoo Parkland
+Northern Cape,Colesberg Golf Club,Colesberg,9,Active,Karoo Parkland
+Northern Cape,Carnarvon Golf Club,Carnarvon,9,Active,Karoo Sand Greens
+Northern Cape,Calvinia Golf Club,Calvinia,9,Active,Karoo Sand Greens
+Northern Cape,Victoria-Wes Golf Club,Victoria West,9,Active,Karoo Sand Greens
+Northern Cape,Richmond Golf Club (NC),Richmond,9,Active,Karoo Sand Greens
+Northern Cape,Postmasburg Golf Club,Postmasburg,9,Active,Mining Parkland
+Northern Cape,Beeshoek Golf Club,Postmasburg,9,Active,Mining Parkland
+Northern Cape,Black Rock Golf Club,Black Rock / Hotazel,9,Active,Mining Kalahari
+Northern Cape,Alexander Bay Golf Club,Alexander Bay,9,Active,Coastal Sand Greens
+Northern Cape,Port Nolloth Golf Club,Port Nolloth,9,Active,Coastal Sand Greens
+Northern Cape,Kakamas Golf Club,Kakamas,9,Active,River Parkland
+Northern Cape,Keimoes Golf Club,Keimoes,9,Active,River Parkland
+Northern Cape,Kenhardt Golf Club,Kenhardt,9,Unrated/Minimal Data,Desert Sand Greens
