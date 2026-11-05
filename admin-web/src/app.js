@@ -19,7 +19,8 @@ function login(message=''){
 }
 async function load(){
  if(demo){render();return;}
- const allowed=await checked(client.rpc('is_admin'));if(!allowed){await client.auth.signOut();login('This account is not on the administrator allowlist.');return;}
+ await checked(client.rpc('portal_claim_admin_email'));
+ const allowed=await checked(client.rpc('is_admin'));if(!allowed){await client.auth.signOut();login('This account is not authorized, or its email has not been verified.');return;}
  const [dashboard,members,products,orders,tasks,audit,courses,accessDirectory,feedback]=await Promise.all([
   checked(client.rpc('admin_league_dashboard')),checked(client.rpc('admin_portal_members')),
   checked(client.from('admin_products').select('*').order('name')),
@@ -29,7 +30,8 @@ async function load(){
   checked(client.from('courses').select('id,name,country,province,city,address,phone,website,par,holes,active,playable,data_status,source_url,image_url').order('name')),
   checked(client.rpc('portal_admin_access_directory')),
   checked(client.from('member_test_feedback').select('id,reporter_id,category,description,app_version,created_at').order('created_at',{ascending:false}).limit(200))]);
- data={...dashboard,members,products,orders,tasks,audit,courses,accessDirectory,feedback};
+ const pendingAdmins=accessDirectory?await checked(client.rpc('portal_pending_admin_emails')):[];
+ data={...dashboard,members,products,orders,tasks,audit,courses,accessDirectory,feedback,pendingAdmins};
  if(section==='Administrators'&&!accessDirectory)section='Overview';
  render();
 }
@@ -73,13 +75,13 @@ function render(){
  }else if(section==='Feedback'){html=table(['Received','Member','Area','Version','Feedback'],data.feedback.map(f=>[date(f.created_at),esc(memberName(f.reporter_id)),pill(f.category),esc(f.app_version),esc(f.description)]))+'<p class="muted">Latest 200 submissions. Members choose what to send.</p>';
  }else if(section==='Administrators'&&data.accessDirectory){
   const current=data.accessDirectory.filter(member=>member.admin);
-  html='<p>Choose a registered member with a verified email. Only the owner can grant or revoke administrator access.</p>'
-    +'<div class="notice">This website also uses private Sites sharing. Give a new administrator viewer access in the site’s sharing settings so they can reach the portal login.</div>'
+  html='<p>Enter an email address to authorize an administrator. The person must sign in with a confirmed email address before access is activated. Only the owner can grant or revoke access.</p>'
+    +'<div class="notice">This private website also requires separate viewer access in Sites sharing settings. The person must already have or create a verified app account. No invitation email is sent by this form.</div>'
     +btn('Add administrator','grant-admin','',true)
     +table(['Administrator','Email','Access',''],current.map(member=>[
       esc(member.name||'Member'),esc(member.email),pill(member.owner?'Owner':'Administrator'),
       member.owner?'Protected':btn('Revoke access','revoke-admin',member.id)
-    ]));
+    ]))+'<h2>Pending email authorizations</h2>'+table(['Email','Authorized',''],(data.pendingAdmins||[]).map(item=>[esc(item.email),date(item.authorized_at),btn('Cancel authorization','cancel-admin-email',item.email)]));
  }else if(section==='Audit'){html=table(['When','Administrator','Record','Reason',''],data.audit.map(a=>[date(a.created_at),esc(memberName(a.actor)),esc(a.entity),esc(a.reason),btn('Details','audit',String(a.id))]))+'<p class="muted">Latest 200 portal edits. Existing app operations and scheduling use their existing records and are not included in this audit list.</p>';}
  content.innerHTML=html;
  const q=document.querySelector('#search');if(q){q.value=query;q.oninput=e=>{query=e.target.value;const pos=q.selectionStart;render();document.querySelector('#search').focus();document.querySelector('#search').setSelectionRange(pos,pos);};}
@@ -156,7 +158,19 @@ async function action(e){const b=e.target.closest('[data-action]');if(!b||b.disa
  if(a==='nav'){section=id;query='';render();}if(a==='logout'){demo=false;dialog.close();await client.auth.signOut();login();}
  if(a==='refresh')await load();if(a==='close'&&!busy)dialog.close();if(a==='edit'||a==='new')await edit(id);
  if(a==='all-rounds'){playDay='';render();}if(a==='today-rounds'){playDay=playDate({created_at:new Date().toISOString()});render();}
- if(a==='grant-admin'||a==='revoke-admin'){
+ if(a==='grant-admin'){
+  if(demo||!Array.isArray(data?.accessDirectory))return;
+  form('Add administrator by email',field('email','Email address','','email')+reason(),async values=>{
+    await checked(client.rpc('portal_authorize_admin_email',{p_email:values.email,p_reason:values.reason}));
+  },'Access activates when this person signs in to the portal with the same verified email. Give them separate viewer access in Sites sharing.');
+ }
+ if(a==='cancel-admin-email'){
+  if(demo||!Array.isArray(data?.accessDirectory))return;
+  form('Cancel pending authorization',`<p>${esc(id)}</p>`+reason(),async values=>{
+    await checked(client.rpc('portal_cancel_admin_email',{p_email:id,p_reason:values.reason}));
+  });
+ }
+ if(a==='revoke-admin'){
   if(demo||!Array.isArray(data?.accessDirectory))return;
   const grant=a==='grant-admin';
   const options=data.accessDirectory.filter(member=>grant?!member.admin:member.id===id&&member.admin&&!member.owner)
