@@ -1,7 +1,7 @@
 import {createClient} from '@supabase/supabase-js';
 import config from './config.json';
 import {googleSignInOptions,finishGoogleSignIn} from './oauth.js';
-import {esc,division,seasonRounds,csv,playDate,roundsOnDate,playerCard,provisionalNet,grossLeaderboard,courseCoverage} from './domain.js';
+import {esc,division,seasonRounds,csv,playDate,roundsOnDate,playerCard,provisionalNet,grossLeaderboard,courseCoverage,availableTeeSets} from './domain.js';
 const client=createClient(config.url,config.key,{auth:{storage:sessionStorage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,flowType:'pkce'}});
 const root=document.querySelector('#app'),dialog=document.querySelector('#editor');
 let data=null,section='Overview',query='',year=new Date().getFullYear(),playDay=playDate({created_at:new Date().toISOString()}),demo=false,busy=false;
@@ -105,7 +105,7 @@ async function edit(id){
 function order(id){const o=data.orders.find(o=>o.id===id);const key=o?.id||crypto.randomUUID();const opts=data.members.map(m=>[m.id,m.display_name]);const fields=o?field('status','Order status',o.status,'text',['pending','paid','fulfilled','cancelled'].map(x=>[x,x])):field('member_id','Member','','text',opts)+field('product_id','Product','','text',data.products.filter(p=>p.active).map(p=>[p.id,`${p.name} · ${money(p.price)}`]))+field('quantity','Quantity',1,'number');form(o?'Update order':'Record order',fields+field('note','Reference / notes',o?.note,'text',null,false)+reason(),async values=>{const {reason,...r}=values;await checked(client.rpc('admin_portal_save',{p_kind:'order',p_record:{...r,id:key,status:r.status||'pending'},p_reason:reason}));},'Manual order ledger. No payment is collected. New orders reserve stock.');}
 async function schedule(){
  const token=crypto.randomUUID();form('Schedule a fourball',field('course','Course','','text',[['','Choose course'],...data.courses.filter(c=>c.active&&c.playable).map(c=>[c.id,c.name])])+field('tee','Tee','','text',[['','Choose course first']])+field('when','Local tee time','','datetime-local')+[0,1,2,3].map(i=>field('player'+i,i===0?'Host':'Player '+(i+1),'','text',[['','Select member'],...data.members.map(m=>[m.id,m.display_name])],i===0)).join(''),async v=>{const players=[v.player0,v.player1,v.player2,v.player3].filter(Boolean);if(new Set(players).size!==players.length)throw Error('Select different members.');await checked(client.rpc('admin_schedule_fourball',{p_course_id:v.course,p_tee_set_id:v.tee,p_scheduled_at:new Date(v.when).toISOString(),p_player_ids:players,p_request_key:token}));},'Time uses this browser’s local timezone. The selected host starts the round in the app. This does not book a tee time with the course.');
- dialog.querySelector('[name=course]').onchange=async e=>{const course=e.target.value;const tees=await checked(client.from('tee_sets').select('id,name').eq('course_id',course).eq('selectable',true));if(dialog.querySelector('[name=course]')?.value===course)dialog.querySelector('[name=tee]').innerHTML='<option value="">Select tee</option>'+tees.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');};
+ dialog.querySelector('[name=course]').onchange=async e=>{const course=e.target.value;const tees=await checked(client.from('tee_sets').select('id,name,colour,selectable').eq('course_id',course).eq('selectable',true));if(dialog.querySelector('[name=course]')?.value===course)dialog.querySelector('[name=tee]').innerHTML='<option value="">Select tee</option>'+availableTeeSets(tees).map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');};
 }
 async function showCourse(id){
  const course=data.courses.find(c=>c.id===id);if(!course)return;
@@ -115,14 +115,14 @@ async function showCourse(id){
   checked(client.from('tee_sets').select('id,name,colour,course_rating,slope_rating,par,total_distance,distance_unit,selectable').eq('course_id',id).order('total_distance')),
   checked(client.from('tee_box_hole_distances').select('tee_set_id,hole_number,distance_meters,source_url').eq('course_id',id).limit(1000))
  ]);
- const coverage=courseCoverage(holes,tees,distances), visible=tees.filter(t=>t.selectable);
+ const coverage=courseCoverage(holes,tees,distances), visible=availableTeeSets(tees);
  const val=x=>x==null||x===''?'—':esc(x);
  dialog.innerHTML=`<header><h2>${esc(course.name)}</h2>${btn('Close','close')}</header><p>${val(course.city)} · ${val(course.province)} · ${val(course.country)}</p>`
   +`<p>App status: ${course.active?(course.playable?'Active · playable flag on':'Active · directory only'):'Inactive'} · Data status: ${val(course.data_status)} · Par ${val(course.par)} · ${val(course.holes)} holes</p>`
   +`<p>Address: ${val(course.address)}<br>Telephone: ${val(course.phone)}<br>Website: ${val(course.website)}<br>Course source: ${val(course.source_url)}</p>`
   +`<div class="notice">${coverage.holes} hole records · ${coverage.selectableTees} selectable tees · ${coverage.greenCoordinates} holes with front, centre and back coordinates. Coordinates may be unverified. Course image: ${course.image_url?'URL recorded':'not supplied'}.</div>`
   +'<h3>Available tees</h3>'+table(['Tee','Course rating','Slope','Par','Total','Hole distances'],coverage.teeDistances.map(({tee,count})=>[esc(tee.name),val(tee.course_rating),val(tee.slope_rating),val(tee.par),`${val(tee.total_distance)} ${val(tee.distance_unit)}`,`${count} / ${holes.length||18}`]))
-  +'<p class="muted">Only selectable tees are shown, matching new-round selection. Individual hole distances below are stored in metres; a dash means no distance is recorded.</p>'
+  +'<p class="muted">Tees shown match the app’s new-round selection, including its unrated fallback rules. Individual hole distances below are stored in metres; a dash means no distance is recorded.</p>'
   +table(['Hole','Par','Stroke index',...visible.map(t=>`${t.name} (m)`),'Green GPS','Hole image'],holes.map(h=>[val(h.number),val(h.par),val(h.stroke_index),...visible.map(t=>val(distances.find(d=>d.tee_set_id===t.id&&d.hole_number===h.number)?.distance_meters)),[h.green_front_latitude,h.green_front_longitude,h.green_centre_latitude,h.green_centre_longitude,h.green_back_latitude,h.green_back_longitude].every(x=>Number.isFinite(Number(x))&&Number(x)!==0)?'Present':'Missing',h.image_url?'URL recorded':'Missing']))
   +'<p class="muted">Data is displayed as recorded in the app database. Source attribution and verification still need review; this page does not modify a scorecard.</p>';
  dialog.showModal();
