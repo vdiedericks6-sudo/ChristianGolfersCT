@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {esc,csv,division,seasonRounds,playDate,roundsOnDate,playerCard,provisionalNet,grossLeaderboard} from './domain.js';
+import {esc,csv,division,seasonRounds,playDate,roundsOnDate,playerCard,provisionalNet,grossLeaderboard,courseCoverage} from './domain.js';
+test('course coverage counts selectable tees, unique hole distances and complete green coordinates',()=>{const c=courseCoverage([{green_front_latitude:-33,green_front_longitude:18,green_centre_latitude:-33,green_centre_longitude:18,green_back_latitude:-33,green_back_longitude:18},{green_front_latitude:0}], [{id:'a',selectable:true},{id:'b',selectable:false}], [{tee_set_id:'a',hole_number:1,distance_meters:300},{tee_set_id:'a',hole_number:1,distance_meters:300},{tee_set_id:'b',hole_number:2,distance_meters:200}]);assert.equal(c.holes,2);assert.equal(c.selectableTees,1);assert.equal(c.greenCoordinates,1);assert.equal(c.teeDistances[0].count,1);});
 test('database text cannot inject markup',()=>assert.equal(esc('<img onerror="x">'), '&lt;img onerror=&quot;x&quot;&gt;'));
 test('exports escape quotes and neutralise spreadsheet formulas',()=>assert.equal(csv([['=SUM(A1)', 'a"b']]), '"\'=SUM(A1)","a""b"'));
 test('manual division overrides index and blank uses automatic classification',()=>{assert.equal(division({handicap:30,league:'A'}),'A');assert.equal(division({handicap:null}),'Social');assert.equal(division({handicap:18}),'B');});

@@ -4,6 +4,11 @@ export function seasonRounds(rounds,year){return rounds.filter(r=>new Date(r.pla
 // A round belongs to its scheduled/start day, even if it is completed after midnight.
 export function playDate(round){const value=round.scheduled_at||round.started_at||round.played_at||round.created_at;return value?new Date(value).toLocaleDateString('en-CA',{timeZone:'Africa/Johannesburg'}):'';}
 export function roundsOnDate(rounds,day){return day?rounds.filter(round=>playDate(round)===day):rounds;}
+export function courseCoverage(holes,tees,distances){
+ const selectable=tees.filter(t=>t.selectable);
+ const hasCoordinates=h=>[h.green_front_latitude,h.green_front_longitude,h.green_centre_latitude,h.green_centre_longitude,h.green_back_latitude,h.green_back_longitude].every(x=>Number.isFinite(Number(x))&&Number(x)!==0);
+ return {holes:holes.length,selectableTees:selectable.length,greenCoordinates:holes.filter(hasCoordinates).length,teeDistances:selectable.map(t=>({tee:t,count:new Set(distances.filter(d=>d.tee_set_id===t.id&&d.distance_meters!=null).map(d=>d.hole_number)).size}))};
+}
 export function playerCard(scores,roundId,playerId){
  const holes=Array(18).fill(null);
  for(const score of scores){if(score.round_id===roundId&&score.player_id===playerId&&score.hole_number>=1&&score.hole_number<=18)holes[score.hole_number-1]=score;}

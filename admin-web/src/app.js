@@ -1,7 +1,7 @@
 import {createClient} from '@supabase/supabase-js';
 import config from './config.json';
 import {googleSignInOptions,finishGoogleSignIn} from './oauth.js';
-import {esc,division,seasonRounds,csv,playDate,roundsOnDate,playerCard,provisionalNet,grossLeaderboard} from './domain.js';
+import {esc,division,seasonRounds,csv,playDate,roundsOnDate,playerCard,provisionalNet,grossLeaderboard,courseCoverage} from './domain.js';
 const client=createClient(config.url,config.key,{auth:{storage:sessionStorage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,flowType:'pkce'}});
 const root=document.querySelector('#app'),dialog=document.querySelector('#editor');
 let data=null,section='Overview',query='',year=new Date().getFullYear(),playDay=playDate({created_at:new Date().toISOString()}),demo=false,busy=false;
@@ -26,7 +26,7 @@ async function load(){
   checked(client.from('admin_orders').select('*').order('created_at',{ascending:false}).limit(1000)),
   checked(client.from('admin_tasks').select('*').order('due_date')),
   checked(client.from('admin_audit').select('*').order('created_at',{ascending:false}).limit(200)),
-  checked(client.from('courses').select('id,name,province,city,active,playable,data_status').order('name')),
+  checked(client.from('courses').select('id,name,country,province,city,address,phone,website,par,holes,active,playable,data_status,source_url,image_url').order('name')),
   checked(client.rpc('portal_admin_access_directory')),
   checked(client.from('member_test_feedback').select('id,reporter_id,category,description,app_version,created_at').order('created_at',{ascending:false}).limit(200))]);
  data={...dashboard,members,products,orders,tasks,audit,courses,accessDirectory,feedback};
@@ -55,17 +55,17 @@ function render(){
   const players=data.players.filter(p=>ids.has(p.round_id)),grossLeaders=grossLeaderboard(matching,players,data.scores);
   html=toolbar(btn('Schedule fourball','schedule','',true)+btn('Export day scores','export-rounds'))
    +`<div class="toolbar"><label for="play-day">Play date (South Africa)</label><input id="play-day" type="date" value="${esc(playDay)}"><button data-action="all-rounds">All dates</button><button data-action="today-rounds">Today</button></div>`
-   +`<div class="notice">${playDay?'Showing fourballs scheduled or started on '+esc(playDay):'Showing all dates'}. Scores appear after they sync to the database; use Refresh data for the latest. Gross is provisional while holes are missing or unconfirmed. Net is provisional and uses the round's shared tee, not each player's tee; verify handicaps and results before prize giving. Net is hidden for incomplete or unconfirmed cards.</div>`
+   +`<div class="notice">${playDay?'Showing fourballs scheduled or started on '+esc(playDay):'Showing all dates'}. Scores appear after they sync to the database; use Refresh data for the latest. Gross is provisional while holes are missing or unconfirmed. Net results remain provisional; newer rounds use each selected tee and older rounds may use a shared tee. Verify handicaps and results before prize giving. Net is hidden for incomplete or unconfirmed cards.</div>`
    +`<div class="sectionhead"><h2>Fourballs (${matching.length})</h2></div>`+roundTable(matching)
    +`<div class="sectionhead" style="margin-top:28px"><h2>Completed gross cards (${grossLeaders.length})</h2></div>`
    +'<p class="muted">Gross-stroke order for review only. Only active players with 18 confirmed scores in completed rounds appear; tied gross scores share a position. This is not a net leaderboard or a prize decision. Offline cards appear only after the golfer syncs them.</p>'
    +table(['Position','Player','Course / fourball','Gross',''],grossLeaders.map(({round,player,card,rank})=>[rank,esc(player.display_name),`${esc(round.course_name)}<small>${esc(round.host_name)}</small>`,card.gross,btn('View card','round',round.id)]))
    +`<div class="sectionhead" style="margin-top:28px"><h2>Player scores (${players.length})</h2></div>`
-   +table(['Player','Fourball / course','Round status','Holes entered','Confirmed','Gross so far','Net (shared tee, provisional)',''],players.map(p=>{
+   +table(['Player','Fourball / course','Round status','Holes entered','Confirmed','Gross so far','Net (provisional)',''],players.map(p=>{
      const r=matching.find(x=>x.id===p.round_id),card=playerCard(data.scores,p.round_id,p.user_id),result=data.results.find(x=>x.round_id===p.round_id&&x.player_id===p.user_id);
      return [esc(p.display_name),`${esc(r.course_name)}<small>${esc(r.host_name)} · ${date(r.scheduled_at||r.started_at||r.played_at)}</small>`,pill(r.status),card.entered,`${card.confirmed}/${card.entered}`,card.gross??'—',provisionalNet(r,card,result)??'—',btn('View card','round',r.id)+(r.status==='active'?` ${btn('Enter score','score',`${r.id}|${p.user_id}`)}`:'')];
    }));
- }else if(section==='Courses'){html=toolbar('')+table(['Course','Province','Availability','Data status'],search(data.courses).map(c=>[esc(c.name),esc(c.province),pill(c.active?(c.playable?'Round-ready':'Directory only'):'Inactive'),esc(c.data_status||'Not verified')]))+'<div class="notice">Course imports and verified tee / hole data are maintained through reviewed migrations. Missing imagery and ratings are not fabricated.</div>';
+ }else if(section==='Courses'){html=toolbar('')+`<div class="notice">This catalogue reads the same live database as the app. Availability does not itself verify ratings, tee distances or GPS coordinates. Open a course to inspect its coverage.</div>`+table(['Course','Province','Availability','Data status',''],search(data.courses).map(c=>[esc(c.name),esc(c.province),pill(c.active?(c.playable?'Playable flag on':'Directory only'):'Inactive'),esc(c.data_status||'Not verified'),btn('View course','course',c.id)]));
  }else if(section==='Operations'){html=toolbar(btn('New task','new','',true))+table(['Task','Owner','Due','Status',''],search(data.tasks).map(t=>[esc(t.title),esc(memberName(t.owner_id)),esc(t.due_date||'—'),pill(t.status),btn('Edit','edit',t.id)]));
  }else if(section==='Merchandise'){
   html=`<div class="stats">${stat('Catalogue items',data.products.length,'Products and variants')}${stat('Units in stock',data.products.reduce((s,p)=>s+p.stock,0),'Available stock after reservations')}${stat('Pending orders',data.orders.filter(o=>o.status==='pending').length,'Payment not confirmed')}${stat('Recorded sales',money(data.orders.filter(o=>['paid','fulfilled'].includes(o.status)).reduce((s,o)=>s+o.quantity*o.unit_price,0)),'Manual ledger · not reconciled payments')}</div><div class="toolbar">${btn('Add product','new','',true)}${btn('Record order','order')}</div>`+table(['Product / SKU','Price','Available','Status',''],data.products.map(p=>[`${esc(p.name)}<small>${esc(p.sku)}</small>`,money(p.price),p.stock,pill(p.active?'Active':'Archived'),btn('Edit','edit',p.id)]));
@@ -107,14 +107,34 @@ async function schedule(){
  const token=crypto.randomUUID();form('Schedule a fourball',field('course','Course','','text',[['','Choose course'],...data.courses.filter(c=>c.active&&c.playable).map(c=>[c.id,c.name])])+field('tee','Tee','','text',[['','Choose course first']])+field('when','Local tee time','','datetime-local')+[0,1,2,3].map(i=>field('player'+i,i===0?'Host':'Player '+(i+1),'','text',[['','Select member'],...data.members.map(m=>[m.id,m.display_name])],i===0)).join(''),async v=>{const players=[v.player0,v.player1,v.player2,v.player3].filter(Boolean);if(new Set(players).size!==players.length)throw Error('Select different members.');await checked(client.rpc('admin_schedule_fourball',{p_course_id:v.course,p_tee_set_id:v.tee,p_scheduled_at:new Date(v.when).toISOString(),p_player_ids:players,p_request_key:token}));},'Time uses this browser’s local timezone. The selected host starts the round in the app. This does not book a tee time with the course.');
  dialog.querySelector('[name=course]').onchange=async e=>{const course=e.target.value;const tees=await checked(client.from('tee_sets').select('id,name').eq('course_id',course).eq('selectable',true));if(dialog.querySelector('[name=course]')?.value===course)dialog.querySelector('[name=tee]').innerHTML='<option value="">Select tee</option>'+tees.map(t=>`<option value="${esc(t.id)}">${esc(t.name)}</option>`).join('');};
 }
+async function showCourse(id){
+ const course=data.courses.find(c=>c.id===id);if(!course)return;
+ if(demo){toast('Course detail requires live data.');return;}
+ const [holes,tees,distances]=await Promise.all([
+  checked(client.from('holes').select('number,par,stroke_index,tee_latitude,tee_longitude,green_front_latitude,green_front_longitude,green_centre_latitude,green_centre_longitude,green_back_latitude,green_back_longitude,image_url').eq('course_id',id).order('number')),
+  checked(client.from('tee_sets').select('id,name,colour,course_rating,slope_rating,par,total_distance,distance_unit,selectable').eq('course_id',id).order('total_distance')),
+  checked(client.from('tee_box_hole_distances').select('tee_set_id,hole_number,distance_meters,source_url').eq('course_id',id).limit(1000))
+ ]);
+ const coverage=courseCoverage(holes,tees,distances), visible=tees.filter(t=>t.selectable);
+ const val=x=>x==null||x===''?'—':esc(x);
+ dialog.innerHTML=`<header><h2>${esc(course.name)}</h2>${btn('Close','close')}</header><p>${val(course.city)} · ${val(course.province)} · ${val(course.country)}</p>`
+  +`<p>App status: ${course.active?(course.playable?'Active · playable flag on':'Active · directory only'):'Inactive'} · Data status: ${val(course.data_status)} · Par ${val(course.par)} · ${val(course.holes)} holes</p>`
+  +`<p>Address: ${val(course.address)}<br>Telephone: ${val(course.phone)}<br>Website: ${val(course.website)}<br>Course source: ${val(course.source_url)}</p>`
+  +`<div class="notice">${coverage.holes} hole records · ${coverage.selectableTees} selectable tees · ${coverage.greenCoordinates} holes with front, centre and back coordinates. Coordinates may be unverified. Course image: ${course.image_url?'URL recorded':'not supplied'}.</div>`
+  +'<h3>Available tees</h3>'+table(['Tee','Course rating','Slope','Par','Total','Hole distances'],coverage.teeDistances.map(({tee,count})=>[esc(tee.name),val(tee.course_rating),val(tee.slope_rating),val(tee.par),`${val(tee.total_distance)} ${val(tee.distance_unit)}`,`${count} / ${holes.length||18}`]))
+  +'<p class="muted">Only selectable tees are shown, matching new-round selection. Individual hole distances below are stored in metres; a dash means no distance is recorded.</p>'
+  +table(['Hole','Par','Stroke index',...visible.map(t=>`${t.name} (m)`),'Green GPS','Hole image'],holes.map(h=>[val(h.number),val(h.par),val(h.stroke_index),...visible.map(t=>val(distances.find(d=>d.tee_set_id===t.id&&d.hole_number===h.number)?.distance_meters)),[h.green_front_latitude,h.green_front_longitude,h.green_centre_latitude,h.green_centre_longitude,h.green_back_latitude,h.green_back_longitude].every(x=>Number.isFinite(Number(x))&&Number(x)!==0)?'Present':'Missing',h.image_url?'URL recorded':'Missing']))
+  +'<p class="muted">Data is displayed as recorded in the app database. Source attribution and verification still need review; this page does not modify a scorecard.</p>';
+ dialog.showModal();
+}
 function showRound(id){
  const r=data.rounds.find(r=>r.id===id);if(!r)return;
  const players=data.players.filter(p=>p.round_id===id);
  dialog.innerHTML=`<header><h2>${esc(r.course_name)}</h2>${btn('Close','close')}</header><p>${date(r.scheduled_at||r.started_at||r.played_at)} · ${esc(r.tee_set_name)} · ${esc(r.status)} · Hole ${esc(r.current_hole)}</p>`
-  +table(['Player',...Array.from({length:18},(_,i)=>i+1),'Holes','Confirmed','Gross so far','Net (shared tee, provisional)',''],players.map(p=>{
+  +table(['Player',...Array.from({length:18},(_,i)=>i+1),'Holes','Confirmed','Gross so far','Net (provisional)',''],players.map(p=>{
     const card=playerCard(data.scores,id,p.user_id),result=data.results.find(x=>x.round_id===id&&x.player_id===p.user_id);
     return [esc(p.display_name),...card.holes.map(s=>s?`<span title="${esc(`${s.confirmed?'Confirmed':'Unconfirmed'} · ${s.putts??'—'} putts · ${s.penalty_strokes||0} penalties`)}">${Number(s.strokes)+Number(s.penalty_strokes||0)}${s.confirmed?'':'*'}</span>`:'—'),card.entered,`${card.confirmed}/${card.entered}`,card.gross??'—',provisionalNet(r,card,result)??'—',r.status==='active'?btn('Enter score','score',`${id}|${p.user_id}`):''];
-  }))+'<p class="muted">* Unconfirmed hole; — indicates no score. Gross includes recorded penalty strokes and is provisional for incomplete or unconfirmed cards. Net is provisional, uses the shared round tee and is hidden without 18 confirmed holes and a handicap index. Verify results before prize giving. Score editing is available only while the round is active.</p>';
+  }))+'<p class="muted">* Unconfirmed hole; — indicates no score. Gross includes recorded penalty strokes and is provisional for incomplete or unconfirmed cards. Net is provisional and hidden without 18 confirmed holes and a handicap index; older results may use the shared round tee. Verify results before prize giving. Score editing is available only while the round is active.</p>';
  dialog.showModal();
 }
 function editScore(id){
@@ -149,14 +169,14 @@ async function action(e){const b=e.target.closest('[data-action]');if(!b||b.disa
       p_member_id:values.member,p_grant:grant,p_reason:values.reason
     }));},grant?'Saving grants this member league, membership and operations administration in the app and portal.':'Saving removes administrative access in both the app and portal. The member account and scores are retained.');
  }
- if(a==='order')order(id);if(a==='schedule')await schedule();if(a==='round')showRound(id);if(a==='score')editScore(id);
+ if(a==='order')order(id);if(a==='schedule')await schedule();if(a==='round')showRound(id);if(a==='score')editScore(id);if(a==='course')await showCourse(id);
  if(a==='audit'){const audit=data.audit.find(x=>String(x.id)===id);dialog.innerHTML=`<header><h2>Change details</h2>${btn('Close','close')}</header><pre>${esc(JSON.stringify(audit,null,2))}</pre>`;dialog.showModal();}
  if(a==='invite')form('Invite member',field('displayName','Full name')+field('email','Email address','','email'),async v=>{await checked(client.functions.invoke('admin-invite-member',{body:v}));},'Saving sends an invitation email with the app sign-in link.');
  if(a==='export'){const blob=new Blob([csv([['Name','Email','Handicap','League','Membership'],...data.members.map(m=>[m.display_name,m.email,m.handicap,league(m),m.membership_status])])],{type:'text/csv;charset=utf-8'});const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download='cgct-members.csv';link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);}
  if(a==='export-rounds'){
   const rounds=roundsOnDate(search(data.rounds),playDay),ids=new Set(rounds.map(r=>r.id));
   const rows=data.players.filter(p=>ids.has(p.round_id)).map(p=>{const r=rounds.find(x=>x.id===p.round_id),card=playerCard(data.scores,p.round_id,p.user_id),result=data.results.find(x=>x.round_id===p.round_id&&x.player_id===p.user_id);return [playDate(r),r.course_name,r.host_name,r.status,p.display_name,...card.holes.map(s=>s?Number(s.strokes)+Number(s.penalty_strokes||0):''),card.entered,card.confirmed,card.gross??'',provisionalNet(r,card,result)??''];});
-  const blob=new Blob([csv([['Play date','Course','Host','Round status','Player',...Array.from({length:18},(_,i)=>`Hole ${i+1}`),'Holes entered','Confirmed holes','Gross so far','Net provisional - shared tee'],...rows])],{type:'text/csv;charset=utf-8'});const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=`cgct-scores-${playDay||'all-dates'}.csv`;link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
+  const blob=new Blob([csv([['Play date','Course','Host','Round status','Player',...Array.from({length:18},(_,i)=>`Hole ${i+1}`),'Holes entered','Confirmed holes','Gross so far','Net provisional'],...rows])],{type:'text/csv;charset=utf-8'});const link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=`cgct-scores-${playDay||'all-dates'}.csv`;link.click();setTimeout(()=>URL.revokeObjectURL(link.href),1000);
  }
  if(a==='demo'){demo=true;data={members:[{id:'sample',display_name:'Sample golfer',email:'sample@example.test',handicap:14.2,league:'B',membership_status:'active'}],rounds:[],players:[],scores:[],results:[],products:[],orders:[],tasks:[],audit:[],courses:[],feedback:[],league_a_max_handicap:12,league_b_max_handicap:24};render();}
  }catch(error){toast(error.message||'Unable to complete action.');}}
