@@ -1,7 +1,7 @@
 import {createClient} from '@supabase/supabase-js';
 import config from './config.json';
 import {googleSignInOptions,finishGoogleSignIn} from './oauth.js';
-import {esc,division,seasonRounds,csv,playDate,roundsOnDate,playerCard,provisionalNet} from './domain.js';
+import {esc,division,seasonRounds,csv,playDate,roundsOnDate,playerCard,provisionalNet,grossLeaderboard} from './domain.js';
 const client=createClient(config.url,config.key,{auth:{storage:sessionStorage,persistSession:true,autoRefreshToken:true,detectSessionInUrl:false,flowType:'pkce'}});
 const root=document.querySelector('#app'),dialog=document.querySelector('#editor');
 let data=null,section='Overview',query='',year=new Date().getFullYear(),playDay=playDate({created_at:new Date().toISOString()}),demo=false,busy=false;
@@ -52,11 +52,14 @@ function render(){
   const ids=new Set(completed.map(r=>r.id));html+=table(['Member','Current league','Completed rounds','Average gross','Best gross'],data.members.map(m=>{const rs=data.results.filter(r=>r.player_id===m.id&&ids.has(r.round_id));return [esc(m.display_name),pill(league(m)),rs.length,rs.length?(rs.reduce((s,r)=>s+r.gross_strokes,0)/rs.length).toFixed(1):'—',rs.length?Math.min(...rs.map(r=>r.gross_strokes)):'—'];}));
  }else if(section==='Rounds'){
   const matching=roundsOnDate(search(data.rounds),playDay), ids=new Set(matching.map(r=>r.id));
-  const players=data.players.filter(p=>ids.has(p.round_id));
+  const players=data.players.filter(p=>ids.has(p.round_id)),grossLeaders=grossLeaderboard(matching,players,data.scores);
   html=toolbar(btn('Schedule fourball','schedule','',true)+btn('Export day scores','export-rounds'))
    +`<div class="toolbar"><label for="play-day">Play date (South Africa)</label><input id="play-day" type="date" value="${esc(playDay)}"><button data-action="all-rounds">All dates</button><button data-action="today-rounds">Today</button></div>`
    +`<div class="notice">${playDay?'Showing fourballs scheduled or started on '+esc(playDay):'Showing all dates'}. Scores appear after they sync to the database; use Refresh data for the latest. Gross is provisional while holes are missing or unconfirmed. Net is provisional and uses the round's shared tee, not each player's tee; verify handicaps and results before prize giving. Net is hidden for incomplete or unconfirmed cards.</div>`
    +`<div class="sectionhead"><h2>Fourballs (${matching.length})</h2></div>`+roundTable(matching)
+   +`<div class="sectionhead" style="margin-top:28px"><h2>Completed gross cards (${grossLeaders.length})</h2></div>`
+   +'<p class="muted">Gross-stroke order for review only. Only active players with 18 confirmed scores in completed rounds appear; tied gross scores share a position. This is not a net leaderboard or a prize decision. Offline cards appear only after the golfer syncs them.</p>'
+   +table(['Position','Player','Course / fourball','Gross',''],grossLeaders.map(({round,player,card,rank})=>[rank,esc(player.display_name),`${esc(round.course_name)}<small>${esc(round.host_name)}</small>`,card.gross,btn('View card','round',round.id)]))
    +`<div class="sectionhead" style="margin-top:28px"><h2>Player scores (${players.length})</h2></div>`
    +table(['Player','Fourball / course','Round status','Holes entered','Confirmed','Gross so far','Net (shared tee, provisional)',''],players.map(p=>{
      const r=matching.find(x=>x.id===p.round_id),card=playerCard(data.scores,p.round_id,p.user_id),result=data.results.find(x=>x.round_id===p.round_id&&x.player_id===p.user_id);

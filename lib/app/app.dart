@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../features/scorecard/presentation/score_outbox_provider.dart';
 
 import '../core/config/app_config.dart';
 import '../core/theme/app_theme.dart';
 import 'router.dart';
 
-class ChristianGolfersApp extends StatelessWidget {
+class ChristianGolfersApp extends ConsumerWidget {
   const ChristianGolfersApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(scoreOutboxProvider);
     return MaterialApp.router(
       title: 'Christian Golfers Cape Town',
       debugShowCheckedModeBanner: false,

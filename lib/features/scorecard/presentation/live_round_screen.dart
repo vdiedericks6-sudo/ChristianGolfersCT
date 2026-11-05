@@ -18,6 +18,8 @@ import '../../rounds/domain/golf_round.dart';
 import '../domain/hole_score.dart';
 import '../domain/score_voice_parser.dart';
 import 'score_providers.dart';
+import 'score_outbox_provider.dart';
+import '../data/score_outbox.dart';
 import 'green_distance_card.dart';
 
 class LiveRoundScreen extends ConsumerStatefulWidget {
@@ -46,6 +48,39 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
   bool _completing = false;
   int _editRevision = 0;
   bool _dirty = false;
+  int? _localHole;
+  bool _movingHole = false;
+
+  Future<void> _reviewQueued(QueuedScore item) async {
+    if (item.status != QueuedScoreStatus.blocked) return;
+    try {
+      final row = await ref.read(supabaseClientProvider).from('hole_scores').select().eq('round_id', item.roundId).eq('player_id', item.playerId).eq('hole_number', item.holeNumber).maybeSingle().timeout(const Duration(seconds: 10));
+      final server = row == null ? null : HoleScore.fromJson(row);
+      if (!mounted) return;
+      final decision = await showDialog<String>(context: context, builder: (ctx) => AlertDialog(
+        title: const Text('Review unsynced score'),
+        content: Text('Hole ${item.holeNumber}: this phone has ${item.strokes + item.penaltyStrokes} gross. Server: ${server == null ? 'no score' : '${server.totalStrokes} gross'}.\n\n${item.error ?? 'Score needs review.'}'),
+        actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')), TextButton(onPressed: () => Navigator.pop(ctx, 'server'), child: const Text('Keep server score')), TextButton(onPressed: () => Navigator.pop(ctx, 'retry'), child: const Text('Submit phone score'))],
+      ));
+      final outbox = ref.read(scoreOutboxProvider);
+      if (decision == 'server') await outbox.discard(item.id);
+      if (decision == 'retry') await outbox.retryBlocked(item.id, expectedExists: server != null, expectedUpdatedAt: server?.updatedAt);
+    } catch (error) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Connect to review this score: $error')));
+    }
+  }
+
+  void _showQueue(List<QueuedScore> items) {
+    showDialog<void>(context: context, builder: (ctx) => AlertDialog(
+      title: const Text('Scores waiting to sync'),
+      content: SizedBox(width: double.maxFinite, child: ListView(shrinkWrap: true, children: [for (final item in items) ListTile(
+        title: Text('Hole ${item.holeNumber} · ${item.strokes + item.penaltyStrokes} gross'),
+        subtitle: Text(item.status == QueuedScoreStatus.blocked ? 'Needs review: ${item.error ?? ''}' : 'Waiting for connection'),
+        onTap: item.status == QueuedScoreStatus.blocked ? () { Navigator.pop(ctx); _reviewQueued(item); } : null,
+      )])),
+      actions: [TextButton(onPressed: () { ref.read(scoreOutboxProvider).sync(); Navigator.pop(ctx); }, child: const Text('Retry sync')), TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Close'))],
+    ));
+  }
   final _speech = SpeechToText();
   bool _listening = false;
   bool _voiceBusy = false;
@@ -237,8 +272,9 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
     setState(() => _saving = true);
 
     try {
-      final repository = ref.read(scoreRepositoryProvider);
-      await repository.saveGroupScore(
+      if (userId == null) throw StateError('Sign in to save scores.');
+      await ref.read(scoreOutboxProvider).enqueue(
+        actorId: userId,
         roundId: widget.roundId,
         playerId: playerId,
         holeNumber: holeNumber,
@@ -258,8 +294,8 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
           SnackBar(
             content: Text(
               playerId == userId
-                  ? 'Score saved to the server.'
-                  : 'Score saved to the server; the player must confirm it.',
+                  ? 'Saved on this device. Waiting to sync.'
+                  : 'Saved on this device. The player must confirm it after sync.',
             ),
           ),
         );
@@ -292,24 +328,44 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
 
   Future<void> _changeSharedHole(int currentHole, int delta) async {
     final next = ((currentHole - 1 + delta + 18) % 18) + 1;
-    if (_saving || !await _confirmDiscard() || !mounted) return;
+    if (_saving || _movingHole || !await _confirmDiscard() || !mounted) return;
+    final round = ref.read(roundProvider(widget.roundId)).valueOrNull;
+    final userId = ref.read(currentUserIdProvider);
+    setState(() {
+      _dirty = false;
+      _localHole = next;
+      _loadedHole = null;
+      _movingHole = true;
+    });
 
     try {
-      await ref
-          .read(roundRepositoryProvider)
-          .setCurrentHole(roundId: widget.roundId, holeNumber: next);
-      _loadedHole = null;
+      if (round?.hostUserId == userId) {
+        await ref.read(roundRepositoryProvider)
+            .setCurrentHole(roundId: widget.roundId, holeNumber: next)
+            .timeout(const Duration(seconds: 3));
+      }
     } catch (error) {
       if (!mounted) return;
 
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('$error')));
+      ).showSnackBar(const SnackBar(content: Text(
+        'Hole changed on this phone. The shared round may update when connected.',
+      )));
+    } finally {
+      if (mounted) setState(() => _movingHole = false);
     }
   }
 
   Future<void> _completeRound() async {
     if (_saving || !await _confirmDiscard() || !mounted) return;
+    final actor = ref.read(currentUserIdProvider);
+    final outbox = ref.read(scoreOutboxProvider);
+    await outbox.ready;
+    if (actor != null && outbox.pendingForRound(actor, widget.roundId).isNotEmpty) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Sync all scores before finishing the round.')));
+      return;
+    }
     setState(() => _completing = true);
 
     try {
@@ -335,12 +391,19 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
     final playersState = ref.watch(roundPlayersProvider(widget.roundId));
     final scoresState = ref.watch(roundScoresProvider(widget.roundId));
     final userId = ref.watch(currentUserIdProvider);
+    final outbox = ref.watch(scoreOutboxProvider);
+    final List<QueuedScore> pending = userId == null ? const <QueuedScore>[] : outbox.pendingForRound(userId, widget.roundId);
 
     return Scaffold(
       appBar: AppBar(
         leading: const AppBackButton(),
         title: const Text('Live round'),
         actions: [
+          if (pending.isNotEmpty) IconButton(
+            tooltip: '${pending.length} scores waiting to sync',
+            onPressed: () => _showQueue(pending),
+            icon: const Icon(Icons.sync_problem),
+          ),
           IconButton(
             tooltip: 'Hole view',
             onPressed: () =>
@@ -384,8 +447,8 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
                 // A host may move the shared hole while someone is editing.
                 // Keep their draft attached to its original hole until saved.
                 final editingHole = _dirty
-                    ? (_loadedHole ?? round.currentHole)
-                    : round.currentHole;
+                    ? (_loadedHole ?? _localHole ?? round.currentHole)
+                    : (_localHole ?? round.currentHole);
                 final hole = _holeForNumber(holes, editingHole);
                 if (hole == null) {
                   return const Center(child: Text('Hole data unavailable.'));
@@ -433,11 +496,17 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
                           error: (error, stackTrace) =>
                               Center(child: Text('$error')),
                           data: (scores) {
-                            final existingScore = _scoreFor(
+                            final displayedScores = <HoleScore>[
+                              ...scores.where((s) => !pending.any((q) => q.playerId == s.playerId && q.holeNumber == s.holeNumber)),
+                              for (final q in pending) HoleScore(roundId: q.roundId, playerId: q.playerId, holeNumber: q.holeNumber, strokes: q.strokes, putts: q.putts, penaltyStrokes: q.penaltyStrokes, sandShots: q.sandShots, fairway: q.fairway, greenInRegulation: q.greenInRegulation, confirmed: false, updatedAt: q.expectedUpdatedAt),
+                            ];
+                            final queued = pending.where((q) => q.playerId == selectedPlayer.userId && q.holeNumber == hole.number).firstOrNull;
+                            final serverScore = _scoreFor(
                               scores,
                               selectedId,
                               hole.number,
                             );
+                            final existingScore = queued == null ? serverScore : HoleScore(roundId: queued.roundId, playerId: queued.playerId, holeNumber: queued.holeNumber, strokes: queued.strokes, putts: queued.putts, penaltyStrokes: queued.penaltyStrokes, sandShots: queued.sandShots, fairway: queued.fairway, greenInRegulation: queued.greenInRegulation, confirmed: false, updatedAt: queued.expectedUpdatedAt);
 
                             _loadExistingScore(
                               hole.number,
@@ -487,7 +556,7 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
                               hole: hole,
                               tee: tee,
                               players: players,
-                              scores: scores,
+                              scores: displayedScores,
                               userId: userId,
                               selectedPlayer: selectedPlayer,
                               onPlayerSelected: _selectPlayer,
@@ -495,12 +564,14 @@ class _LiveRoundScreenState extends ConsumerState<LiveRoundScreen> {
                                   existingScore != null &&
                                   !existingScore.confirmed,
                               scoreLocked:
+                                  queued != null ||
                                   existingScore?.confirmed == true &&
                                   selectedPlayer.userId != userId,
                               scoreConflict:
                                   _dirty &&
                                   _loadedScoreVersion !=
                                       _scoreVersion(existingScore),
+                              queuedScore: queued != null,
                               onReloadScore: () => setState(() {
                                 _dirty = false;
                                 _loadedScoreVersion = null;
@@ -645,6 +716,7 @@ class _HoleView extends StatelessWidget {
     required this.onPlayerSelected,
     required this.needsConfirmation,
     required this.scoreLocked,
+    required this.queuedScore,
     required this.scoreConflict,
     required this.onReloadScore,
     required this.groupOnDifferentHole,
@@ -689,6 +761,7 @@ class _HoleView extends StatelessWidget {
   final ValueChanged<String?> onPlayerSelected;
   final bool needsConfirmation;
   final bool scoreLocked;
+  final bool queuedScore;
   final bool scoreConflict;
   final VoidCallback onReloadScore;
   final bool groupOnDifferentHole;
@@ -772,7 +845,7 @@ class _HoleView extends StatelessWidget {
                 children: [
                   _StepArrow(
                     icon: Icons.chevron_left_rounded,
-                    enabled: isHost && !saving && !listening && !voiceBusy,
+                    enabled: !saving && !listening && !voiceBusy,
                     onTap: () => onMoveHole(-1),
                     semantic: 'Previous hole',
                   ),
@@ -806,7 +879,7 @@ class _HoleView extends StatelessWidget {
                   ),
                   _StepArrow(
                     icon: Icons.chevron_right_rounded,
-                    enabled: isHost && !saving && !listening && !voiceBusy,
+                    enabled: !saving && !listening && !voiceBusy,
                     onTap: () => onMoveHole(1),
                     semantic: 'Next hole',
                   ),
@@ -815,7 +888,7 @@ class _HoleView extends StatelessWidget {
               if (!isHost) ...[
                 const SizedBox(height: 10),
                 Text(
-                  'The host moves the group to the next hole.',
+                  'Use the arrows to view another hole on this phone.',
                   textAlign: TextAlign.center,
                   style: AppTheme.body(11.5, colour: AppTheme.textFaint),
                 ),
@@ -827,7 +900,7 @@ class _HoleView extends StatelessWidget {
         if (groupOnDifferentHole) ...[
           const SizedBox(height: 10),
           const Text(
-            'The group moved on. Save or discard your changes on this hole first.',
+            'You are viewing a different hole from the shared round.',
           ),
         ],
         const SizedBox(height: 14),
@@ -850,7 +923,9 @@ class _HoleView extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          scoreLocked
+          queuedScore
+              ? 'Saved on this phone and waiting to sync. Use the sync icon to review any problem.'
+              : scoreLocked
               ? 'This player confirmed their score. Only they can change it.'
               : selectedPlayer.userId == userId
               ? (needsConfirmation

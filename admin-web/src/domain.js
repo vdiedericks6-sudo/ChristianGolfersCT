@@ -13,4 +13,20 @@ export function playerCard(scores,roundId,playerId){
 // A stored net can be computed from incomplete or unconfirmed holes by older
 // server versions. Do not present it unless the full card is confirmed.
 export function provisionalNet(round,card,result){return round.status==='completed'&&card.entered===18&&card.confirmed===18&&result?.handicap_index!=null?result.net_strokes??null:null;}
+// Rank only submitted, complete and confirmed cards. This is a gross-stroke
+// view for review, not a claim that a competition prize has been awarded.
+export function grossLeaderboard(rounds,players,scores){
+ const byId=new Map(rounds.map(round=>[round.id,round]));
+ const rows=[];
+ for(const player of players){
+  const round=byId.get(player.round_id);
+  if(!round||round.status!=='completed'||player.active===false)continue;
+  const card=playerCard(scores,round.id,player.user_id);
+  if(card.entered!==18||card.confirmed!==18||!Number.isFinite(card.gross))continue;
+  rows.push({round,player,card});
+ }
+ rows.sort((a,b)=>a.card.gross-b.card.gross||String(a.player.display_name??'').localeCompare(String(b.player.display_name??'')));
+ let rank=0,previous;
+ return rows.map((row,index)=>{if(row.card.gross!==previous)rank=index+1;previous=row.card.gross;return {...row,rank};});
+}
 export function csv(rows){return rows.map(row=>row.map(v=>'"'+String(v??'').replace(/^[=+@\-\t\r]/,"'$&").replaceAll('"','""')+'"').join(',')).join('\r\n');}

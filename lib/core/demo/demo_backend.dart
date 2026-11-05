@@ -707,6 +707,23 @@ class _DemoRoundRepository implements RoundRepository {
   }
 
   @override
+  Future<void> setMyRoundTee({required String roundId, required String teeSetId}) async {
+    final round = _require(roundId);
+    if (round.isCompleted || (_backend._scores[roundId] ?? []).any((score) => score.playerId == _me)) {
+      throw StateError('Choose your tee before recording your first score.');
+    }
+    final seats = _backend._players[roundId] ?? <RoundPlayer>[];
+    final index = seats.indexWhere((player) => player.userId == _me && player.active);
+    if (index < 0) throw StateError('You are not an active player in this round.');
+    final player = seats[index];
+    seats[index] = RoundPlayer(userId: player.userId, displayName: player.displayName,
+      role: player.role, active: player.active, handicapIndex: player.handicapIndex,
+      courseHandicap: player.courseHandicap, playingHandicap: player.playingHandicap,
+      joinedAt: player.joinedAt, teeSetId: teeSetId);
+    _backend._bump();
+  }
+
+  @override
   Future<void> startRound(String roundId) async {
     final round = _require(roundId);
 

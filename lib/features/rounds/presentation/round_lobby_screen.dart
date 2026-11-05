@@ -10,6 +10,8 @@ import '../../../core/notifications/app_notification_service.dart';
 import '../../../core/widgets/app_back_button.dart';
 import '../../../core/widgets/christian_golfers_components.dart';
 import '../../authentication/presentation/auth_providers.dart';
+import '../../courses/presentation/course_providers.dart';
+import '../../scorecard/presentation/score_outbox_provider.dart';
 import '../data/round_link.dart';
 import 'round_providers.dart';
 
@@ -105,6 +107,9 @@ class _RoundLobbyScreenState extends ConsumerState<RoundLobbyScreen> {
 
             final isHost = round.hostUserId == currentUserId;
             final players = playersState.valueOrNull ?? const [];
+            final me = players.where((p) => p.userId == currentUserId).firstOrNull;
+            final tees = ref.watch(courseTeeSetsProvider(round.courseId)).valueOrNull ?? [];
+            final pending = currentUserId == null ? const [] : ref.watch(scoreOutboxProvider).pendingForRound(currentUserId, round.id);
 
             return ListView(
               padding: const EdgeInsets.fromLTRB(18, 14, 18, 32),
@@ -119,6 +124,17 @@ class _RoundLobbyScreenState extends ConsumerState<RoundLobbyScreen> {
                   '${round.teeSetName} tees · Stroke play',
                   style: AppTheme.body(13, colour: AppTheme.textMuted),
                 ),
+                if (me != null && tees.any((t) => t.selectable))
+                  DropdownButtonFormField<String>(
+                    value: tees.any((t) => t.selectable && t.id == (me.teeSetId ?? round.teeSetId)) ? (me.teeSetId ?? round.teeSetId) : null,
+                    decoration: const InputDecoration(labelText: 'Your tee box'),
+                    items: tees.where((t) => t.selectable).map((t) => DropdownMenuItem(value: t.id, child: Text(t.name))).toList(),
+                    onChanged: pending.any((s) => s.playerId == currentUserId) ? null : (id) async {
+                      if (id == null) return;
+                      try { await ref.read(roundRepositoryProvider).setMyRoundTee(roundId: round.id, teeSetId: id); }
+                      catch (error) { if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('$error'))); }
+                    },
+                  ),
 
                 const SizedBox(height: 22),
                 _CodeBlock(

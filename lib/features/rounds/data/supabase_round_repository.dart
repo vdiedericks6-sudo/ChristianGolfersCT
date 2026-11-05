@@ -97,6 +97,14 @@ class SupabaseRoundRepository implements RoundRepository {
   }
 
   @override
+  Future<void> setMyRoundTee({required String roundId, required String teeSetId}) async {
+    await _client.rpc('set_my_round_tee', params: {
+      'p_round_id': roundId,
+      'p_tee_set_id': teeSetId,
+    });
+  }
+
+  @override
   Future<void> startRound(String roundId) async {
     final round = await _requireRound(roundId);
 

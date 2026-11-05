@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/demo/demo_providers.dart';
+import '../../../core/offline/round_snapshot_cache.dart';
+import '../../authentication/presentation/auth_providers.dart';
 import '../../authentication/presentation/auth_providers.dart';
 import '../data/course_repository.dart';
 import '../data/supabase_course_repository.dart';
@@ -30,12 +32,38 @@ final courseTeeSetsProvider = StreamProvider.family<List<TeeSet>, String>((
   ref,
   courseId,
 ) {
-  return ref.watch(courseRepositoryProvider).watchTeeSets(courseId);
+  final userId = ref.watch(currentUserIdProvider);
+  final repository = ref.watch(courseRepositoryProvider);
+  if (userId == null || ref.watch(demoBackendProvider) != null) {
+    return repository.watchTeeSets(courseId);
+  }
+  return snapshotThenLive<List<TeeSet>>(
+    userId: userId,
+    kind: 'tees',
+    id: courseId,
+    decode: (value) => snapshotList(value, TeeSet.fromJson),
+    encode: (value) => value.map(teeSnapshotJson).toList(),
+    cacheable: (value) => value.isNotEmpty,
+    live: () => repository.watchTeeSets(courseId),
+  );
 });
 
 final courseHolesProvider = StreamProvider.family<List<GolfHole>, String>((
   ref,
   courseId,
 ) {
-  return ref.watch(courseRepositoryProvider).watchHoles(courseId);
+  final userId = ref.watch(currentUserIdProvider);
+  final repository = ref.watch(courseRepositoryProvider);
+  if (userId == null || ref.watch(demoBackendProvider) != null) {
+    return repository.watchHoles(courseId);
+  }
+  return snapshotThenLive<List<GolfHole>>(
+    userId: userId,
+    kind: 'holes',
+    id: courseId,
+    decode: (value) => snapshotList(value, GolfHole.fromJson),
+    encode: (value) => value.map(holeSnapshotJson).toList(),
+    cacheable: (value) => value.isNotEmpty,
+    live: () => repository.watchHoles(courseId),
+  );
 });

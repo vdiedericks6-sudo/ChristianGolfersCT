@@ -21,6 +21,9 @@ abstract class RoundRepository {
 
   Future<void> startRound(String roundId);
 
+  /// Each golfer chooses their own tee before their first score is recorded.
+  Future<void> setMyRoundTee({required String roundId, required String teeSetId});
+
   Future<void> setCurrentHole({
     required String roundId,
     required int holeNumber,
