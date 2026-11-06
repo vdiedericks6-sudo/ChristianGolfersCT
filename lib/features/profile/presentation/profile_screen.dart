@@ -7,6 +7,7 @@ import '../../../core/widgets/christian_golfers_components.dart';
 import '../../authentication/presentation/auth_providers.dart';
 import '../../history/presentation/history_providers.dart';
 import 'profile_providers.dart';
+import 'achievement_badges.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -102,6 +103,9 @@ class ProfileScreen extends ConsumerWidget {
                     ],
                   ),
                 ),
+                const SizedBox(height: 20),
+
+                const AchievementBadges(),
                 const SizedBox(height: 20),
 
                 // Profile Menu Options matching Screen 6
